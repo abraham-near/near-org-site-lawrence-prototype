@@ -1,0 +1,164 @@
+/* Section 0: a floating ink bar with compact dark menus. Tokens only. 768px = --breakpoint-md. */
+
+.header {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 50;
+  pointer-events: none; /* only the bar itself takes clicks; the gap around it stays scrollable/clickable */
+}
+
+.skip {
+  position: absolute;
+  left: var(--page-margin);
+  top: var(--space-2);
+  z-index: 2;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--color-green);
+  color: var(--color-ink);
+  font-size: var(--text-small);
+  pointer-events: auto;
+  transform: translateY(-200%);
+}
+.skip:focus-visible { transform: none; }
+
+.frame { max-width: var(--content-max); margin-inline: auto; padding: var(--space-4) var(--page-margin) 0; }
+
+.bar {
+  pointer-events: auto;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  height: var(--space-8);
+  padding-inline: var(--space-5) var(--space-3);
+  border-radius: var(--radius-lg);
+  background: var(--color-ink);
+  color: var(--color-on-dark);
+  /* A faint edge so the bar still reads over the ink footer and dark imagery */
+  border: 1px solid color-mix(in srgb, var(--color-on-dark) 14%, transparent);
+}
+.bar :focus-visible { outline-color: var(--color-on-dark); outline-offset: 2px; }
+
+.home { display: inline-flex; align-items: center; min-height: 44px; }
+
+.actions { display: flex; align-items: center; gap: var(--space-2); margin-left: auto; }
+.cta { min-height: 44px; border: 1px solid transparent; }
+/* While the hero (which has its own green action) is in view, the header's action goes quiet: one coloured action per
+   screen (D15). HeroInView sets the flag. */
+:global(html[data-hero-in-view]) .cta { background: transparent; color: var(--color-on-dark); border-color: var(--color-on-dark-muted); }
+:global(html[data-hero-in-view]) .cta:hover { border-color: var(--color-on-dark); }
+
+/* Desktop: logo · centred menus · action */
+.desktopNav { display: none; }
+@media (min-width: 768px) {
+  .bar { display: grid; grid-template-columns: 1fr auto 1fr; }
+  .desktopNav { display: block; }
+}
+
+.groups { position: relative; display: flex; list-style: none; margin: 0; padding: 0; }
+
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border: 0;
+  border-radius: var(--radius-md);
+  background: none;
+  color: var(--color-on-dark);
+  cursor: pointer;
+}
+/* Underline the label only, trimmed of its trailing letter-spacing */
+.triggerText { margin-right: calc(-1 * var(--tracking-label)); }
+.trigger:hover .triggerText, .trigger[aria-expanded="true"] .triggerText {
+  text-decoration: underline;
+  text-decoration-color: var(--color-green);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 6px;
+}
+.chevron { flex: none; opacity: 0.7; transition: transform var(--dur-2) var(--ease-out); }
+.trigger[aria-expanded="true"] .chevron { transform: rotate(180deg); }
+
+/* The panel: compact, dark, hung from the start of the menu row; sections sit side by side. */
+.panel {
+  position: absolute;
+  /* 8px under the bar: the menu row is 44px, centred in the 64px bar (10px to its bottom edge) */
+  top: calc(100% + 10px + var(--space-2));
+  left: calc(-1 * var(--space-2));
+  display: flex;
+  gap: var(--space-8);
+  padding: var(--space-6) var(--space-7) var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--color-ink);
+  color: var(--color-on-dark);
+  border: 1px solid color-mix(in srgb, var(--color-on-dark) 14%, transparent);
+  transition: opacity var(--dur-2) var(--ease-out), transform var(--dur-2) var(--ease-out);
+}
+.panel[hidden] { display: none; }
+@starting-style {
+  .panel[data-open] { opacity: 0; transform: translateY(-4px); }
+}
+/* Switching between groups while one is open: swap in place, no second entrance (no flicker while scanning) */
+.groups[data-switching] .panel { transition: none; }
+
+/* Columns size to their content (descriptions stay on one line up to ~34ch) */
+.section { width: max-content; max-width: 34ch; }
+.sectionHeading { margin: 0 0 var(--space-3); font-size: var(--text-small); color: var(--color-on-dark-muted); }
+.items { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-2); }
+
+.item { display: grid; gap: 2px; padding: var(--space-2) 0; color: inherit; text-decoration: none; }
+.itemName { display: inline-flex; align-items: center; gap: var(--space-2); font-size: var(--text-small); font-weight: 500; line-height: 1.3; }
+.itemDesc { font-size: var(--text-small); line-height: 1.35; color: var(--color-on-dark-muted); text-wrap: pretty; }
+.ext { flex: none; opacity: 0.7; }
+.item:hover .itemName, .item:focus-visible .itemName {
+  text-decoration: underline;
+  text-decoration-color: var(--color-green);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+
+/* Phones: Menu button + full-height ink sheet */
+.menuButton {
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--color-on-dark-muted);
+  border-radius: var(--radius-md);
+  background: none;
+  color: var(--color-on-dark);
+  cursor: pointer;
+}
+@media (min-width: 768px) {
+  .menuButton { display: none; }
+}
+
+.sheet {
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  max-height: none;
+  margin: 0;
+  padding: 0 var(--page-margin) var(--space-7);
+  border: 0;
+  background: var(--color-ink);
+  color: var(--color-on-dark);
+  overflow-y: auto;
+  /* Opens with a short fade-down and closes with a quicker fade (transform/opacity; 0 ms with reduced motion) */
+  transition: opacity var(--dur-2) var(--ease-out), transform var(--dur-2) var(--ease-out), overlay var(--dur-2) allow-discrete, display var(--dur-2) allow-discrete;
+}
+.sheet:not([open]) { opacity: 0; transform: translateY(calc(var(--space-2) * -1)); transition-duration: var(--dur-1); }
+@starting-style {
+  .sheet[open] { opacity: 0; transform: translateY(calc(var(--space-2) * -1)); }
+}
+.sheet::backdrop { background: var(--color-ink); }
+.sheet :focus-visible { outline-color: var(--color-on-dark); }
+.sheetTop { display: flex; align-items: center; justify-content: space-between; height: calc(var(--space-8) + var(--space-4)); padding-top: var(--space-4); }
+.sheetNav { margin-top: var(--space-5); }
+.sheetGroup { border-top: 1px solid var(--color-on-dark-muted); }
+.sheetGroup:last-child { border-bottom: 1px solid var(--color-on-dark-muted); }
+.sheetSummary { display: flex; align-items: center; justify-content: space-between; min-height: var(--space-8); cursor: pointer; list-style: none; }
+.sheetSummary::-webkit-details-marker { display: none; }
+.sheetGroup[open] .chevron { transform: rotate(180deg); }
+.sheetSection { padding-bottom: var(--space-4); }
+.sheetCta { width: 100%; justify-content: center; margin-top: var(--space-7); min-height: 48px; }

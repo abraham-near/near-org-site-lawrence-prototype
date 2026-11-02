@@ -1,0 +1,134 @@
+/* Section 1: Chapter 1. Tokens only. Two modes:
+   - Static (default: phones, tablets, reduced motion, no JS): stacked beats, a static green rule, photo band first.
+   - Motion (html[data-js], ≥ 1280px = --breakpoint-lg, motion allowed): pinned stage, beats scroll over it. */
+
+.chapter { position: relative; }
+
+/* ── Static mode ─────────────────────────────────────────────── */
+.stage { position: relative; height: 42vh; height: 42svh; overflow: hidden; }
+.photo { position: absolute; inset: 0; }
+.media { position: absolute; inset: 0; will-change: transform; }
+.photoImg { object-fit: cover; object-position: 78% 50%; }
+/* The slow loop: hidden until it's actually playing, then a long, soft crossfade over the poster */
+.media :global(.hero-video) { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 78% 50%; opacity: 0; transition: opacity var(--dur-5) var(--ease-out); }
+.media :global(.hero-video[data-playing]) { opacity: 1; }
+.curtain { display: none; }
+.lines, .tags { display: none; }
+.nowrap { white-space: nowrap; }
+
+/* Motion toggle: over the photo band's bottom-left on phones; pinned over the stage on desktop. */
+.motionSlot { position: relative; height: 0; z-index: 3; }
+.motionToggle {
+  position: absolute; bottom: var(--space-4); left: var(--page-margin);
+  display: inline-flex; align-items: center; gap: var(--space-2); min-height: 44px; padding: 0 var(--space-4);
+  border: 0; border-radius: var(--radius-md); background: var(--color-ink); color: var(--color-on-dark);
+  font-size: var(--text-small); font-weight: 500; cursor: pointer;
+}
+.motionToggle:focus-visible { outline-color: var(--color-ink); }
+@media (prefers-reduced-motion: reduce) { .motionSlot { display: none; } }
+
+/* Content sits in the page container (1440 max), so at wide screens it aligns with the header. */
+.beats { --inset: max(var(--page-margin), calc((100% - var(--content-max)) / 2 + var(--page-margin))); position: relative; margin-left: var(--space-2); padding-bottom: var(--space-7); }
+/* The text sits on the page container's edge and the green rule hangs in the margin beside it (like the quote marks) */
+@media (min-width: 768px) { .beats { margin-left: calc(var(--inset) - var(--space-5)); } }
+/* The thread, as a line down the left edge, with a dot at each beat */
+.beats::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: var(--color-green); transform: scaleY(var(--rule, 1)); transform-origin: top; }
+/* Phones/tablets with motion (D15): dots scale in as their beat arrives (ChapterOneMotion sets data-dots/data-dot) */
+.beats[data-dots] .beat::before { transform: scale(0); transition: transform var(--dur-3) var(--ease-out); }
+.beats[data-dots] .beat[data-dot]::before { transform: scale(1); }
+.beat { position: relative; padding: var(--space-8) var(--page-margin) var(--space-7) var(--space-2); }
+@media (min-width: 768px) { .beat { padding-left: var(--space-5); } }
+.beat::before { content: ""; position: absolute; left: -5px; top: calc(var(--space-8) + 10px); width: 12px; height: 12px; border-radius: 50%; background: var(--color-green); }
+.copy { max-width: 640px; }
+.lede { margin-top: var(--space-5); }
+.cta { margin-top: var(--space-6); }
+.missionTitle { margin: 0 0 var(--space-5); }
+.sentence { display: block; } /* the mission sets one sentence per line (D15) */
+/* Desktop: the mission heading is as wide as its longest sentence, so none of the three lines wraps */
+@media (min-width: 1280px) {
+  .beatMission .copy { max-width: none; }
+  .missionTitle { width: max-content; max-width: 100%; }
+}
+.payoff { margin: var(--space-6) 0 0; max-width: 24ch; }
+
+.anthemMark { display: none; }
+.statement { margin: 0; font-size: var(--text-h2); font-weight: 500; line-height: 1.1; letter-spacing: var(--tracking-h2); max-width: 20em; }
+.wd { display: inline-block; white-space: nowrap; }
+.ch { display: inline-block; }
+.lb { display: none; }
+.hl { color: var(--color-green-text); }
+
+.ownK { display: none; }
+.ownSteps { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-6); max-width: 640px; }
+/* Static: the four lines read as a list under the mission line, one step below it */
+.ownH { margin: 0; font-size: var(--text-h3); line-height: 1.15; letter-spacing: var(--tracking-h3); }
+.mask :global(.accent) { line-height: 1; } /* the roll's mask clips to the line box, so the word keeps its own */
+.ownH :global(.accent) { font-family: var(--font-accent); } /* h3-sized here: Kepler's text cut (DESIGN §2) */
+.ownLine { margin: var(--space-3) 0 0; }
+
+/* ── Motion mode ─────────────────────────────────────────────── */
+@media (min-width: 1280px) and (prefers-reduced-motion: no-preference) {
+  :global(html[data-js]) .stage { position: sticky; top: 0; height: 100vh; height: 100svh; }
+  :global(html[data-js]) .curtain { display: block; position: absolute; top: 0; bottom: 0; background: var(--color-surface); transform: scaleX(0); will-change: transform; }
+  :global(html[data-js]) .curtainL { left: 0; transform-origin: left center; }
+  :global(html[data-js]) .curtainR { right: 0; transform-origin: right center; }
+  :global(html[data-js]) .photoImg, :global(html[data-js]) .media :global(.hero-video) { object-position: 30% 50%; }
+  :global(html[data-js]) .lines { display: block; position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  :global(html[data-js]) .tags { display: block; position: absolute; inset: 0; pointer-events: none; }
+
+  :global(html[data-js]) .beats { margin: -100vh 0 0; margin-top: -100svh; padding: 0; }
+  /* Pinned with the stage: the toggle stays in the stage's bottom-right corner, clear of the beats' text column. It
+     hangs upward from a slot at the screen's bottom edge, so it stops inside the chapter instead of spilling below. */
+  :global(html[data-js]) .motionSlot { position: sticky; top: calc(100vh - var(--space-4)); top: calc(100svh - var(--space-4)); height: 0; margin-top: -100vh; margin-top: -100svh; }
+  /* Quiet outline, bottom-left under the text column (D15); ChapterOneMotion fades it out at the chapter's end */
+  :global(html[data-js]) .motionToggle {
+    bottom: 0; top: auto; right: auto;
+    left: max(var(--page-margin), calc((100% - var(--content-max)) / 2 + var(--page-margin))); /* the page container's edge */
+    border: 1px solid var(--color-line-strong); background: var(--color-surface); color: var(--color-ink);
+  }
+  :global(html[data-js]) .motionToggle:hover { border-color: var(--color-ink); }
+  :global(html[data-js]) .lede { max-width: 34ch; } /* keeps the lede on the pale side of the photo */
+  :global(html[data-js]) .beats::before { display: none; }
+  :global(html[data-js]) .beat { display: flex; align-items: center; padding: 0 var(--inset); }
+  :global(html[data-js]) .beat::before { display: none; }
+  :global(html[data-js]) .beatClaim { min-height: 100vh; min-height: 100svh; }
+  :global(html[data-js]) .beatAnthem { min-height: 200vh; align-items: flex-start; }
+  :global(html[data-js]) .beatMission { min-height: 100vh; }
+  :global(html[data-js]) .beatOwn { min-height: 260vh; align-items: flex-start; }
+
+  /* Anthem: pinned while its colour wipes on */
+  :global(html[data-js]) .anthem { position: sticky; top: 0; height: 100vh; height: 100svh; display: flex; align-items: center; }
+  :global(html[data-js]) .statement { font-size: 1em; }
+  :global(html[data-js]) .anthemRow { display: flex; align-items: flex-start; gap: 0.52em; font-size: var(--text-statement); }
+  :global(html[data-js]) .anthemMark { display: block; width: 0.95em; height: 0.95em; margin-top: 0.08em; flex: none; }
+  :global(html[data-js]) .lb { display: inline; }
+
+  /* Own your …: "Own your" holds; one word at a time rolls through its mask */
+  :global(html[data-js]) .own { position: sticky; top: 0; height: 100vh; height: 100svh; display: flex; flex-direction: column; justify-content: center; width: min(100%, 640px); }
+  :global(html[data-js]) .ownK { display: block; margin: 0 0 -0.06em; }
+  :global(html[data-js]) .ownSteps { display: grid; gap: 0; }
+  :global(html[data-js]) .ownStep { grid-area: 1 / 1; }
+  :global(html[data-js]) .ownH { font-size: var(--text-h1); line-height: 1.05; letter-spacing: var(--tracking-h1); }
+  :global(html[data-js]) .ownH :global(.accent) { font-family: var(--font-accent-display); }
+  :global(html[data-js]) .ownPrefix { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  :global(html[data-js]) .mask { display: block; overflow: hidden; padding-bottom: 0.14em; margin-bottom: -0.14em; }
+  :global(html[data-js]) .ownWord { display: inline-block; transform: translateY(115%); }
+  :global(html[data-js]) .ownLine { margin-top: var(--space-6); max-width: 38ch; opacity: 0; transform: translateY(8px); }
+}
+
+/* Thread drawing (SVG built by ChapterOneMotion) */
+.lines :global(.thread), .lines :global(.strand), .lines :global(.rail) { fill: none; stroke-linecap: round; }
+.lines :global(.thread), .lines :global(.strand) { stroke: var(--color-green); stroke-width: 2; }
+.lines :global(.rail) { stroke: var(--color-ink); stroke-width: 1; opacity: 0.55; }
+.lines :global(.dot) { fill: var(--color-green); }
+.lines :global(.node) { fill: var(--color-surface); stroke: var(--color-green-text); stroke-width: 1.5; transition: fill var(--dur-3) var(--ease-out); }
+.lines :global(.node.lit) { fill: var(--color-green); }
+
+.tag { position: absolute; font-size: var(--text-small); font-weight: 500; white-space: nowrap; opacity: 0; transform: translateY(4px); transition: opacity var(--dur-3) var(--ease-out), transform var(--dur-3) var(--ease-out); }
+.tag em { font-style: normal; font-weight: 400; color: var(--color-muted); margin-left: var(--space-2); }
+.tag[data-on] { opacity: 1; transform: none; }
+.strandTag { font-size: var(--text-small); font-weight: 500; color: var(--color-muted); }
+.strandTag[data-now] { color: var(--color-ink); }
+.strandTag[data-on] { transition-delay: var(--dur-3); } /* the label follows its strand, not before it */
+.strandTag[data-left] { transform: translate(-100%, 4px); }
+.strandTag[data-left][data-on] { transform: translateX(-100%); }

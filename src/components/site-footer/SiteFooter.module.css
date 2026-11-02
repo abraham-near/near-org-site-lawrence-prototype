@@ -1,0 +1,78 @@
+/* Footer: ink, site map in eight columns, full-width lockup; the ink rises over the page's last ground (D11). Tokens only. */
+
+.footer {
+  /* Type colours as variables: the real footer swaps them before the wipe; the ink layer's copy keeps these */
+  --fg: var(--color-on-dark);
+  --fg-muted: var(--color-on-dark-muted);
+  position: relative;
+  isolation: isolate;
+  overflow: clip; /* the lockup's transparent artwork padding runs past the edges (and the bottom: no strip of page below) */
+  background: var(--color-ink);
+  color: var(--fg);
+}
+
+/* The ink layer that rises, carrying a cream copy of the footer. Static/no-JS/reduced motion: not shown. */
+.ink { display: none; }
+.mark.markDark { display: none; } /* (.mark sets display: block later in this file) */
+
+@media (prefers-reduced-motion: no-preference) {
+  :global(html[data-js]) .ink {
+    --fg: var(--color-on-dark); --fg-muted: var(--color-on-dark-muted);
+    display: block; position: absolute; inset: 0; z-index: 1; overflow: hidden;
+    background: var(--color-ink); color: var(--fg); transform-origin: bottom center; transform: scaleY(0); will-change: transform;
+  }
+  /* Counter-scaled by FooterReveal (1 / the layer's scale), so the copy's type stays its true size */
+  :global(html[data-js]) .inkContent { position: absolute; inset: 0; transform-origin: bottom center; will-change: transform; }
+
+  /* Before the wipe completes, the real footer sits on the page's last ground with ink type and the black lockup.
+     The ground is the cream surface, or green where the page ends on the green close (home §8). */
+  :global(html[data-js]) .footer:not([data-wiped]) {
+    --fg: var(--color-ink); --fg-muted: var(--color-ink);
+    background: var(--footer-ground, var(--color-surface));
+  }
+  :global(html[data-js]) .footer:not([data-wiped]) > .inner .markLight { display: none; }
+  :global(html[data-js]) .footer:not([data-wiped]) > .inner .markDark { display: block; }
+  /* Wiped: the real footer has its ink colours, so the layer steps aside */
+  :global(html[data-js]) .footer[data-wiped] .ink { visibility: hidden; }
+}
+:global(body:has([data-page-end="green"])) .footer { --footer-ground: var(--color-green); }
+
+.inner {
+  max-width: var(--content-max);
+  margin-inline: auto;
+  padding: var(--space-10) var(--page-margin) var(--space-5);
+}
+@media (min-width: 1280px) {
+  .footer, .inkContent { min-height: 100vh; min-height: 100svh; display: flex; }
+  .inner { display: flex; flex-direction: column; width: 100%; padding-top: var(--space-11); }
+}
+
+.top { display: grid; gap: var(--space-8); }
+@media (min-width: 1280px) {
+  .top { grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 0 var(--space-6); }
+  .tagline { grid-column: 1 / span 4; }
+  .cols { grid-column: 5 / -1; } /* four columns of two, on the page grid */
+}
+
+.tagline { margin: 0; max-width: 12ch; } /* h3 (D13): the page's own closing heading stays the last big sign-off */
+
+.cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-6) var(--space-5); }
+@media (min-width: 768px) {
+  .cols { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-7) var(--space-6); }
+}
+
+.colHeading { margin: 0 0 var(--space-3); font-size: var(--text-small); font-weight: 500; color: var(--fg-muted); }
+.links { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-2); }
+.link { display: inline-flex; align-items: center; gap: var(--space-2); min-height: 24px; font-size: var(--text-small); color: var(--fg); text-decoration: none; }
+.link:hover { text-decoration: underline; text-decoration-color: var(--color-green); text-decoration-thickness: 2px; text-underline-offset: 4px; }
+.link:focus-visible { outline-color: var(--fg); }
+.ext { flex: none; opacity: 0.7; }
+
+/* The lockup's artwork has 108/1656 units of padding on each side; widen and pull it so the mark itself
+   spans the container edge to edge (layout only; the official file is untouched). */
+.mark { display: block; width: calc(100% * 1656 / 1440); max-width: none; height: auto; margin: var(--space-10) calc(100% * -108 / 1440) calc(100% * -108 / 1440); }
+@media (min-width: 1280px) {
+  .mark { margin-top: auto; padding-top: var(--space-9); }
+}
+
+.legal { margin: var(--space-5) 0 0; font-size: var(--text-small); color: var(--fg-muted); text-align: right; }

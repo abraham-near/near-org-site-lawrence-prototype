@@ -1,0 +1,56 @@
+/* Section 8: the close. A full-bleed NEAR-green field (REF-COLOR-simpledonewell) with ink type; the ink footer
+   follows. Not a dark section (D1 counts ink and forest). On green the primary button is ink and the field is
+   surface (DESIGN §1). No motion. Tokens only. */
+
+.close { background: var(--color-green); color: var(--color-ink); padding-block: var(--section-pad-y); }
+.close :focus-visible { outline-color: var(--color-ink); }
+.inner {
+  display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-7);
+  max-width: var(--content-max); margin-inline: auto; padding-inline: var(--page-margin);
+}
+.title { margin: 0; text-wrap: balance; }
+/* "NEAR belongs" stays together, so the line breaks before "to you", never after a lone "NEAR" */
+.keep, .title :global(.accent) { white-space: nowrap; }
+.body { display: flex; flex-direction: column; gap: var(--space-6); }
+.body > p { margin: 0; }
+
+/* Form */
+.form { display: flex; flex-direction: column; }
+.form p { margin: 0; }
+.fieldLabel { margin-bottom: var(--space-2); font-size: var(--text-small); font-weight: 500; }
+/* The field row and the success line share one cell, so the form's height is the same in both states */
+.slot { display: grid; }
+.slot > * { grid-area: 1 / 1; }
+.row { display: flex; flex-direction: column; gap: var(--space-3); }
+.row[data-done] { visibility: hidden; }
+.statusSlot { align-self: center; }
+.input {
+  min-height: var(--control-h); padding: 0 var(--space-4); border: 1px solid var(--color-ink); border-radius: var(--radius-sm);
+  background: var(--color-surface); color: var(--color-ink); font: inherit; font-size: var(--text-body);
+}
+.input[aria-invalid="true"] { border-width: 2px; padding-inline: calc(var(--space-4) - 1px); }
+.input:focus-visible { outline: 2px solid var(--color-ink); outline-offset: 2px; }
+.submit { justify-content: center; min-height: var(--control-h); background: var(--color-ink); color: var(--color-on-dark); border: 0; cursor: pointer; }
+.submit:hover { background: var(--color-forest); }
+
+/* Error: ink on green with an icon (colour alone never carries it); the slot keeps its height so nothing jumps */
+.form .error { display: flex; align-items: center; gap: var(--space-2); min-height: 1.5em; line-height: 1.5; margin-top: var(--space-2); font-size: var(--text-small); font-weight: 500; }
+.error svg, .success svg { flex: none; }
+.form .formNote { margin-top: var(--space-1); font-size: var(--text-small); }
+.formNote a { color: inherit; text-decoration-line: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.formNote a:hover { text-decoration-thickness: 2px; }
+.form .success { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); font-size: var(--text-lede); font-weight: 500; }
+.success:focus { outline: none; }
+
+@media (min-width: 768px) {
+  .row { flex-direction: row; }
+  .input { flex: 1; min-width: 0; }
+  .submit { flex: none; }
+}
+
+/* Desktop: heading on columns 1–6, the line and form on 8–12; both end on one line, so the page closes on it */
+@media (min-width: 1280px) {
+  .inner { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--space-6); align-items: end; }
+  .title { grid-column: 1 / span 6; }
+  .body { grid-column: 8 / span 5; }
+}

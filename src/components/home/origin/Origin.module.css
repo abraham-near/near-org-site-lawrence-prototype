@@ -1,0 +1,50 @@
+/* Section 5: Origin. A quiet light section: heading left, the account right (DESIGN §3 rhythm), one hairline and
+   one footnote. No image, no motion beyond link hovers. Tokens only. */
+
+.origin { padding-bottom: var(--section-pad-y); }
+.inner {
+  display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-7) var(--space-6);
+  max-width: var(--content-max); margin-inline: auto; padding-inline: var(--page-margin);
+}
+/* The hairline sits on the content, not the viewport edge, so it reads as a rule in the column grid */
+.inner::before { content: ""; grid-column: 1 / -1; border-top: 1px solid var(--color-line); margin-bottom: calc(var(--section-pad-y) - var(--space-7)); } /* the rule opens the section at its top edge */
+
+.title { margin: 0; max-width: 14ch; text-wrap: balance; }
+/* The closing Kepler phrase never splits across lines (D2: one phrase, read as one) */
+.title :global(.accent) { white-space: nowrap; }
+.body { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-6); }
+.body p { margin: 0; }
+.cta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
+.nowrap { white-space: nowrap; }
+
+.mark { font-size: max(13px, 0.6em); line-height: 0; }
+.mark a { position: relative; padding: 0 1px; color: var(--color-muted); text-decoration: none; }
+/* A larger hit area (ACCEPTANCE §3, ≥24 px) without moving the line */
+.mark a::after { content: ""; position: absolute; inset: -6px -9px; }
+.mark a:hover { color: var(--color-ink); text-decoration: underline; }
+
+.body .source { display: flex; gap: var(--space-3); margin-top: var(--space-4); padding-top: var(--space-4); border-top: 1px solid var(--color-line); align-self: stretch; font-size: var(--text-small); color: var(--color-muted); }
+.num { color: var(--color-ink); }
+/* Where the footnote mark lands */
+.source:target .num { text-decoration: underline; text-decoration-color: var(--color-green); text-decoration-thickness: 2px; text-underline-offset: 4px; }
+.source a { color: var(--color-ink); text-underline-offset: 4px; text-decoration-line: underline; text-decoration-thickness: 1px; }
+.source a:hover { text-decoration-color: var(--color-green); text-decoration-thickness: 2px; }
+
+/* The image: 4:3, square-cornered (DESIGN §3), decorative (the text carries the story) */
+.figure { position: relative; margin: 0; aspect-ratio: 4 / 3; overflow: hidden; background: var(--color-surface-2); }
+.img { object-fit: cover; }
+
+/* Tablet: heading wide; image on 1–6 and the account on 7–12 beside it, sitting on the image's lower edge.
+   Desktop: heading and image on 1–6; the account on 8–12, spanning both rows, settled at the bottom. */
+@media (min-width: 768px) {
+  .inner { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--space-5); row-gap: var(--space-7); }
+  .title { grid-column: 1 / -1; max-width: 20ch; }
+  .figure { grid-column: 1 / span 6; }
+  .body { grid-column: 7 / -1; align-self: end; }
+}
+@media (min-width: 1280px) {
+  .inner { column-gap: var(--space-6); }
+  .title { grid-column: 1 / span 6; grid-row: 2; max-width: 14ch; }
+  .figure { grid-column: 1 / span 6; grid-row: 3; }
+  .body { grid-column: 8 / span 5; grid-row: 2 / span 2; align-self: end; }
+}

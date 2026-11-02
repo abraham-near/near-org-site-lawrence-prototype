@@ -1,0 +1,61 @@
+/* Section 7: Get into NEAR. Light section; three rows on hairlines, name / line / link across the 12-column grid.
+   Each linked row is one target (the link stretches over it). Hover (mouse only): the row's rules darken, the link's
+   underline turns green and its arrow nudges (transform, 200 ms). Tokens only. */
+
+.paths { padding-block: var(--section-pad-y); }
+.inner { max-width: var(--content-max); margin-inline: auto; padding-inline: var(--page-margin); }
+.inner h2 { margin: 0; }
+.nowrap { white-space: nowrap; }
+
+.list { margin: var(--space-8) 0 0; padding: 0; list-style: none; border-bottom: 1px solid var(--color-line); }
+.row {
+  position: relative; display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-3);
+  padding-block: var(--space-6); border-top: 1px solid var(--color-line);
+}
+.name { margin: 0; }
+/* The row's image: 4:3, square-cornered, decorative; on hover it eases in slightly (transform, 200 ms) */
+.thumb { position: relative; aspect-ratio: 4 / 3; overflow: hidden; background: var(--color-surface-2); }
+.thumbImg { object-fit: cover; transition: transform var(--dur-2) var(--ease-out); }
+/* Phones: image beside the name, line and link below */
+@media (max-width: 767px) {
+  .row { grid-template-columns: calc(var(--space-10) - var(--space-4)) minmax(0, 1fr); column-gap: var(--space-4); align-items: center; }
+  .line, .action { grid-column: 1 / -1; }
+}
+.line { margin: 0; max-width: 60ch; font-size: var(--text-body); line-height: 1.6; color: var(--color-muted); text-wrap: pretty; }
+.action { margin: var(--space-2) 0 0; font-size: var(--text-body); font-weight: 500; }
+
+.link { display: inline-flex; align-items: center; gap: var(--space-2); min-height: 44px; color: var(--color-ink); text-decoration: none; }
+.label { text-decoration: underline; text-decoration-color: var(--color-line-strong); text-decoration-thickness: 1px; text-underline-offset: 5px; }
+/* The stretched target reaches slightly past the text on both sides, so its focus ring never touches the content */
+.link::after { content: ""; position: absolute; inset: 0 calc(var(--space-2) * -1); border-radius: var(--radius-sm); }
+.link:focus-visible { outline: none; }
+.link:focus-visible::after { outline: 2px solid var(--color-ink); outline-offset: 0; }
+.ext { transition: transform var(--dur-2) var(--ease-out); }
+
+@media (hover: hover) and (pointer: fine) {
+  /* The row's own rules darken where the pointer is (instant, no transition), and the link answers on the right */
+  .row[data-linked]:hover, .row[data-linked]:hover + .row { border-top-color: var(--color-line-strong); }
+  .list:has(.row[data-linked]:last-child:hover) { border-bottom-color: var(--color-line-strong); }
+  .row[data-linked]:hover .label { text-decoration-color: var(--color-green); text-decoration-thickness: 2px; }
+  .row[data-linked]:hover .ext { transform: translate(2px, -2px); }
+  .row[data-linked]:hover .thumbImg { transform: scale(1.03); }
+}
+
+/* Tablet: image on 1–3 (spanning the row), name, line and link on 4–12 */
+@media (min-width: 768px) {
+  .row { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--space-5); row-gap: var(--space-2); align-items: start; padding-block: var(--space-6); }
+  .thumb { grid-column: 1 / span 3; grid-row: 1 / span 3; }
+  .name { grid-column: 4 / -1; }
+  .line { grid-column: 4 / -1; }
+  .action { grid-column: 4 / -1; margin-top: 0; }
+  .link::after { inset: 0 calc(var(--space-3) * -1); }
+}
+
+/* Desktop: image 1–2, name 3–5, line 6–10, link 11–12, all in one row; the text centred on the image */
+@media (min-width: 1280px) {
+  .row { column-gap: var(--space-6); align-items: center; padding-block: var(--space-5); }
+  .thumb { grid-column: 1 / span 2; grid-row: 1; }
+  .name { grid-column: 3 / span 3; grid-row: 1; }
+  .line { grid-column: 6 / span 5; grid-row: 1; }
+  .action { grid-column: 11 / -1; grid-row: 1; justify-self: end; }
+}

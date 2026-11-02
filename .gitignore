@@ -43,5 +43,3 @@ next-env.d.ts
 # review screenshots
 /.shots/
 
-# licensed fonts: never committed to the public repo (see src/fonts/README.md)
-/src/fonts/*.woff2

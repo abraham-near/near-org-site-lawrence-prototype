@@ -1,0 +1,46 @@
+/* Lab option E (D34), after Craft: speaker, leader rule, words. Grey band (D15). The quotes are Kepler Italic, which
+   DESIGN §2 keeps for closing accents: choosing this option means a decision for quoted speech. Tokens only. */
+
+.band { background: var(--color-surface-2); color: var(--color-ink); padding-block: var(--section-pad-y); }
+.inner { max-width: var(--content-max); margin-inline: auto; padding-inline: var(--page-margin); }
+.title { margin: 0; font-size: var(--text-h3); font-weight: 500; line-height: 1.15; letter-spacing: var(--tracking-h3); text-wrap: balance; }
+
+.rows { display: grid; row-gap: var(--space-8); margin: var(--space-8) 0 0; padding: 0; list-style: none; }
+.fig { margin: 0; display: grid; grid-template-columns: minmax(0, 1fr); row-gap: var(--space-4); }
+.who { display: flex; flex-direction: column; gap: var(--space-1); }
+.name { font-size: var(--text-h4); font-weight: 500; line-height: 1.2; }
+.role { font-size: var(--text-small); } /* ink: muted fails AA on surface-2 */
+
+/* The leader: a hairline from the speaker to the words, drawn from the left */
+.leader { display: block; width: var(--space-6); height: 1px; background: var(--color-line-strong); transform-origin: left center; }
+.quote { margin: 0; }
+.quote p {
+  margin: 0; max-width: 26ch; font-family: var(--font-accent); font-style: italic; font-weight: 400;
+  font-size: var(--text-title-editorial); line-height: 1.2; letter-spacing: var(--tracking-accent); text-wrap: balance;
+}
+.hang { margin-left: -0.4em; }
+
+/* Each row's entrance, the first time a third of it is on screen: its leader draws (600 ms settle), then its words
+   fade in */
+@media (prefers-reduced-motion: no-preference) {
+  :global(html[data-js]) .row:not([data-in]) .leader { transform: scaleX(0); }
+  :global(html[data-js]) .row:not([data-in]) .quote { opacity: 0; }
+  .leader { transition: transform var(--dur-4) var(--ease-settle); }
+  .quote { transition: opacity var(--dur-3) var(--ease-out) var(--dur-3); }
+}
+
+/* Tablet up: one line per voice, as on the reference: the name, then the leader running from the end of the name to
+   the words, level with the name and the quote's first line; the words on the right 7 columns */
+@media (min-width: 768px) {
+  .fig { grid-template-columns: max-content minmax(var(--space-7), 1fr) minmax(0, 58%); column-gap: var(--space-4); align-items: start; }
+  /* the leader sits at the middle of the quote's first line; the name is lowered to sit level with it */
+  .leader { width: 100%; margin-top: calc(var(--text-title-editorial) * 0.62); }
+  .who { padding-top: calc(var(--text-title-editorial) * 0.62 - var(--text-h4) * 0.6); }
+}
+@media (min-width: 1280px) {
+  .rows { row-gap: var(--space-8); }
+  .fig { column-gap: var(--space-5); }
+  .quote p { max-width: 24ch; font-family: var(--font-accent-display); font-size: var(--text-h2); line-height: 1.12; }
+  .leader { margin-top: calc(var(--text-h2) * 0.6); }
+  .who { padding-top: calc(var(--text-h2) * 0.6 - var(--text-h4) * 0.6); }
+}

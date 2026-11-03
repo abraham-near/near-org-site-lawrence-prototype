@@ -1,0 +1,44 @@
+/* Lab option C (D31): the live layout (Testimonials.module.css) with editorial emphasis. Tokens only. */
+
+.band { background: var(--color-surface-2); color: var(--color-ink); padding-block: var(--section-pad-y); }
+.inner {
+  display: grid; grid-template-columns: minmax(0, 1fr); row-gap: var(--space-8);
+  max-width: var(--content-max); margin-inline: auto; padding-inline: var(--page-margin);
+}
+.title { margin: 0; font-size: var(--text-h3); font-weight: 500; line-height: 1.15; letter-spacing: var(--tracking-h3); text-wrap: balance; }
+
+.featured, .quote { margin: 0; }
+.featured blockquote, .quote blockquote, .featured p, .quote p { margin: 0; }
+.featured p { max-width: 20ch; font-size: var(--text-h2); font-weight: 400; line-height: 1.12; letter-spacing: var(--tracking-h2); text-wrap: balance; }
+.quote p { max-width: 30ch; font-size: var(--text-h4); font-weight: 400; line-height: 1.35; text-wrap: pretty; }
+
+/* The opening mark hangs into the margin, so the text edge stays on the grid line (same ink, same face: DESIGN §2) */
+.open { margin-left: -0.36em; }
+
+/* The mark: a mint highlighter band across the lower part of the strongest phrase (after Basecamp), cloned on each
+   line it wraps to. A band, not a block, so the large quote keeps its air. */
+.mark {
+  color: inherit; background: linear-gradient(transparent 56%, color-mix(in srgb, var(--color-green) 45%, transparent) 56%, color-mix(in srgb, var(--color-green) 45%, transparent) 90%, transparent 90%);
+  -webkit-box-decoration-break: clone; box-decoration-break: clone;
+}
+
+.attrib { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-1) var(--space-3); margin-top: var(--space-5); font-size: var(--text-body); }
+.quote .attrib { margin-top: var(--space-4); font-size: var(--text-small); }
+.name { font-weight: 500; }
+
+.quotes { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-7); margin: 0; padding: 0; list-style: none; }
+.quotes > li { padding-top: var(--space-5); border-top: 1px solid var(--color-line-strong); }
+
+/* Tablet up: the three voices in a row on one hairline line */
+@media (min-width: 768px) {
+  .quotes { grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: var(--space-5); align-items: start; }
+}
+
+/* Desktop: the heading and featured voice on columns 1–8 at the h1 size; the three voices underneath on columns 4–12,
+   so the section reads as a step from top left to bottom right */
+@media (min-width: 1280px) {
+  .inner { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--space-6); }
+  .title, .featured { grid-column: 1 / span 8; }
+  .featured p { max-width: 18ch; font-size: var(--text-h1); line-height: 1.06; letter-spacing: var(--tracking-h1); }
+  .quotes { grid-column: 4 / span 9; column-gap: var(--space-6); }
+}

@@ -53,7 +53,7 @@ export const ITEMS: DeeperItem[] = [
   { id: "bermuda", type: "story", title: "Government of Bermuda and NEAR AI partner to deploy AI-powered public services", source: "Government of Bermuda", url: "https://near.ai/blog/government-of-bermuda-and-near-ai-partner-to-deploy-ai-powered-public-services", image: img("bermuda") },
 ];
 
-export const FEATURED = 2;
+export const FEATURED = 3; // three featured items (D33; was two)
 export const MORE = 10;
 
 export function select(filter: DeeperFilter) {

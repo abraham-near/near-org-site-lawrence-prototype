@@ -1,0 +1,40 @@
+/* Lab option D (D34), after James Clear's praise page: scale set by length, two staggered columns. Grey band (D15),
+   quote type per DESIGN §2 (Montreal 400), hairlines not cards. Muted grey fails AA on surface-2, so roles stay ink
+   and step back by size. Tokens only. */
+
+.band { background: var(--color-surface-2); color: var(--color-ink); padding-block: var(--section-pad-y); }
+.inner {
+  display: grid; grid-template-columns: minmax(0, 1fr); row-gap: var(--space-7);
+  max-width: var(--content-max); margin-inline: auto; padding-inline: var(--page-margin);
+}
+.title { margin: 0; font-size: var(--text-h3); font-weight: 500; line-height: 1.15; letter-spacing: var(--tracking-h3); text-wrap: balance; }
+
+/* Phones: one column, shortest first (Horsley, Federa, Mumtaz, Swihart), still largest to smallest */
+.left, .right { display: contents; }
+.praise[data-id="horsley"] { order: 1; }
+.praise[data-id="federa"] { order: 2; }
+.praise[data-id="mumtaz"] { order: 3; }
+.praise[data-id="swihart"] { order: 4; }
+
+.praise { margin: 0; padding-top: var(--space-5); border-top: 1px solid var(--color-line-strong); }
+.praise blockquote, .praise p { margin: 0; }
+.praise p { font-weight: 400; text-wrap: balance; }
+.praise[data-size="xl"] p { max-width: 12ch; font-size: var(--text-h1); line-height: 1.06; letter-spacing: var(--tracking-h1); }
+.praise[data-size="l"] p { max-width: 20ch; font-size: var(--text-h2); line-height: 1.12; letter-spacing: var(--tracking-h2); }
+.praise[data-size="s"] p { max-width: 26ch; font-size: var(--text-h3); line-height: 1.25; letter-spacing: var(--tracking-h3); }
+.hang { margin-left: -0.36em; }
+
+/* Name over role, stacked, right under the quote (as on the reference) */
+.attrib { display: flex; flex-direction: column; gap: var(--space-1); margin-top: var(--space-4); }
+.name { font-size: var(--text-body); font-weight: 500; }
+.role { font-size: var(--text-small); }
+
+/* Desktop: two columns, the right one starting lower so the blocks interlock. Below 1280 it stays one column: at
+   tablet width the right column was too narrow for the h1 and h2 quotes. */
+@media (min-width: 1280px) {
+  .inner { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--space-6); row-gap: var(--space-8); }
+  .title { grid-column: 1 / span 6; }
+  .left, .right { display: flex; flex-direction: column; gap: var(--space-8); }
+  .left { grid-column: 1 / span 6; }
+  .right { grid-column: 8 / span 5; padding-top: var(--space-10); }
+}

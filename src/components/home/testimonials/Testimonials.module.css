@@ -14,7 +14,6 @@
 .featured, .quote, .featured blockquote, .quote blockquote { margin: 0; }
 .featured p, .quote p { margin: 0; }
 .featQuote { max-width: 20ch; font-size: var(--text-h2); font-weight: 400; line-height: 1.12; letter-spacing: var(--tracking-h2); text-wrap: balance; }
-.nowrap { white-space: nowrap; }
 
 /* Hanging punctuation: the opening mark sits outside the text block (Safari's hanging-punctuation isn't universal).
    The negative margin roughly equals the mark's advance in Montreal, so the text starts on the grid line. */

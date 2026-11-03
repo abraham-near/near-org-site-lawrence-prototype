@@ -1,0 +1,48 @@
+/* Lab option B (D31): the voices read in. Same grey band and quote type as the live section (D15, DESIGN §2).
+   Motion is opacity only and scroll-linked, so it never runs on its own (WCAG 2.2.2, D26). Tokens only. */
+
+.band { background: var(--color-surface-2); color: var(--color-ink); padding-block: var(--section-pad-y); }
+.inner { max-width: var(--content-max); margin-inline: auto; padding-inline: var(--page-margin); }
+.title { margin: 0; font-size: var(--text-h3); font-weight: 500; line-height: 1.15; letter-spacing: var(--tracking-h3); text-wrap: balance; }
+
+.list { display: grid; grid-template-columns: minmax(0, 1fr); row-gap: var(--space-8); margin: var(--space-8) 0 0; padding: 0; list-style: none; }
+.fig { margin: 0; }
+.quote { margin: 0; }
+.quote p { margin: 0; max-width: 20ch; font-size: var(--text-h2); font-weight: 400; line-height: 1.12; letter-spacing: var(--tracking-h2); text-wrap: balance; }
+.hang { margin-left: -0.36em; }
+.word { white-space: nowrap; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+/* Attribution: a short green rule, then the name and role (ink, stepped back by weight: muted fails AA on surface-2) */
+.attrib { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-1) var(--space-3); margin-top: var(--space-5); font-size: var(--text-body); }
+.attrib::before { content: ""; align-self: center; width: var(--space-6); height: 2px; background: var(--color-green); }
+.name { font-weight: 500; }
+
+/* The read-in: each quote is its own view timeline. Word i of n fills in over a short slice of the quote's entry, the
+   slices stepping left to right, so the line fills like reading. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .fig { view-timeline-name: --voice; }
+    .word {
+      animation: read-in linear both;
+      animation-timeline: --voice;
+      animation-range: cover calc(4% + var(--i) / var(--n) * 16%) cover calc(10% + var(--i) / var(--n) * 16%);
+    }
+  }
+}
+/* Unread words start at 35%, and every word is set once the quote's top is about a third of the way up the screen */
+@keyframes read-in { from { opacity: 0.35; } }
+
+/* Tablet up: the quotes alternate sides of the grid (D19's rhythm): left on columns 1–9, right on 4–12 */
+@media (min-width: 768px) {
+  .list { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--space-5); row-gap: var(--space-9); }
+  .item { grid-column: 1 / span 10; }
+  .item[data-side="right"] { grid-column: 3 / span 10; }
+}
+@media (min-width: 1280px) {
+  .list { column-gap: var(--space-6); }
+  .item { grid-column: 1 / span 9; }
+  .item[data-side="right"] { grid-column: 4 / span 9; }
+  /* The first voice leads at the h1 size */
+  .item[data-lead] .quote p { max-width: 18ch; font-size: var(--text-h1); line-height: 1.06; letter-spacing: var(--tracking-h1); }
+}

@@ -1,0 +1,24 @@
+/* Lab chrome for comparing the testimonial options (D31, D34). Not part of the site; tokens only. */
+.intro { max-width: var(--content-max); margin-inline: auto; padding: var(--space-10) var(--page-margin) var(--space-7); }
+.intro h1 { margin: 0 0 var(--space-4); font-size: var(--text-h2); font-weight: 500; line-height: 1.1; letter-spacing: var(--tracking-h2); }
+.intro p { margin: 0 0 var(--space-3); max-width: 64ch; font-size: var(--text-body); line-height: 1.6; }
+.nav { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-5); }
+.nav a { display: inline-flex; align-items: center; min-height: 44px; padding: 0 var(--space-4); border: 1px solid var(--color-line-strong); border-radius: var(--radius-sm); color: var(--color-ink); text-decoration: none; font-size: var(--text-small); }
+.nav a:hover { border-color: var(--color-ink); }
+
+.round { max-width: var(--content-max); margin: 0 auto; padding: var(--space-8) var(--page-margin) var(--space-5); font-size: var(--text-h3); font-weight: 500; }
+
+.label { scroll-margin-top: var(--space-4); border-top: 1px solid var(--color-line-strong); background: var(--color-surface); }
+.labelInner { display: grid; gap: var(--space-5); max-width: var(--content-max); margin-inline: auto; padding: var(--space-5) var(--page-margin) var(--space-6); }
+@media (min-width: 1024px) { .labelInner { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); column-gap: var(--space-7); align-items: start; } }
+.labelText p { margin: 0 0 var(--space-2); max-width: 56ch; }
+.head { font-size: var(--text-h4); }
+.tag, .name { font-weight: 500; }
+.note { font-size: var(--text-small); color: var(--color-muted); line-height: 1.5; }
+.note strong { color: var(--color-ink); font-weight: 500; }
+.links { font-size: var(--text-small); }
+.links a { color: var(--color-ink); text-underline-offset: 4px; }
+.ref { margin: 0; }
+.ref img { display: block; width: 100%; height: auto; max-height: 360px; object-fit: contain; object-position: left top; border: 1px solid var(--color-line); border-radius: var(--radius-sm); background: var(--color-white); }
+.ref figcaption { margin-top: var(--space-2); font-size: var(--text-caption); color: var(--color-muted); }
+.gap { height: var(--space-9); }

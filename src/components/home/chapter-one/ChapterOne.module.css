@@ -1,4 +1,4 @@
-/* Section 1: Chapter 1. Tokens only. Two modes:
+/* Section 1: Chapter 1, the claim and the anthem (the story after it is components/home/story, D29). Tokens only. Two modes:
    - Static (default: phones, tablets, reduced motion, no JS): stacked beats, a static green rule, photo band first.
    - Motion (html[data-js], ≥ 1280px = --breakpoint-lg, motion allowed): pinned stage, beats scroll over it. */
 
@@ -9,15 +9,15 @@
 .photo { position: absolute; inset: 0; }
 .media { position: absolute; inset: 0; will-change: transform; }
 .photoImg { object-fit: cover; object-position: 78% 50%; }
+.video { display: none; }
 .curtain { display: none; }
-.lines, .tags, .ownStage { display: none; }
-.nowrap { white-space: nowrap; }
+.lines { display: none; }
 
 /* Content sits in the page container (1440 max), so at wide screens it aligns with the header. */
-.beats { --inset: max(var(--page-margin), calc((100% - var(--content-max)) / 2 + var(--page-margin))); position: relative; margin-left: var(--space-2); padding-bottom: var(--space-7); }
+.beats { --inset: max(var(--page-margin), calc((100% - var(--content-max)) / 2 + var(--page-margin))); position: relative; margin-left: var(--space-2); }
 /* The text sits on the page container's edge and the green rule hangs in the margin beside it (like the quote marks) */
 @media (min-width: 768px) { .beats { margin-left: calc(var(--inset) - var(--space-5)); } }
-/* The thread, as a line down the left edge, with a dot at each beat */
+/* The thread, as a line down the left edge, with a dot at each beat; the story's own rule carries on below (D29) */
 .beats::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: var(--color-green); transform: scaleY(var(--rule, 1)); transform-origin: top; }
 /* Phones/tablets with motion (D15): dots scale in as their beat arrives (ChapterOneMotion sets data-dots/data-dot) */
 .beats[data-dots] .beat::before { transform: scale(0); transition: transform var(--dur-3) var(--ease-out); }
@@ -28,46 +28,15 @@
 .copy { max-width: 640px; }
 .lede { margin-top: var(--space-5); }
 .cta { margin-top: var(--space-6); }
-.missionTitle { margin: 0 0 var(--space-5); }
-.sentence { display: block; } /* the mission sets one sentence per line (D15) */
-/* Desktop: the mission heading is as wide as its longest sentence, so none of the three lines wraps */
-@media (min-width: 1280px) {
-  .beatMission .copy { max-width: none; }
-  .missionTitle { width: max-content; max-width: 100%; }
-}
-.payoff { margin: var(--space-6) 0 0; max-width: 24ch; }
-/* The rhythm without motion too (D19), from 1024 up: the anthem against the right edge, the mission centred */
-@media (min-width: 1024px) {
-  .beatAnthem .anthem { width: fit-content; margin-left: auto; }
-  .beatAnthem .statement { max-width: 14em; } /* narrow enough that the right weighting shows */
-  .beatMission .copy { max-width: none; margin-inline: auto; text-align: center; }
-  .beatMission .missionTitle, .beatMission :global(.t-lede), .beatMission .payoff { margin-inline: auto; }
-}
 
-.anthemMark { display: none; }
-.statement { margin: 0; font-size: var(--text-h2); font-weight: 500; line-height: 1.1; letter-spacing: var(--tracking-h2); max-width: 20em; }
+/* The anthem (D29): larger, the N tile floated two lines deep beside "NEAR" (its top on the first line's cap height, its
+   foot on the second line's baseline), the text wrapping naturally around it */
+.statement { margin: 0; font-size: var(--text-h2); font-weight: 500; line-height: 1.1; letter-spacing: var(--tracking-h2); max-width: 20em; text-wrap-style: pretty; }
+.anthemMark { float: left; width: 1.84em; height: 1.84em; margin: 0.17em 0.3em 0.1em 0; }
 .wd { display: inline-block; white-space: nowrap; }
 .ch { display: inline-block; }
 .lb { display: none; }
 .hl { color: var(--color-green-text); }
-
-.ownK { display: none; }
-.ownSteps { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-6); max-width: 640px; }
-/* Static: the four lines read as a list under the mission line, one step below it */
-.ownH { margin: 0; font-size: var(--text-h3); line-height: 1.15; letter-spacing: var(--tracking-h3); }
-.mask :global(.accent) { line-height: 1; } /* the roll's mask clips to the line box, so the word keeps its own */
-.ownH :global(.accent) { font-family: var(--font-accent); } /* h3-sized here: Kepler's text cut (DESIGN §2) */
-.ownLine { margin: var(--space-3) 0 0; }
-/* Static: each word's drawing sits above it (D18); on wide screens (reduced motion) beside it */
-.stepArt { margin: 0 0 var(--space-4); }
-@media (min-width: 1024px) {
-  .ownSteps { max-width: none; gap: var(--space-8); }
-  .ownStep { display: grid; grid-template-columns: minmax(0, 36rem) auto; column-gap: var(--space-9); align-items: center; }
-  .stepArt { grid-column: 2; grid-row: 1 / span 2; margin: 0; }
-  .ownH, .ownLine { grid-column: 1; }
-  .ownH { align-self: end; }
-  .ownLine { align-self: start; }
-}
 
 /* ── Motion mode ─────────────────────────────────────────────── */
 @media (min-width: 1280px) and (prefers-reduced-motion: no-preference) {
@@ -76,63 +45,29 @@
   :global(html[data-js]) .curtainL { left: 0; transform-origin: left center; }
   :global(html[data-js]) .curtainR { right: 0; transform-origin: right center; }
   :global(html[data-js]) .photoImg { object-position: 30% 50%; }
+  /* The scrubbed camera move (D29) fades in over its own first frame once it can seek */
+  :global(html[data-js]) .video { display: block; position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 30% 50%; opacity: 0; transition: opacity var(--dur-4) var(--ease-out); }
+  :global(html[data-js]) .video[data-ready] { opacity: 1; }
   :global(html[data-js]) .lines { display: block; position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
-  :global(html[data-js]) .tags { display: block; position: absolute; inset: 0; pointer-events: none; }
-  /* The drawing for the current word, hung on the thread (ChapterOneMotion places it at --own-x/-y and sets data-on) */
-  :global(html[data-js]) .ownStage { display: block; position: absolute; left: var(--own-x, 70%); top: var(--own-y, 35%); width: var(--own-w, 25vw); aspect-ratio: 4 / 3; pointer-events: none; }
-  :global(html[data-js]) .stageArt { position: absolute; inset: 0; width: 100%; opacity: 0; transform: translateY(var(--space-3)); transition: opacity var(--dur-3) var(--ease-out), transform var(--dur-4) var(--ease-out); }
-  :global(html[data-js]) .stageArt[data-on] { opacity: 1; transform: none; transition-delay: var(--dur-2); }
-  :global(html[data-js]) .stepArt { display: none; }
-  :global(html[data-js]) .ownStep { display: block; }
 
   :global(html[data-js]) .beats { margin: -100vh 0 0; margin-top: -100svh; padding: 0; }
   :global(html[data-js]) .lede { max-width: 34ch; } /* keeps the lede on the pale side of the photo */
   :global(html[data-js]) .beats::before { display: none; }
   :global(html[data-js]) .beat { display: flex; align-items: center; padding: 0 var(--inset); }
   :global(html[data-js]) .beat::before { display: none; }
-  :global(html[data-js]) .beatClaim { min-height: 100vh; min-height: 100svh; margin-bottom: 40vh; } /* the photo closes before the right-set anthem arrives (D19) */
+  /* The camera moves down the ridges over the claim and the room after it, then the photo closes (D29: 90 vh of room) */
+  :global(html[data-js]) .beatClaim { min-height: 100vh; min-height: 100svh; margin-bottom: 90vh; }
   :global(html[data-js]) .beatAnthem { min-height: 200vh; align-items: flex-start; }
-  :global(html[data-js]) .beatMission { min-height: 100vh; }
-  :global(html[data-js]) .beatOwn { min-height: 260vh; align-items: flex-start; }
 
-  /* Anthem: pinned while its colour wipes on */
-  :global(html[data-js]) .anthem { position: sticky; top: 0; height: 100vh; height: 100svh; display: flex; align-items: center; }
-  :global(html[data-js]) .statement { font-size: 1em; }
-  :global(html[data-js]) .beatAnthem .statement { max-width: 20em; } /* the set line breaks rule here, not the static cap */
-  :global(html[data-js]) .anthemRow { display: flex; align-items: flex-start; gap: 0.52em; font-size: var(--text-statement); }
-  :global(html[data-js]) .anthemMark { display: block; width: 0.95em; height: 0.95em; margin-top: 0.08em; flex: none; }
+  /* Anthem: pinned while its colour wipes on; set at h1 size across the page container, from its left edge */
+  :global(html[data-js]) .anthem { position: sticky; top: 0; height: 100vh; height: 100svh; display: flex; align-items: center; width: 100%; }
+  :global(html[data-js]) .statement { font-size: var(--text-h1); line-height: 1.05; letter-spacing: var(--tracking-h1); max-width: none; }
   :global(html[data-js]) .lb { display: inline; }
-  /* Right-weighted (D19): the mark and statement sit against the container's right edge, text ragged-right */
-  :global(html[data-js]) .beatAnthem .anthem { width: 100%; }
-  :global(html[data-js]) .anthemRow { margin-left: auto; }
-
-  /* Mission, centred (D19): the three sentences, then room for the pinch, then the lede and the payoff */
-  :global(html[data-js]) .beatMission { justify-content: center; text-align: center; }
-  :global(html[data-js]) .beatMission .copy { display: flex; flex-direction: column; align-items: center; }
-  :global(html[data-js]) .missionTitle { margin-bottom: var(--space-10); }
-
-  /* Own your …: "Own your" holds; one word at a time rolls through its mask */
-  :global(html[data-js]) .own { position: sticky; top: 0; height: 100vh; height: 100svh; display: flex; flex-direction: column; justify-content: center; width: min(100%, 640px); }
-  :global(html[data-js]) .ownK { display: block; margin: 0 0 -0.06em; }
-  :global(html[data-js]) .ownSteps { display: grid; gap: 0; }
-  :global(html[data-js]) .ownStep { grid-area: 1 / 1; }
-  :global(html[data-js]) .ownH { font-size: var(--text-h1); line-height: 1.05; letter-spacing: var(--tracking-h1); }
-  :global(html[data-js]) .ownH :global(.accent) { font-family: var(--font-accent-display); }
-  :global(html[data-js]) .ownPrefix { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-  :global(html[data-js]) .mask { display: block; overflow: hidden; padding-bottom: 0.14em; margin-bottom: -0.14em; }
-  :global(html[data-js]) .ownWord { display: inline-block; transform: translateY(115%); }
-  :global(html[data-js]) .ownLine { margin-top: var(--space-6); max-width: 38ch; opacity: 0; transform: translateY(8px); }
+  :global(html[data-js]) .anthemMark { width: 1.78em; height: 1.78em; margin-top: 0.15em; }
+  /* "own your intelligence." wipes on in ink and only turns green as each letter goes solid (--g, ChapterOneMotion) */
+  :global(html[data-js]) .hl .ch { color: color-mix(in srgb, var(--color-green-text) calc(var(--g, 0) * 100%), var(--color-ink)); }
 }
 
 /* Thread drawing (SVG built by ChapterOneMotion) */
-.lines :global(.thread), .lines :global(.strand), .lines :global(.rail) { fill: none; stroke-linecap: round; }
-.lines :global(.thread), .lines :global(.strand) { stroke: var(--color-green); stroke-width: 2; }
-.lines :global(.rail) { stroke: var(--color-ink); stroke-width: 1; opacity: 0.55; }
+.lines :global(.thread) { fill: none; stroke-linecap: round; stroke: var(--color-green); stroke-width: 2; }
 .lines :global(.dot) { fill: var(--color-green); }
-/* The mission arrival (D28): the packet's retracting trail and the ring it lands with */
-.lines :global(.trail) { fill: none; stroke: var(--color-green); stroke-width: 2; stroke-linecap: round; }
-.lines :global(.ring) { fill: none; stroke: var(--color-green); stroke-width: 1.5; }
-
-.tag { position: absolute; font-size: var(--text-small); font-weight: 500; white-space: nowrap; opacity: 0; transform: translateY(4px); transition: opacity var(--dur-3) var(--ease-out), transform var(--dur-3) var(--ease-out); }
-.tag em { font-style: normal; font-weight: 400; color: var(--color-muted); margin-left: var(--space-2); }
-.tag[data-on] { opacity: 1; transform: none; }

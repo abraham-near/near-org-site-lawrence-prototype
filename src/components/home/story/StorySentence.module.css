@@ -1,0 +1,26 @@
+/* Story option B, "The sentence" (D29). Tokens only. Motion mode only (the static reading is Story.module.css). */
+
+.stage { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding-inline: var(--inset); }
+
+/* The three lines, centred at h1 size. The meet line can be scaled down to a quiet kicker and back (from its top). */
+.connect { display: flex; flex-direction: column; align-items: center; font-size: var(--text-h1); font-weight: 500; line-height: 1.05; letter-spacing: var(--tracking-h1); }
+.line { margin: 0; }
+.slot { justify-items: center; transform-origin: 50% 0; color: color-mix(in srgb, var(--color-muted) calc(var(--mute, 0) * 100%), var(--color-ink)); }
+
+/* The problem, wiping on word by word under the kicker */
+.problem { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding-inline: var(--inset); padding-top: var(--space-8); visibility: hidden; }
+.problem p { margin: 0; max-width: 17em; font-size: var(--text-h2); font-weight: 500; line-height: 1.12; letter-spacing: var(--tracking-h2); text-wrap-style: balance; }
+.pw { opacity: 0.14; }
+
+/* Own your …: under the answer, centred: the drawing, then "Own your | word." pivoting on the axis, then its line */
+.own { position: absolute; left: var(--inset); right: var(--inset); top: 29%; display: flex; flex-direction: column; align-items: center; visibility: hidden; }
+.arts { position: relative; width: 300px; aspect-ratio: 4 / 3; }
+.art { position: absolute; inset: 0; width: 100%; opacity: 0; transform: translateY(var(--space-3)); transition: opacity var(--dur-3) var(--ease-out), transform var(--dur-4) var(--ease-out); }
+.art[data-on] { opacity: 1; transform: none; transition-delay: var(--dur-2); }
+/* A step under the answer (h2), so the answer leads */
+.ownRow { display: grid; grid-template-columns: 1fr 1fr; align-items: baseline; width: 100%; margin-top: var(--space-6); font-size: var(--text-h2); font-weight: 500; line-height: 1.1; letter-spacing: var(--tracking-h2); }
+.ownK { margin: 0; justify-self: end; padding-right: 0.26em; }
+.mask { display: grid; justify-self: start; overflow: hidden; padding-bottom: 0.16em; margin-bottom: -0.16em; }
+.word { grid-area: 1 / 1; display: inline-block; justify-self: start; line-height: 1.1; transform: translateY(115%); }
+.lines { display: grid; justify-items: center; margin-top: var(--space-5); }
+.ownLine { grid-area: 1 / 1; margin: 0; max-width: 36ch; text-align: center; opacity: 0; }

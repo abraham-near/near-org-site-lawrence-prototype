@@ -1,0 +1,50 @@
+/* Lab option F (D34), after Attio: one voice per screen. Grey band (D15), quote type per DESIGN §2 (Montreal 400).
+   Static by default (stacked, centred, fully inked); [data-pinned] (desktop with motion, set by the component) turns
+   it into the pinned stage. Motion: opacity per word, scrubbed; quote swaps per D28. Tokens only. */
+
+.band { background: var(--color-surface-2); color: var(--color-ink); }
+.track { padding-block: var(--section-pad-y); }
+.stage { max-width: var(--content-max); margin-inline: auto; padding-inline: var(--page-margin); text-align: center; }
+.title { margin: 0 auto; font-size: var(--text-h3); font-weight: 500; line-height: 1.15; letter-spacing: var(--tracking-h3); text-wrap: balance; }
+
+.quotes { display: grid; margin-top: var(--space-8); }
+.fig { margin: 0; padding-block: var(--space-7); border-top: 1px solid var(--color-line-strong); }
+.fig:last-child { padding-bottom: 0; }
+.quote { margin: 0; }
+.quote p { margin: 0 auto; max-width: 18ch; font-size: var(--text-h2); font-weight: 400; line-height: 1.12; letter-spacing: var(--tracking-h2); text-wrap: balance; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.word { white-space: nowrap; }
+/* Name over role, centred, small (as on the reference); ink, since muted fails AA on surface-2 */
+.attrib { display: flex; flex-direction: column; align-items: center; gap: var(--space-1); margin-top: var(--space-5); font-size: var(--text-small); }
+.name { font-weight: 500; }
+.roster { display: none; }
+
+/* Pinned: a tall track, a sticky full-screen stage on dot-grid paper between two page-frame hairlines; the quotes
+   share one cell in the middle, the heading at the top, the roster at the bottom */
+.band[data-pinned] .track { height: calc(100vh + 4 * 60vh); padding: 0; }
+.band[data-pinned] .stage {
+  position: sticky; top: 0; height: 100vh; display: grid; grid-template-rows: auto 1fr auto; align-items: center;
+  padding-block: var(--space-9) var(--space-7);
+  border-inline: 1px solid var(--color-line);
+  background-image: radial-gradient(circle, var(--color-line) 1px, transparent 1.5px);
+  background-size: var(--space-5) var(--space-5); background-position: center;
+}
+.band[data-pinned] .quotes { margin: 0; }
+.band[data-pinned] .fig { grid-area: 1 / 1; padding: 0; border: 0; }
+.band[data-pinned] .quote p { max-width: 22ch; font-size: var(--text-h1); line-height: 1.06; letter-spacing: var(--tracking-h1); }
+/* The quote the reader is on settles in (opacity 320 ms, rise 600 ms on a long settle) after the last leaves (120 ms) */
+.band[data-pinned] .fig { transition: opacity var(--dur-3) var(--ease-out) var(--dur-1), transform var(--dur-4) var(--ease-settle) var(--dur-1); }
+.band[data-pinned] .fig:not([data-active]) {
+  visibility: hidden; opacity: 0; transform: translateY(var(--space-2));
+  transition: opacity var(--dur-1) var(--ease-out), visibility 0s linear var(--dur-1), transform 0s linear var(--dur-1);
+}
+.band[data-pinned] .roster {
+  display: flex; justify-content: center; gap: var(--space-6); margin: 0; padding: 0; list-style: none; font-size: var(--text-small);
+}
+.band[data-pinned] .roster li { position: relative; padding-top: var(--space-3); }
+.band[data-pinned] .roster li::before {
+  content: ""; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--color-ink);
+  transform: scaleX(0); transform-origin: left center; transition: transform var(--dur-3) var(--ease-out);
+}
+.band[data-pinned] .roster li[data-on] { font-weight: 500; }
+.band[data-pinned] .roster li[data-on]::before { transform: none; }

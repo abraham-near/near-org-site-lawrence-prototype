@@ -1,0 +1,50 @@
+/* Story option C, "The rail" (D29). Tokens only. Motion mode only (the static reading is Story.module.css).
+   The world is a track several screens wide that slides left; everything on it is placed at --x (vw) on one line. */
+
+.stage { --rail-y: 64%; }
+.world { position: absolute; top: 0; left: 0; height: 100%; width: var(--end); will-change: transform; }
+
+.rail { position: absolute; left: 0; right: 0; top: var(--rail-y); height: 1px; background: var(--color-line-strong); }
+.green { position: absolute; top: calc(var(--rail-y) - 1px); height: 2px; background: var(--color-green); }
+.greenL { left: 0; width: 50vw; }
+.greenR { left: 50vw; width: 50vw; }
+.greenOn { left: var(--x); width: calc(var(--end) - var(--x)); }
+.end { position: absolute; left: var(--x); top: calc(var(--rail-y) + var(--space-4)); font-size: var(--text-small); font-weight: 500; white-space: nowrap; }
+.end em { font-style: normal; font-weight: 400; color: var(--color-muted); margin-left: var(--space-2); }
+.endR { transform: translateX(-100%); }
+.point { position: absolute; left: var(--x); top: var(--rail-y); width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; background: var(--color-green); }
+
+/* The problem and its box */
+/* Placed so that, with the box centred, it starts on the page container's edge (under the kicker) and ends a clear gap
+   above the line, whatever the screen height */
+/* --inset uses 100%, which on the wide track would mean the track's width; the screen's own inset is in vw here */
+.problem { position: absolute; left: calc(var(--x) + max(var(--page-margin), (100vw - var(--content-max)) / 2 + var(--page-margin))); bottom: calc(100% - var(--rail-y) + var(--space-8)); width: min(640px, 44vw); }
+/* h2, smaller on short screens so it stays clear of the kicker above it */
+.problem p { margin: 0; font-size: min(var(--text-h2), 6.2vh); font-weight: 500; line-height: 1.12; letter-spacing: var(--tracking-h2); text-wrap-style: balance; }
+.pw { opacity: 0.14; }
+.gate { position: absolute; left: var(--x); top: var(--rail-y); width: 96px; height: 96px; margin: -48px 0 0 -48px; }
+/* Each half: an outline that fills with ink (--shut) while the problem is read */
+.half { position: absolute; left: 0; right: 0; height: 50%; border: 1px solid var(--color-ink); background: color-mix(in srgb, var(--color-ink) calc(var(--shut, 0) * 100%), var(--color-surface)); }
+.top { top: 0; border-bottom: 0; border-radius: var(--radius-md) var(--radius-md) 0 0; }
+.bottom { bottom: 0; border-top: 0; border-radius: 0 0 var(--radius-md) var(--radius-md); }
+
+/* Stations: centred on their --x, the drawing above the line, the words below */
+.station { position: absolute; left: var(--x); top: 0; bottom: 0; width: 0; }
+.artSlot { position: absolute; left: 0; bottom: calc(100% - var(--rail-y) + var(--space-6)); width: 300px; transform: translateX(-50%); }
+.art { width: 100%; }
+.dot { position: absolute; left: 0; top: var(--rail-y); width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; background: var(--color-green); }
+.title { position: absolute; left: 0; top: calc(var(--rail-y) + var(--space-6)); width: 40rem; margin: 0; transform: translateX(-50%); text-align: center; font-size: var(--text-h2); font-weight: 500; line-height: 1.1; letter-spacing: var(--tracking-h2); }
+.line { position: absolute; left: 0; top: calc(var(--rail-y) + var(--space-6) + 1.5 * var(--text-h2)); width: 34ch; margin: 0; transform: translateX(-50%); text-align: center; }
+
+/* Fixed on the stage */
+.connect { position: absolute; left: var(--inset); top: 14%; font-size: var(--text-h1); font-weight: 500; line-height: 1.05; letter-spacing: var(--tracking-h1); }
+.cline { margin: 0; white-space: nowrap; }
+.slot { justify-items: start; transform-origin: 0 0; color: color-mix(in srgb, var(--color-muted) calc(var(--mute, 0) * 100%), var(--color-ink)); }
+
+/* Looks (D32) */
+/* Window: the framed view replaces the small box */
+.stage[data-look="window"] .gate { display: none; }
+/* Drafting: each drawing sits in a dashed frame on a dotted leader down to its dot; both belong to the drawing, so they
+   show and hide with it (a half-frame cut by the screen's edge would read as a bug) */
+.stage[data-look="drafting"] .art { position: relative; outline: 1px dashed var(--color-line-strong); outline-offset: var(--space-4); }
+.stage[data-look="drafting"] .art::after { content: ""; position: absolute; left: 50%; top: calc(100% + var(--space-4)); height: calc(var(--space-6) - var(--space-4)); border-left: 1px dotted var(--color-ink); }

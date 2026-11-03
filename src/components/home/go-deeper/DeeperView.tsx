@@ -6,9 +6,10 @@ import { useSearchParams } from "next/navigation";
 import { FILTERS, TILE_LABEL, TYPE_LABEL, select, type DeeperFilter, type DeeperItem, type DeeperType } from "./content";
 import styles from "./GoDeeper.module.css";
 
-// The filter tablist and its five panels (layout 4C, D9). All panels share one grid cell, so the section always
+// The filter tablist and its panels (layout 4C, D9). All panels share one grid cell, so the section always
 // holds the tallest filter's height and switching never moves the page (on phones only the active one is shown;
-// see the CSS). The filter is mirrored in ?type= so a filter can be linked to.
+// see the CSS). The filter is mirrored in ?type= so a filter can be linked to. One footer row under the panels holds
+// "View everything" and the arrows for the active panel's strip, so the section fits one screen (D30).
 
 const isFilter = (v: string | null): v is DeeperFilter => FILTERS.some((f) => f.key === v);
 
@@ -31,6 +32,41 @@ export function DeeperFromUrl() {
 
 export function DeeperView({ active, onSelect }: { active: DeeperFilter; onSelect?: (f: DeeperFilter) => void }) {
   const tabs = useRef<(HTMLButtonElement | null)[]>([]);
+  const strips = useRef<Partial<Record<DeeperFilter, HTMLOListElement | null>>>({});
+  const nav = useRef<HTMLDivElement>(null);
+  const prev = useRef<HTMLButtonElement>(null);
+  const next = useRef<HTMLButtonElement>(null);
+  const hasStrip = select(active).more.length > 0;
+
+  // The arrows follow the active strip: hidden when it doesn't overflow (or there is none), disabled at each end.
+  useEffect(() => {
+    const s = strips.current[active], n = nav.current;
+    if (!n) return;
+    if (!s) { n.hidden = true; return; }
+    const sync = () => {
+      const max = s.scrollWidth - s.clientWidth;
+      n.hidden = max <= 1;
+      const p = prev.current, x = next.current;
+      if (!p || !x) return;
+      p.disabled = s.scrollLeft <= 1;
+      x.disabled = s.scrollLeft >= max - 1;
+      // A button that disables under the keyboard would drop focus to the page; hand it to the other arrow
+      if (p.disabled && document.activeElement === p && !x.disabled) x.focus();
+      if (x.disabled && document.activeElement === x && !p.disabled) p.focus();
+    };
+    const ro = new ResizeObserver(sync);
+    ro.observe(s);
+    s.addEventListener("scroll", sync, { passive: true });
+    sync();
+    return () => { ro.disconnect(); s.removeEventListener("scroll", sync); };
+  }, [active]);
+
+  const go = (dir: number) => {
+    const s = strips.current[active];
+    if (!s) return;
+    const smooth = !matchMedia("(prefers-reduced-motion: reduce)").matches;
+    s.scrollBy({ left: dir * s.clientWidth * 0.8, behavior: smooth ? "smooth" : "auto" });
+  };
 
   const onKey = (e: KeyboardEvent, i: number) => {
     const n = FILTERS.length;
@@ -56,13 +92,30 @@ export function DeeperView({ active, onSelect }: { active: DeeperFilter; onSelec
         ))}
       </div>
       <div className={styles.panels}>
-        {FILTERS.map((f) => <Panel key={f.key} filter={f.key} label={f.label} active={f.key === active} />)}
+        {FILTERS.map((f) => (
+          <Panel key={f.key} filter={f.key} label={f.label} active={f.key === active} stripRef={(el) => { strips.current[f.key] = el; }} />
+        ))}
+      </div>
+      <div className={styles.foot}>
+        <a href="/blog" className={styles.all}>View everything</a>
+        {/* Hidden until the effect finds the active strip overflowing (and so always hidden without JavaScript); the
+            effect owns it from then on */}
+        <div ref={nav} className={styles.stripNav} hidden>
+          <button ref={prev} type="button" className={styles.navBtn} onClick={() => go(-1)} aria-controls={hasStrip ? stripId(active) : undefined} aria-label="Previous items">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 6 8.5 12l6 6" /></svg>
+          </button>
+          <button ref={next} type="button" className={styles.navBtn} onClick={() => go(1)} aria-controls={hasStrip ? stripId(active) : undefined} aria-label="Next items">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 6l6 6-6 6" /></svg>
+          </button>
+        </div>
       </div>
     </>
   );
 }
 
-function Panel({ filter, label, active }: { filter: DeeperFilter; label: string; active: boolean }) {
+const stripId = (filter: DeeperFilter) => `deeper-strip-${filter}`;
+
+function Panel({ filter, label, active, stripRef }: { filter: DeeperFilter; label: string; active: boolean; stripRef: (el: HTMLOListElement | null) => void }) {
   const { featured, more } = select(filter);
   return (
     <div
@@ -70,10 +123,10 @@ function Panel({ filter, label, active }: { filter: DeeperFilter; label: string;
       className={styles.panel} data-active={active || undefined} inert={!active}
     >
       <div className={styles.featGrid} data-count={featured.length}>
-        {featured.map((it, i) => <Featured key={it.id} item={it} show={active} eager={filter === "all" && i < 2} wide={featured.length === 1} />)}
+        {featured.map((it, i) => <Featured key={it.id} item={it} show={active} eager={filter === "all" && i < 2} />)}
       </div>
-      {more.length > 0 ? <Strip items={more} label={label} /> : (
-        <p className={styles.empty}>That&rsquo;s everything in {label} for now. <a href="/blog">View everything</a></p>
+      {more.length > 0 ? <Strip id={stripId(filter)} items={more} label={label} stripRef={stripRef} /> : (
+        <p className={styles.empty}>That&rsquo;s everything in {label} for now.</p>
       )}
     </div>
   );
@@ -94,57 +147,30 @@ const Source = ({ item }: { item: DeeperItem }) => <>{item.source}</>;
 const DateTbd = ({ item }: { item: DeeperItem }) => (item.date ? <time dateTime={item.date}>{item.date}</time> : null);
 
 // Images load only for the visible panel; hidden panels keep the media box, so the shared height still holds.
-function Featured({ item, show, eager, wide }: { item: DeeperItem; show: boolean; eager: boolean; wide: boolean }) {
+// A filter with one featured item sets it beside its text at the same image size, so it never sets the height (D30).
+function Featured({ item, show, eager }: { item: DeeperItem; show: boolean; eager: boolean }) {
   return (
     <article className={styles.feat}>
       <div className={styles.media}>
-        {item.image && show && <Image src={item.image} alt="" fill sizes={wide ? "(min-width: 1440px) 1316px, 100vw" : "(min-width: 1440px) 634px, (min-width: 768px) 50vw, 100vw"} loading={eager ? undefined : "lazy"} className={styles.img} onLoad={(e) => e.currentTarget.setAttribute("data-loaded", "")} />}
+        {item.image && show && <Image src={item.image} alt="" fill sizes="(min-width: 1440px) 420px, (min-width: 1280px) 33vw, (min-width: 768px) 50vw, 100vw" loading={eager ? undefined : "lazy"} className={styles.img} onLoad={(e) => e.currentTarget.setAttribute("data-loaded", "")} />}
       </div>
-      <p className={styles.meta}><span className={styles.type}>{TYPE_LABEL[item.type]}</span><DateTbd item={item} /></p>
-      <h3 className={styles.featTitle}><Title item={item} /></h3>
-      <p className={styles.src}><Source item={item} /></p>
-      {item.note && <p className={styles.note}>{item.note}</p>}
+      <div className={styles.featText}>
+        {/* One line for the type and the source, above the title (D30: was two lines) */}
+        <p className={styles.meta}><span className={styles.type}>{TYPE_LABEL[item.type]}</span><span><Source item={item} /></span><DateTbd item={item} /></p>
+        <h3 className={styles.featTitle}><Title item={item} /></h3>
+        {item.note && <p className={styles.note}>{item.note}</p>}
+      </div>
     </article>
   );
 }
 
-// The older items: a horizontally scrolling strip of hairline tiles with a type glyph (never images). The scroll
-// buttons only show when the strip overflows.
-function Strip({ items, label }: { items: DeeperItem[]; label: string }) {
-  const strip = useRef<HTMLOListElement>(null);
-  const nav = useRef<HTMLDivElement>(null);
-  const prev = useRef<HTMLButtonElement>(null);
-  const next = useRef<HTMLButtonElement>(null);
-  const id = `deeper-strip-${label.toLowerCase().replace(/\W+/g, "-")}`;
-
-  useEffect(() => {
-    const s = strip.current, n = nav.current;
-    if (!s || !n) return;
-    // Hide the buttons when nothing overflows; disable each one at its end.
-    const sync = () => {
-      const max = s.scrollWidth - s.clientWidth;
-      n.hidden = max <= 1;
-      if (prev.current) prev.current.disabled = s.scrollLeft <= 1;
-      if (next.current) next.current.disabled = s.scrollLeft >= max - 1;
-    };
-    const ro = new ResizeObserver(sync);
-    ro.observe(s);
-    s.addEventListener("scroll", sync, { passive: true });
-    sync();
-    return () => { ro.disconnect(); s.removeEventListener("scroll", sync); };
-  }, []);
-
-  const go = (dir: number) => {
-    const s = strip.current;
-    if (!s) return;
-    const smooth = !matchMedia("(prefers-reduced-motion: reduce)").matches;
-    s.scrollBy({ left: dir * s.clientWidth * 0.8, behavior: smooth ? "smooth" : "auto" });
-  };
-
+// The older items: a horizontally scrolling strip of hairline tiles with a type glyph (never images). Its arrows sit in
+// the footer row (DeeperView).
+function Strip({ id, items, label, stripRef }: { id: string; items: DeeperItem[]; label: string; stripRef: (el: HTMLOListElement | null) => void }) {
   return (
     <div className={styles.stripWrap}>
       {/* Focusable so keyboard users can scroll it with the arrow keys */}
-      <ol ref={strip} id={id} className={styles.strip} tabIndex={0} aria-label={`More in ${label}, scrolls sideways`}>
+      <ol ref={stripRef} id={id} className={styles.strip} tabIndex={0} aria-label={`More in ${label}, scrolls sideways`}>
         {items.map((it) => (
           <li key={it.id} className={styles.tile}>
             <p className={styles.meta}><Glyph type={it.type} /><span>{TILE_LABEL[it.type]}</span><DateTbd item={it} /></p>
@@ -153,14 +179,6 @@ function Strip({ items, label }: { items: DeeperItem[]; label: string }) {
           </li>
         ))}
       </ol>
-      <div ref={nav} className={styles.stripNav}>
-        <button ref={prev} type="button" className={styles.navBtn} onClick={() => go(-1)} aria-controls={id} aria-label="Previous items">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 6 8.5 12l6 6" /></svg>
-        </button>
-        <button ref={next} type="button" className={styles.navBtn} onClick={() => go(1)} aria-controls={id} aria-label="Next items">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 6l6 6-6 6" /></svg>
-        </button>
-      </div>
     </div>
   );
 }

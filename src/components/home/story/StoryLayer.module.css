@@ -1,0 +1,42 @@
+/* Story option A, "The layer" (D29). Tokens only. Motion mode only (the static reading is Story.module.css). */
+
+/* The words in a 640 px column on the page container's left edge; the cross-section on its right edge */
+.copy { position: absolute; left: var(--inset); top: 0; bottom: 0; width: min(640px, 46%); }
+/* Never more than 40vw wide, so at 1280 the copy column keeps clear of it */
+.diagram { position: absolute; right: var(--inset); top: 50%; height: min(680px, 76vh, 42.8vw); width: auto; aspect-ratio: 560 / 600; transform: translateY(-50%); overflow: visible; }
+
+/* h2, or smaller where the column is narrow (1280), so the longest line fits its column */
+.connect { --a-size: min(var(--text-h2), 3.7vw); position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; font-size: var(--a-size); font-weight: 500; line-height: 1.1; letter-spacing: var(--tracking-h2); }
+.line { margin: 0; }
+.slot { justify-items: start; transform-origin: 0 0; color: color-mix(in srgb, var(--color-muted) calc(var(--mute, 0) * 100%), var(--color-ink)); }
+
+.problem { position: absolute; inset: 0; display: flex; align-items: center; visibility: hidden; }
+.problem p { margin: 0; font-size: min(var(--text-h2), 3.7vw); font-weight: 500; line-height: 1.12; letter-spacing: var(--tracking-h2); text-wrap-style: balance; }
+.pw { opacity: 0.14; }
+
+/* Own your …: a step under the answer (h3). The rows build into a list under it; the one being read is ink, the rest
+   step back, and its line shows under it while the rows after it move down to make room (transform only) */
+.own { position: absolute; left: 0; right: 0; top: calc(16% + 2.2 * min(var(--text-h2), 3.7vw) + var(--space-6)); visibility: hidden; }
+.rows { list-style: none; margin: 0; padding: 0; font-size: var(--text-h3); font-weight: 500; line-height: 1.25; letter-spacing: var(--tracking-h3); }
+.rows :global(.accent) { font-family: var(--font-accent); }
+.row { position: relative; opacity: 0; color: color-mix(in srgb, var(--color-muted) calc(var(--dim, 0) * 100%), var(--color-ink)); }
+.row::before { content: ""; position: absolute; left: calc(var(--space-6) * -1); top: 0.5em; width: 10px; height: 10px; border-radius: 50%; background: var(--color-green); opacity: calc(1 - var(--dim, 0)); }
+.rowTitle { display: block; }
+.lineWrap { position: absolute; left: 0; top: 100%; opacity: 0; }
+.ownLine { display: block; max-width: 36ch; padding: var(--space-2) 0 var(--space-5); color: var(--color-ink); }
+
+/* The cross-section */
+.band { fill: none; stroke: var(--color-ink); stroke-width: 1; }
+.bandFill { fill: var(--color-surface); }
+.dark { fill: var(--color-ink); opacity: 0; }
+.green { fill: var(--color-green); } /* scaled in from the left by StoryLayerMotion */
+.link { stroke: var(--color-green); stroke-width: 2; stroke-linecap: round; }
+.point { fill: var(--color-green); }
+.name { font-size: 20px; font-weight: 500; fill: var(--color-ink); }
+.sub { fill: var(--color-muted); font-weight: 400; }
+.owned { opacity: 0; }
+/* The layer's name reads on the dark band (--inv), and in ink again on the green */
+.layerName { fill: color-mix(in srgb, var(--color-on-dark) calc(var(--inv, 0) * 100%), var(--color-ink)); }
+/* Each cell: pale green, full green while its line is read (--on) */
+.cell { fill: color-mix(in srgb, var(--color-green) calc(16% + var(--on, 0) * 84%), var(--color-surface)); stroke: var(--color-ink); stroke-width: 1; }
+.cellName { font-size: 17px; font-weight: 500; fill: var(--color-ink); }

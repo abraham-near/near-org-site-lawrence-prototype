@@ -29,15 +29,16 @@ export function NewsletterForm() {
 
   return (
     <form className={styles.form} method="post" noValidate onSubmit={submit}>
-      <label htmlFor={`${id}-email`} className={styles.fieldLabel}>Email address</label>
+      {/* The field and button are one pill (D22); the label stays for screen readers, the placeholder says it on screen */}
+      <label htmlFor={`${id}-email`} className="sr-only">Email address</label>
       <div className={styles.slot}>
         <div className={styles.row} data-done={done || undefined} inert={done}>
           <input
-            ref={input} id={`${id}-email`} name="email" type="email" required autoComplete="email" inputMode="email" spellCheck={false}
+            ref={input} id={`${id}-email`} name="email" type="email" required autoComplete="email" inputMode="email" spellCheck={false} placeholder="Email address"
             className={styles.input} aria-invalid={error ? true : undefined} aria-describedby={error ? `${id}-error` : undefined}
             onInput={() => error && setError(null)}
           />
-          <button type="submit" className={`btn ${styles.submit}`}>Subscribe</button>
+          <button type="submit" className={`btn btn-primary ${styles.submit}`}>Subscribe</button>
         </div>
         {/* Always present, so the success text is announced when it's written in */}
         <div role="status" className={styles.statusSlot}>

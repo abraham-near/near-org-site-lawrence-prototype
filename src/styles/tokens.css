@@ -30,6 +30,8 @@
   --radius-sm: 4px;
   --radius-md: 8px;
   --radius-lg: 16px;
+  --radius-xl: 32px; /* large panels: the home close (D22) */
+  --radius-full: 999px; /* pills: the newsletter field and button (D22) */
 
   /* §3 Breakpoints */
   --breakpoint-md: 768px;
@@ -67,19 +69,21 @@
   --measure: 40ch; /* ~60 characters: Montreal's "0" (what ch measures) is about 1.5 average characters wide */
 
   /* §1 Stack illustration colours (D7). Used only by the home Stack drawing; never for UI or text. */
-  /* On the brand hue (D15): the draft's matte steps, re-tinted from lime to NEAR mint */
-  --stack-top-protocol: #5fe0ae;
-  --stack-top-intents: #93ebc6;
-  --stack-top-ai: #c4f4de;
-  --stack-top-com: #e3fbef;
-  --stack-side-l-from: #a3efcb;
-  --stack-side-l-to: #00b877;
-  --stack-side-r-from: #4fd9a3;
-  --stack-side-r-to: #008c5c;
-  /* At rest, unselected layers step back to dim greens (D15); hover/focus still drops them to charcoal (below) */
-  --stack-rest-top: #3d6a58;
-  --stack-rest-l: #2e5244;
-  --stack-rest-r: #264538;
+  /* D18: flat faces per layer, after Lawrence's reference (inner frame lightest, outer darkest), on the brand hue.
+     t = top, l = the left-facing side, r = the right-facing side. */
+  --stack-protocol-t: #5fe0ae;
+  --stack-protocol-l: #3cc994;
+  --stack-protocol-r: #22a374;
+  --stack-intents-t: #d4f8e7;
+  --stack-intents-l: #9debc8;
+  --stack-intents-r: #6dd9aa;
+  --stack-ai-t: #4fd09c;
+  --stack-ai-l: #33b482;
+  --stack-ai-r: #208e64;
+  --stack-com-t: #2a9a6d;
+  --stack-com-l: #1e7a55;
+  --stack-com-r: #145b3f;
+  /* Hovering or focusing a layer drops the others to charcoal */
   --stack-dim-top: #4a4d4b;
   --stack-dim-l: #3a3c3b;
   --stack-dim-r: #313332;
@@ -110,6 +114,7 @@
   --dur-5: 1200ms;
   --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-settle: cubic-bezier(0.16, 1, 0.3, 1); /* a long ease to a stop: the Stack rings settling (D21) */
 }
 
 @media (min-width: 768px) { :root { --section-pad-y: var(--space-9); --page-margin: var(--space-6); } }

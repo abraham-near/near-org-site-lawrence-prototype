@@ -1,6 +1,8 @@
 /* Section 7: Get into NEAR. Light section; three rows on hairlines, name / line / link across the 12-column grid.
-   Each linked row is one target (the link stretches over it). Hover (mouse only): the row's rules darken, the link's
-   underline turns green and its arrow nudges (transform, 200 ms). Tokens only. */
+   Each linked row is one target (the link stretches over it). Hover (mouse only) and keyboard focus answer at two
+   speeds (D28, after Stripe): fast, a green rule draws across the row's top, the link's underline darkens and its arrow
+   nudges (transform, 200–320 ms); slow, the image eases in on a long settle (600 ms). Keyboard focus shows its ring and
+   the nudge. Tokens only. */
 
 .paths { padding-block: var(--section-pad-y); }
 .inner { max-width: var(--content-max); margin-inline: auto; padding-inline: var(--page-margin); }
@@ -13,9 +15,14 @@
   padding-block: var(--space-6); border-top: 1px solid var(--color-line);
 }
 .name { margin: 0; }
-/* The row's image: 4:3, square-cornered, decorative; on hover it eases in slightly (transform, 200 ms) */
+/* The row's image: 4:3, square-cornered, decorative; on hover it eases in slowly (transform, 600 ms settle) */
 .thumb { position: relative; aspect-ratio: 4 / 3; overflow: hidden; background: var(--color-surface-2); }
-.thumbImg { object-fit: cover; transition: transform var(--dur-2) var(--ease-out); }
+.thumbImg { object-fit: cover; transition: transform var(--dur-4) var(--ease-settle); }
+/* The green rule over the row's top hairline, drawn from the left (transform only) */
+.row::before {
+  content: ""; position: absolute; top: -1px; left: 0; right: 0; height: 2px; background: var(--color-green);
+  transform: scaleX(0); transform-origin: left center; transition: transform var(--dur-3) var(--ease-out);
+}
 /* Phones: image beside the name, line and link below */
 @media (max-width: 767px) {
   .row { grid-template-columns: calc(var(--space-10) - var(--space-4)) minmax(0, 1fr); column-gap: var(--space-4); align-items: center; }
@@ -25,7 +32,7 @@
 .action { margin: var(--space-2) 0 0; font-size: var(--text-body); font-weight: 500; }
 
 .link { display: inline-flex; align-items: center; gap: var(--space-2); min-height: 44px; color: var(--color-ink); text-decoration: none; }
-.label { text-decoration: underline; text-decoration-color: var(--color-line-strong); text-decoration-thickness: 1px; text-underline-offset: 5px; }
+.label { text-decoration: underline; text-decoration-color: var(--color-line-strong); text-decoration-thickness: 1px; text-underline-offset: 5px; transition: text-decoration-color var(--dur-2) var(--ease-out); }
 /* The stretched target reaches slightly past the text on both sides, so its focus ring never touches the content */
 .link::after { content: ""; position: absolute; inset: 0 calc(var(--space-2) * -1); border-radius: var(--radius-sm); }
 .link:focus-visible { outline: none; }
@@ -36,10 +43,13 @@
   /* The row's own rules darken where the pointer is (instant, no transition), and the link answers on the right */
   .row[data-linked]:hover, .row[data-linked]:hover + .row { border-top-color: var(--color-line-strong); }
   .list:has(.row[data-linked]:last-child:hover) { border-bottom-color: var(--color-line-strong); }
-  .row[data-linked]:hover .label { text-decoration-color: var(--color-green); text-decoration-thickness: 2px; }
+  .row[data-linked]:hover::before { transform: none; }
+  .row[data-linked]:hover .label { text-decoration-color: var(--color-ink); }
   .row[data-linked]:hover .ext { transform: translate(2px, -2px); }
-  .row[data-linked]:hover .thumbImg { transform: scale(1.03); }
+  .row[data-linked]:hover .thumbImg { transform: scale(1.04); }
 }
+/* Keyboard focus nudges the arrow too (its own ring marks the row, so no rule under it; the image holds still) */
+.row:has(.link:focus-visible) .ext { transform: translate(2px, -2px); }
 
 /* Tablet: image on 1–3 (spanning the row), name, line and link on 4–12 */
 @media (min-width: 768px) {

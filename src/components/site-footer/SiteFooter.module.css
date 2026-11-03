@@ -25,7 +25,8 @@
   :global(html[data-js]) .inkContent { position: absolute; inset: 0; transform-origin: bottom center; will-change: transform; }
 
   /* Before the wipe completes, the real footer sits on the page's last ground with ink type and the black lockup.
-     The ground is the cream surface, or green where the page ends on the green close (home §8). */
+     The ground is the cream surface, or green where a page ends on a green field (data-page-end="green"; the home
+     close was green until D20). */
   :global(html[data-js]) .footer:not([data-wiped]) {
     --fg: var(--color-ink); --fg-muted: var(--color-ink);
     background: var(--footer-ground, var(--color-surface));

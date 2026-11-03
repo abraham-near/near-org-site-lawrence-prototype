@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, type KeyboardEvent } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { FILTERS, TILE_LABEL, TYPE_LABEL, select, type DeeperFilter, type DeeperItem, type DeeperType } from "./content";
@@ -16,8 +16,12 @@ const isFilter = (v: string | null): v is DeeperFilter => FILTERS.some((f) => f.
 export function DeeperFromUrl() {
   const params = useSearchParams();
   const type = params.get("type");
-  const active: DeeperFilter = isFilter(type) ? type : "all";
+  // A choice shows at once; the URL (replaceState, so no history entries) catches up a moment later. Without this
+  // the old panel stayed active for ~300 ms, so a quick Tab landed in it and lost focus when it hid (D28).
+  const [picked, setPicked] = useState<DeeperFilter | null>(null);
+  const active: DeeperFilter = picked ?? (isFilter(type) ? type : "all");
   const choose = (next: DeeperFilter) => {
+    setPicked(next);
     const u = new URL(window.location.href);
     if (next === "all") u.searchParams.delete("type"); else u.searchParams.set("type", next);
     window.history.replaceState(null, "", u);
@@ -75,10 +79,15 @@ function Panel({ filter, label, active }: { filter: DeeperFilter; label: string;
   );
 }
 
-// Only a real URL becomes a link; until the CMS supplies them, titles are plain text (no dead "#" links).
+// Every item is one link (D20): its own page where the URL is on record, otherwise the blog listing (never a dead "#")
 const Title = ({ item }: { item: DeeperItem }) => {
-  const text = item.title;
-  return item.url ? <a href={item.url} className={styles.stretch}>{text}</a> : <span>{text}</span>;
+  const href = item.url ?? "/blog", external = /^https?:/.test(href);
+  return (
+    <a href={href} className={styles.stretch}>
+      {item.title}
+      {external && <span className="sr-only"> (another site)</span>}
+    </a>
+  );
 };
 const Source = ({ item }: { item: DeeperItem }) => <>{item.source}</>;
 // Dates show only once they are real; until then the section note covers them (one marker, not one per item)

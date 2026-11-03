@@ -83,6 +83,16 @@
   .btn-primary:hover { background: color-mix(in srgb, var(--color-green) 85%, var(--color-ink)); }
   .btn-secondary { border: 1px solid var(--color-ink); color: var(--color-ink); }
   .btn-secondary:hover { background: var(--color-ink); color: var(--color-on-dark); }
+  /* The two "Get started" buttons' glyph (D28, components/GoArrow): › at rest, → on hover (300 ms, transform/opacity) */
+  .btn-go { flex: none; margin-right: calc(var(--space-1) * -1); fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  .btn-go-head { transition: transform var(--dur-3) var(--ease-settle); }
+  .btn-go-shaft { opacity: 0; transition: opacity var(--dur-3) var(--ease-settle); }
+  @media (hover: hover) and (pointer: fine) {
+    .btn:hover .btn-go-head { transform: translateX(2px); }
+    .btn:hover .btn-go-shaft { opacity: 1; }
+  }
+  .btn:focus-visible .btn-go-head { transform: translateX(2px); }
+  .btn:focus-visible .btn-go-shaft { opacity: 1; }
 
   /* Visible placeholder for anything not yet confirmed (CLAUDE.md: never fabricate). */
   .tbd { font-size: var(--text-small); font-weight: 500; color: var(--color-ink); background: var(--color-surface-2); padding: 0 var(--space-1); border-radius: var(--radius-sm); -webkit-box-decoration-break: clone; box-decoration-break: clone; } /* may wrap: a long marker must never push the page wider than a phone */

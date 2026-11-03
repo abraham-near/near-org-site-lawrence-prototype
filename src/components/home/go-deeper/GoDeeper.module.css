@@ -5,7 +5,7 @@
 
 .head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--space-4) var(--space-6); }
 .head h2 { margin: 0; }
-.all { margin: 0; font-size: var(--text-small); font-weight: 500; }
+.all { margin: var(--space-7) 0 0; font-size: var(--text-small); font-weight: 500; }
 .all a, .empty a { color: var(--color-ink); text-decoration-line: underline; text-decoration-thickness: 1px; text-underline-offset: 5px; }
 .all a:hover, .empty a:hover { text-decoration-color: var(--color-green); text-decoration-thickness: 2px; }
 
@@ -18,7 +18,11 @@
 }
 .filters::-webkit-scrollbar { display: none; }
 .filter { flex: none; }
-@media (min-width: 768px) { .filters { flex-wrap: wrap; margin: var(--space-6) 0; padding: 0; overflow: visible; } }
+@media (min-width: 768px) {
+  .filters { flex-wrap: wrap; justify-content: center; margin: var(--space-6) 0; padding: 0; overflow: visible; }
+  .head { justify-content: center; text-align: center; }
+  .all { text-align: center; }
+}
 .filter {
   min-height: 44px; padding: 0 var(--space-4);
   border: 1px solid var(--color-line-strong); border-radius: var(--radius-sm);
@@ -33,12 +37,17 @@
    Phones show only the active panel: a locked height would leave a screen of space under a one-item filter. */
 .panels { display: grid; }
 .panel { grid-area: 1 / 1; min-width: 0; }
-/* The newly selected panel settles in (the old one hides at once, so text never overlaps) */
-.panel[data-active] { animation: panel-in var(--dur-2) var(--ease-out); }
-@keyframes panel-in { from { opacity: 0; transform: translateY(var(--space-1)); } }
+/* Switching (D28, after Tempo): out fast, in slow. The old panel fades out in 120 ms; then the new one fades up 8 px on a
+   long settle, so the two never show at once. Phones show only the active panel (it settles in the same way). */
+@media (max-width: 767px) { .panel[data-active] { animation: panel-in var(--dur-4) var(--ease-settle); } }
+@keyframes panel-in { from { opacity: 0; transform: translateY(var(--space-2)); } }
 .panel:not([data-active]) { display: none; }
 @media (min-width: 768px) {
-  .panel:not([data-active]) { display: block; visibility: hidden; }
+  .panel { transition: opacity var(--dur-3) var(--ease-out) var(--dur-1), transform var(--dur-4) var(--ease-settle) var(--dur-1); }
+  .panel:not([data-active]) {
+    display: block; visibility: hidden; opacity: 0; transform: translateY(var(--space-2));
+    transition: opacity var(--dur-1) var(--ease-out), visibility 0s linear var(--dur-1), transform 0s linear var(--dur-1);
+  }
 }
 
 /* Whole-item links: the title's link stretches over its item */
@@ -47,7 +56,7 @@
 .stretch::after { content: ""; position: absolute; inset: 0; }
 .stretch:focus-visible { outline: none; }
 .stretch:focus-visible::after { outline: 2px solid var(--color-ink); outline-offset: 4px; border-radius: var(--radius-sm); }
-.feat:hover a.stretch, .tile:hover a.stretch {
+.feat:hover a.stretch {
   text-decoration: underline; text-decoration-color: var(--color-green); text-decoration-thickness: 2px; text-underline-offset: 5px;
 }
 
@@ -63,11 +72,12 @@
 }
 
 .media { position: relative; aspect-ratio: 16 / 10; overflow: hidden; margin-bottom: var(--space-4); background: var(--color-surface-2); } /* images are square-cornered unless framed (DESIGN §3) */
-.img { object-fit: cover; transition: transform var(--dur-2) var(--ease-out), opacity var(--dur-3) var(--ease-out); }
+.img { object-fit: cover; transition: transform var(--dur-4) var(--ease-settle), opacity var(--dur-3) var(--ease-out); }
 /* Images fade in once loaded (no pop after a filter switch); without JS they simply show */
 :global(html[data-js]) .img:not([data-loaded]) { opacity: 0; }
-/* Hover only for items that link somewhere (≤200 ms, DESIGN §4) */
-.feat:has(.stretch):hover .img { transform: scale(1.02); }
+/* Hover (mouse only) on items that link somewhere: the image eases in slowly on a long settle, a gentle 3% (D28,
+   after Stripe's two-speed cards: the title answers at once, the picture follows) */
+@media (hover: hover) and (pointer: fine) { .feat:has(.stretch):hover .img { transform: scale(1.03); } }
 .featTitle { margin: var(--space-2) 0; max-width: 30ch; font-size: var(--text-h3); font-weight: 500; line-height: 1.15; letter-spacing: var(--tracking-h3); text-wrap: balance; }
 .src { margin: 0; font-size: var(--text-small); color: var(--color-muted); }
 .note { margin: var(--space-2) 0 0; font-size: var(--text-label); color: var(--color-muted); }
@@ -84,9 +94,27 @@
 @media (min-width: 1280px) { .strip { grid-auto-columns: calc((100% - var(--gap) * 4) / 5); } }
 .strip:focus-visible { outline-offset: 6px; border-radius: var(--radius-sm); }
 .tile {
-  display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-4) var(--space-2) var(--space-1) 0;
+  display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-4) var(--space-3) var(--space-3);
   border-top: 1px solid var(--color-line-strong); scroll-snap-align: start;
+  transition: background-color var(--dur-2) var(--ease-out);
 }
+/* Hover (D20; lightened in D24): the whole tile answers. A light lift to white, the top rule turns green, the glyph
+   turns green; no underline (colour and a 200 ms rule draw only: DESIGN §4). Mouse only, so a tap never leaves a
+   tile lit. */
+.tile::before { content: ""; position: absolute; top: -1px; left: 0; right: 0; height: 2px; background: var(--color-green); transform: scaleX(0); transform-origin: left center; transition: transform var(--dur-2) var(--ease-out); }
+@media (hover: hover) and (pointer: fine) {
+  .tile:hover { background: var(--color-white); }
+  .tile:hover::before { transform: none; }
+  .tile:hover .glyph { stroke: var(--color-green-text); }
+  .tile:hover .tileSrc { color: var(--color-ink); }
+}
+/* Keyboard focus gets the same state as hover, and its ring sits inside the tile (the strip's scroll box clips
+   anything outside it) */
+.tile:has(.stretch:focus-visible) { background: var(--color-white); }
+.tile:has(.stretch:focus-visible)::before { transform: none; }
+.tile:has(.stretch:focus-visible) .glyph { stroke: var(--color-green-text); }
+.tile:has(.stretch:focus-visible) .tileSrc { color: var(--color-ink); }
+.tile .stretch:focus-visible::after { outline-offset: -2px; border-radius: 0; }
 .tileTitle { flex: 1; margin: 0; font-size: var(--text-body); font-weight: 500; line-height: 1.35; text-wrap: balance; }
 .tileSrc { margin: 0; font-size: var(--text-small); color: var(--color-muted); }
 .glyph { width: 18px; height: 18px; flex: none; fill: none; stroke: var(--color-ink); stroke-width: 1.4; stroke-linejoin: round; stroke-linecap: round; }
@@ -107,3 +135,6 @@
 /* Tablet up: titles reserve three lines so the source lines align across tiles */
 @media (min-width: 768px) { .tileTitle { min-height: 4lh; } }
 @media (min-width: 1440px) { .tileTitle { min-height: 3lh; } }
+
+/* From tablet up the strip's arrows sit on the opener's centre axis, with "View everything" under them (D19) */
+@media (min-width: 768px) { .stripNav { justify-content: center; } }

@@ -5,7 +5,7 @@ import styles from "./SiteFooter.module.css";
 
 // Footer (spec/pages/home.md §9, after the draft site, D11): tagline, the site map in eight columns, the lockup at
 // full width. Ink. With motion allowed, the ink rises from the bottom as the footer scrolls in ("the black change"),
-// over whatever ground the page ends on (the home close's green, otherwise the cream surface):
+// over whatever ground the page ends on (the cream surface, or green where a page ends on a green field):
 // - the real footer (interactive) shows ink type on that ground until the wipe completes, then takes its ink colours;
 // - the ink layer carries a decorative copy in cream type, counter-scaled so the type is uncovered, never stretched
 //   (FooterReveal). The copy is aria-hidden and inert.

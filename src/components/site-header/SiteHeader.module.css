@@ -22,7 +22,13 @@
 }
 .skip:focus-visible { transform: none; }
 
-.frame { max-width: var(--content-max); margin-inline: auto; padding: var(--space-4) var(--page-margin) 0; }
+.frame {
+  max-width: var(--content-max); margin-inline: auto; padding: var(--space-4) var(--page-margin) 0;
+  transition: transform var(--dur-3) var(--ease-out);
+}
+/* Scrolling down: the bar slides up out of view (D27); any scroll up brings it straight back (transform only) */
+.header[data-hidden] .frame { transform: translateY(-100%); transition-duration: var(--dur-4); }
+@media (prefers-reduced-motion: reduce) { .frame { transition: none; } }
 
 .bar {
   pointer-events: auto;

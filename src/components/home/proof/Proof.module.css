@@ -18,19 +18,10 @@
 
 /* Framed as one instrument (D15): a rule above and below the strip, none per cell */
 .figures { border-top: 1px solid var(--color-line); border-bottom: 1px solid var(--color-line); }
-.cell { position: relative; padding: var(--space-5) 0 var(--space-6); }
+.cell { position: relative; padding: var(--space-5) 0 var(--space-6); text-align: center; } /* centred in its cell (D19) */
 .value { margin: 0; font-size: var(--text-h3); font-weight: 400; line-height: 1.1; letter-spacing: var(--tracking-h3); color: var(--color-ink); }
 .unit { margin-left: 0.3em; font-size: var(--text-body); letter-spacing: 0; color: var(--color-muted); }
-.caption { margin: var(--space-2) 0 0; max-width: 26ch; font-size: var(--text-small); line-height: 1.45; color: var(--color-muted); text-wrap: pretty; }
-.keep { white-space: nowrap; }
-.mark { margin-left: 2px; font-size: var(--text-caption); line-height: 0; }
-.mark a { color: var(--color-muted); text-decoration: none; padding: 0 2px; }
-.mark a:hover { color: var(--color-ink); text-decoration: underline; }
-.note { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-2) var(--space-5); margin: var(--space-5) 0 0; font-size: var(--text-small); color: var(--color-muted); }
-.note p { margin: 0; }
-.sources { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-5); margin: 0; padding: 0; list-style: none; counter-reset: src; }
-.sources li { counter-increment: src; }
-.sources li::before { content: counter(src) " "; color: var(--color-ink); }
+.caption { margin: var(--space-2) auto 0; max-width: 26ch; font-size: var(--text-small); line-height: 1.45; color: var(--color-muted); text-wrap: balance; }
 
 /* The one-shot reveal (D15): a green line draws across the strip's top rule, the figures fade up in a quick stagger,
    then the line settles back into the hairline. ~1.2 s, once. The start state only applies once ProofReveal has armed

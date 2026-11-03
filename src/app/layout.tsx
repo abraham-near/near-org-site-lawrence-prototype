@@ -20,7 +20,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     // data-js is set before first paint, so motion layouts never flash their static fallback (and no-JS stays static).
     <html lang="en" className={fontVariables} suppressHydrationWarning>
       <head>
-        <InlineScript html="document.documentElement.setAttribute('data-js','');try{if(localStorage.getItem('near-motion')==='paused')document.documentElement.setAttribute('data-motion-paused','')}catch(e){}" />
+        <InlineScript html="document.documentElement.setAttribute('data-js','')" />
       </head>
       <body>
         <SiteHeader />

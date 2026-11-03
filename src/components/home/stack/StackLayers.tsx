@@ -1,26 +1,39 @@
 "use client";
 
-import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore, type KeyboardEvent } from "react";
 import { LAYERS, type LayerKey } from "./layers";
 import styles from "./Stack.module.css";
 
-// The layer list and the selected layer's detail (D14, after Lawrence's Figma layout): a vertical tablist,
-// NEAR Protocol selected first. Hovering or focusing a row highlights its layer in the drawing (StackInteractions,
-// via data-key); clicking a layer in the drawing selects it ("stack:select"). Panels share one grid cell so
-// switching never moves the page; without JS every panel shows, stacked.
+// The layer list and the selected layer's detail (D14, D18): a vertical tablist, core first, NEAR Protocol selected
+// first. Hovering or focusing a row highlights its layer in the drawing (StackInteractions, via data-key). A choice
+// (a row, the keys, or a layer in the drawing) is a "stack:select"; where the section is pinned, StackInteractions
+// also scrolls to that layer's step. Scrolling through the pinned section sends "stack:step". Panels share one grid
+// cell so switching never moves the page; without JS every panel shows, stacked.
 export const SELECT_EVENT = "stack:select";
+export const STEP_EVENT = "stack:step";
+const noop = () => () => {};
+const choose = (k: LayerKey) => window.dispatchEvent(new CustomEvent(SELECT_EVENT, { detail: k }));
 
 export function StackLayers() {
   const [active, setActive] = useState<LayerKey>("protocol");
+  // Hidden panels leave the tab order at once, though they take 120 ms to fade (D28), so focus can't land in one.
+  // Only after hydration: without JS every panel shows and stays reachable.
+  const hydrated = useSyncExternalStore(noop, () => true, () => false);
   const tabs = useRef<(HTMLButtonElement | null)[]>([]);
 
-  // The drawing shows the selection at rest (Stack.module.css reads data-active-layer on the band)
-  useEffect(() => { tabs.current[0]?.closest("[data-stack]")?.setAttribute("data-active-layer", active); }, [active]);
+  // The drawing shows the selection (Stack.module.css reads data-active-layer on the band); where the section is
+  // pinned, the drawing is built up to the selected layer (data-build)
+  useEffect(() => {
+    const root = tabs.current[0]?.closest("[data-stack]");
+    root?.setAttribute("data-active-layer", active);
+    if (root?.hasAttribute("data-pinned")) root.setAttribute("data-build", String(LAYERS.findIndex((l) => l.key === active)));
+  }, [active]);
 
   useEffect(() => {
     const on = (e: Event) => { const k = (e as CustomEvent<LayerKey>).detail; if (LAYERS.some((l) => l.key === k)) setActive(k); };
     window.addEventListener(SELECT_EVENT, on);
-    return () => window.removeEventListener(SELECT_EVENT, on);
+    window.addEventListener(STEP_EVENT, on);
+    return () => { window.removeEventListener(SELECT_EVENT, on); window.removeEventListener(STEP_EVENT, on); };
   }, []);
 
   const onKey = (e: KeyboardEvent, i: number) => {
@@ -28,7 +41,7 @@ export function StackLayers() {
     const to = { ArrowDown: (i + 1) % n, ArrowUp: (i - 1 + n) % n, Home: 0, End: n - 1 }[e.key];
     if (to === undefined) return;
     e.preventDefault();
-    setActive(LAYERS[to].key);
+    choose(LAYERS[to].key);
     tabs.current[to]?.focus();
   };
 
@@ -39,7 +52,7 @@ export function StackLayers() {
           <button
             key={l.key} ref={(el) => { tabs.current[i] = el; }} type="button" role="tab"
             id={`stack-tab-${l.key}`} aria-controls={`stack-panel-${l.key}`} aria-selected={l.key === active} tabIndex={l.key === active ? 0 : -1}
-            className={styles.tab} data-key={l.key} onClick={() => setActive(l.key)} onKeyDown={(e) => onKey(e, i)}
+            className={styles.tab} data-key={l.key} onClick={() => choose(l.key)} onKeyDown={(e) => onKey(e, i)}
           >
             <span className={styles.index} aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
             <span className={styles.tabName}>{l.name}</span>
@@ -51,7 +64,7 @@ export function StackLayers() {
         {LAYERS.map((l) => (
           <div
             key={l.key} role="tabpanel" id={`stack-panel-${l.key}`} aria-labelledby={`stack-tab-${l.key}`}
-            className={styles.panel} data-active={l.key === active || undefined}
+            className={styles.panel} data-active={l.key === active || undefined} inert={hydrated && l.key !== active}
           >
             <div className={styles.panelTop}>
               <p className={`t-label ${styles.role}`}>{l.role}</p>

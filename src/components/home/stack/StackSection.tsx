@@ -3,10 +3,12 @@ import { StackInteractions } from "./StackInteractions";
 import { StackLayers } from "./StackLayers";
 import styles from "./Stack.module.css";
 
-// Section 2 (spec/pages/home.md §2, D7, D14): an ink band in three columns, after Lawrence's Figma layout: the four
-// layers as a numbered list, the selected layer's detail, and the isometric Stack on the right (Protocol the core,
-// then Intents, NEAR AI and near.com around it). Hovering a layer in the list or the drawing highlights it there;
-// clicking one in the drawing selects it (StackInteractions). Then the close and the secondary row.
+// Section 2 (spec/pages/home.md §2, D7, D14, D17, D18): an ink band. The heading, then three columns: the four layers
+// as a numbered list (core first), the selected layer's detail, and the isometric Stack on the right (the Protocol
+// pillar inside the Intents, NEAR AI and near.com frames). On desktop with motion the columns pin while the reader
+// scrolls through the four layers and the drawing builds outwards, one layer per step (StackInteractions). Hovering a
+// layer in the list or the drawing highlights it; clicking one in the drawing selects it. Then the close and the
+// secondary row.
 export function StackSection() {
   return (
     <section className={styles.band} aria-labelledby="stack-title" data-stack data-tone="dark" data-active-layer="protocol">
@@ -19,14 +21,21 @@ export function StackSection() {
             </h2>
             <p className="t-lede">Each layer does one job, and together they keep your world in your&nbsp;hands.</p>
           </header>
-          <div className={styles.art}><StackDrawing /></div>
-          <StackLayers />
+          <div className={styles.track} data-track>
+            <div className={styles.pin} data-pin>
+              <span className={styles.pinLine} aria-hidden="true" />
+              <div className={styles.cols}>
+                <div className={styles.art}><StackDrawing /></div>
+                <StackLayers />
+              </div>
+              {/* Inside the pin (D23), so it stays readable at the bottom while the layers build */}
+              <p className={`t-h3 ${styles.close}`}>
+                <span className={styles.sentence}>Four layers, built as one system.</span>{" "}
+                <span className={styles.sentence}>At&nbsp;every one of them, the owner is you.</span>
+              </p>
+            </div>
+          </div>
         </div>
-
-        <p className={`t-h3 ${styles.close}`}>
-          <span className={styles.sentence}>Four layers, built as one system.</span>{" "}
-          <span className={styles.sentence}>At&nbsp;every one of them, the owner is you.</span>
-        </p>
 
         <div className={styles.secondary}>
           <div>

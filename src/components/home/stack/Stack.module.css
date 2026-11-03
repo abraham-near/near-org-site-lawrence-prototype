@@ -1,52 +1,75 @@
-/* Section 2: the Stack (2C, D7, D14). An ink band: the layer list, the selected layer, the isometric drawing.
+/* Section 2: the Stack (2C, D7, D14, D18). An ink band: the layer list, the selected layer, the isometric drawing.
    Tokens only. Breakpoints: 768 (--breakpoint-md) and 1280 (--breakpoint-lg). */
 
-.band { position: relative; background: var(--color-ink); color: var(--color-on-dark); padding-block: var(--section-pad-y); }
+.band { position: relative; overflow-x: clip; background: var(--color-ink); color: var(--color-on-dark); padding-block: var(--section-pad-y); }
 .band :focus-visible { outline-color: var(--color-on-dark); }
 .inner { max-width: var(--content-max); margin-inline: auto; padding-inline: var(--page-margin); }
 
-/* The Chapter 1 thread arrives at the band's top edge and runs down to the drawing's own thread, at its x
-   (StackInteractions sets --handoff-x/-h from the drawing). */
-.handoff { display: none; position: absolute; left: var(--handoff-x, 50%); top: 0; width: 2px; height: var(--handoff-h, 0px); background: var(--color-green); transform: translateX(-1px); }
+/* The Chapter 1 thread arrives at the band's top edge and runs down to the pinned columns' top (.handoff), then on
+   down to the drawing's own thread at its x (.pinLine, inside the pin so it stays with the drawing while pinned).
+   StackInteractions measures both from the drawing. */
+.handoff, .pinLine { display: none; position: absolute; top: 0; width: 2px; background: var(--color-green); transform: translateX(-1px); }
+.handoff { left: var(--handoff-x, 50%); height: var(--handoff-h, 0px); }
+.pinLine { left: var(--pin-x, 50%); height: var(--pin-h, 0px); }
 /* Only where Chapter 1 runs its thread (desktop, JS, motion allowed); elsewhere its rule runs down the left. */
 @media (min-width: 1280px) and (prefers-reduced-motion: no-preference) {
-  :global(html[data-js]) .handoff { display: block; }
+  :global(html[data-js]) :is(.handoff, .pinLine) { display: block; }
 }
 
-/* Layout (D14, after Lawrence's Figma): phones and tablets stack the heading, the drawing, then the list and the
-   selected layer's detail; desktop is three columns: list (1–3), detail (4–7), the drawing (8–12); from 1440, list 1–2, detail 3–6,
-   air on 7, drawing 8–12, as the Figma reads. */
-.grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-7); }
+/* Layout (D14; the Figma's measurements in D17; pinned in D18): phones and tablets stack the heading, the drawing,
+   then the list and the selected layer's detail. Desktop: the heading, then a 224 px list, a 48 px gap, a 416 px
+   detail column, 112 px of air, then the drawing at up to 624 px, running into the right margin. Widths are built
+   from spacing tokens (224 = 192 + 32, 416 = 2 × 192 + 32, 112 = 128 − 16, 624 = 3 × 192 + 48). */
+.grid {
+  --list-w: calc(var(--space-11) + var(--space-6));
+  --detail-w: calc(var(--space-11) * 2 + var(--space-6));
+  display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-7);
+}
 .head { max-width: none; }
 .head h2 { margin: 0; }
 .head p { max-width: var(--measure); margin: var(--space-5) 0 0; color: var(--color-on-dark-muted); }
-.art { width: min(100%, 520px); margin-inline: auto; }
+.pin { position: relative; }
+.cols { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-7); }
+.art { width: min(100%, calc(var(--space-11) * 2 + var(--space-8))); margin-inline: auto; }
 @media (min-width: 768px) {
-  .grid { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--space-5); }
-  .head, .art { grid-column: 1 / -1; }
+  .cols { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--space-5); }
+  .art { grid-column: 1 / -1; }
   .list { grid-column: 1 / span 4; }
   .panels { grid-column: 5 / -1; }
 }
 @media (min-width: 1280px) {
-  .grid { column-gap: var(--space-6); row-gap: var(--space-8); align-items: start; }
-  .head { grid-column: 1 / span 7; grid-row: 1; }
-  .list { grid-column: 1 / span 3; grid-row: 2; }
-  .panels { grid-column: 4 / span 4; grid-row: 2; }
-  /* The drawing is centred on the list and detail (not the heading), with air between it and the text */
-  .art { grid-column: 8 / -1; grid-row: 2; align-self: center; width: 100%; padding-left: var(--space-7); }
+  .grid { gap: var(--space-8); }
+  .cols { grid-template-columns: var(--list-w) var(--detail-w) minmax(0, 1fr); column-gap: var(--space-7); align-items: start; }
+  .list { grid-column: 1; grid-row: 1; }
+  .panels { grid-column: 2; grid-row: 1; }
+  /* 112 px of air before the drawing; it may run past the column into the page margin (and any room beside the
+     centred container on wide screens), stopping 16 px short of the viewport edge, up to 624 px wide */
+  .art {
+    --air: calc(var(--space-10) - var(--space-4) - var(--space-7));
+    grid-column: 3; grid-row: 1; align-self: center; justify-self: start;
+    width: calc(100% - var(--air) + var(--page-margin) - var(--space-4) + max(0px, (100vw - var(--content-max)) / 2));
+    max-width: calc(var(--space-11) * 3 + var(--space-7));
+    margin: 0 0 0 var(--air);
+  }
 }
-/* From 1440 the Figma's rhythm fits: list 2 columns, detail 4, one column of air, drawing 5 */
-@media (min-width: 1440px) {
-  .list { grid-column: 1 / span 2; }
-  .panels { grid-column: 3 / span 4; }
-  .art { grid-column: 8 / -1; padding-left: 0; }
-  .tab { gap: var(--space-4); padding-inline: var(--space-3); }
+/* Pinned (D18): on desktop with motion and room for it, the columns hold still while the reader scrolls through the
+   four layers (about 60 vh each), and the drawing builds outwards. The drawing is capped to fit the viewport. */
+@media (min-width: 1280px) and (min-height: 760px) and (prefers-reduced-motion: no-preference) {
+  :global(html[data-js]) .grid { gap: 0; }
+  :global(html[data-js]) .track { height: calc(100vh + 3 * 60vh); }
+  /* The close line sits at the bottom of the pinned screen, readable the whole time the layers build (D23) */
+  :global(html[data-js]) .pin { position: sticky; top: 0; display: flex; flex-direction: column; height: 100vh; padding: calc(var(--space-9) + var(--space-3)) 0 var(--space-6); }
+  :global(html[data-js]) .cols { flex: 1; min-height: 0; }
+  :global(html[data-js]) .pin .close { margin: var(--space-5) auto 0; }
+  :global(html[data-js]) .art { max-width: min(calc(var(--space-11) * 3 + var(--space-7)), calc((100vh - var(--space-11) - var(--space-8)) * 0.84)); }
 }
 
-/* The layer list: numbered rows on hairlines; the selected row is a green field with ink type */
+/* The layer list (Figma: 54 px rows, 15 px inset, ~10 px index, 20 px name in a muted tone; the selected row a green
+   field with ink type) */
 .list { display: flex; flex-direction: column; align-self: start; border-bottom: 1px solid var(--color-line-on-dark); }
 .tab {
-  display: flex; align-items: center; gap: var(--space-5); white-space: nowrap; min-height: 54px; padding: 0 var(--space-4); cursor: pointer;
+  display: flex; align-items: center; gap: var(--space-5); white-space: nowrap;
+  min-height: calc(var(--space-7) + var(--space-1) * 1.5); padding: 0 var(--space-4); cursor: pointer;
   border: 0; border-top: 1px solid var(--color-line-on-dark); background: none; color: var(--color-on-dark-muted); font: inherit; text-align: left;
   transition: color var(--dur-2) var(--ease-out);
 }
@@ -55,89 +78,94 @@
 .tab:focus-visible { outline-offset: -4px; }
 .tab[aria-selected="true"]:focus-visible { outline-color: var(--color-ink); }
 .index { flex: none; width: 2ch; font-size: var(--text-caption); font-variant-numeric: tabular-nums; }
-.tabName { font-size: var(--text-h4); line-height: 1.2; }
+.tabName { font-size: var(--text-h4); font-weight: 400; line-height: 1.2; }
 
 /* The selected layer's detail. Panels share one cell from tablet up (no jump when switching); without JS all show. */
 .panels { display: grid; }
 .panel { grid-area: 1 / 1; min-width: 0; }
-/* The newly selected layer settles in with the list and the drawing (all within 200 ms) */
-:global(html[data-js]) .panel[data-active] { animation: panel-in var(--dur-2) var(--ease-out); }
-@keyframes panel-in { from { opacity: 0; transform: translateY(var(--space-1)); } }
+/* Switching (D28, after Tempo): out fast, in slow. The old panel fades out in 120 ms; then the new one fades up 8 px on a
+   long settle, so the two never show at once. Phones show only the active panel (it settles in the same way). */
+@media (max-width: 767px) { :global(html[data-js]) .panel[data-active] { animation: panel-in var(--dur-4) var(--ease-settle); } }
+@keyframes panel-in { from { opacity: 0; transform: translateY(var(--space-2)); } }
 .panel + .panel { margin-top: var(--space-8); }
 :global(html[data-js]) .panel + .panel { margin-top: 0; }
 :global(html[data-js]) .panel:not([data-active]) { display: none; }
 @media (min-width: 768px) {
-  :global(html[data-js]) .panel:not([data-active]) { display: block; visibility: hidden; }
+  :global(html[data-js]) .panel { transition: opacity var(--dur-3) var(--ease-out) var(--dur-1), transform var(--dur-4) var(--ease-settle) var(--dur-1); }
+  :global(html[data-js]) .panel:not([data-active]) {
+    display: block; visibility: hidden; opacity: 0; transform: translateY(var(--space-2));
+    transition: opacity var(--dur-1) var(--ease-out), visibility 0s linear var(--dur-1), transform 0s linear var(--dur-1);
+  }
 }
-.panelTop { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--space-2) var(--space-5); padding-bottom: var(--space-4); border-bottom: 1px solid var(--color-line-on-dark); }
+/* Figma: a top row (role + URL, small caps-style, 15 px above and below, hairline under); 36 px to a 20 px lede set
+   tight (~1.12); 32 px to the feature list (hairline left, 12/20 px inset, ~22 px between items, 17 px names over
+   12.5 px details); 24 px to the stat pairs (square, Medium value, hairline, label). Sizes under 13 px are held at
+   the 13 px floor (DESIGN §2). */
+.panelTop {
+  display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--space-2) var(--space-5);
+  padding-block: calc(var(--space-4) - 1px); border-bottom: 1px solid var(--color-line-on-dark);
+}
+.role, .url { font-size: var(--text-caption); font-weight: 400; letter-spacing: 0.02em; text-transform: uppercase; }
 .role { margin: 0; color: var(--color-on-dark); }
-.url { display: inline-flex; align-items: center; gap: var(--space-1); min-height: 24px; font-size: var(--text-small); color: var(--color-on-dark-muted); text-decoration: none; }
-.url:hover, .url:focus-visible { color: var(--color-on-dark); text-decoration: underline; text-decoration-color: var(--color-green); text-underline-offset: 4px; }
-.line { margin: var(--space-6) 0 0; font-size: var(--text-h4); font-weight: 400; line-height: 1.45; text-wrap: balance; }
-.features { display: grid; gap: var(--space-5); margin: var(--space-6) 0 0; padding: var(--space-3) 0 var(--space-3) var(--space-5); list-style: none; border-left: 1px solid var(--color-line-on-dark); }
+.url { display: inline-flex; align-items: center; gap: var(--space-1); min-height: 24px; color: var(--color-on-dark); text-decoration: none; }
+.url:hover, .url:focus-visible { text-decoration: underline; text-decoration-color: var(--color-green); text-underline-offset: 4px; }
+.line { margin: calc(var(--space-6) + var(--space-1)) 0 0; font-size: var(--text-h4); font-weight: 400; line-height: 1.15; text-wrap: balance; }
+.features {
+  display: grid; gap: calc(var(--space-5) - 2px); margin: var(--space-6) 0 0;
+  padding: var(--space-3) 0 var(--space-3) calc(var(--space-4) + var(--space-1)); list-style: none; border-left: 1px solid var(--color-line-on-dark);
+}
 .features p { margin: 0; }
-.featTitle { font-size: var(--text-body); line-height: 1.3; }
-.features .featDetail { margin-top: var(--space-1); font-size: var(--text-caption); line-height: 1.45; color: var(--color-on-dark-muted); }
+.featTitle { font-size: var(--text-body); line-height: 1.2; }
+.features .featDetail { margin-top: 2px; font-size: var(--text-caption); line-height: 1.3; color: var(--color-on-dark); }
 /* Stats: a green square, the value, a hairline, its label */
-.stats { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-6); margin: var(--space-6) 0 0; padding: 0; list-style: none; font-size: var(--text-caption); }
-.stats li { display: flex; align-items: center; gap: var(--space-2); }
-.stats li::before { content: ""; flex: none; width: calc(var(--space-1) * 1.5); height: calc(var(--space-1) * 1.5); margin-right: var(--space-1); background: var(--color-green); }
+.stats { display: flex; flex-wrap: wrap; gap: calc(var(--space-2) + 2px) var(--space-5); margin: var(--space-5) 0 0; padding: 0; list-style: none; font-size: var(--text-caption); }
+.stats li { display: flex; align-items: center; gap: calc(var(--space-2) - 1px); }
+.stats li::before { content: ""; flex: none; width: calc(var(--space-1) * 1.5); height: calc(var(--space-1) * 1.5); margin-right: 2px; background: var(--color-green); }
 /* Phones: value and label pairs in two aligned columns instead of a ragged wrap */
 @media (max-width: 767px) { .stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--space-5); } .stats li { min-width: 0; align-items: baseline; } }
-.statValue { padding-right: var(--space-2); border-right: 1px solid var(--color-line-on-dark); font-weight: 500; }
+.statValue { padding-right: calc(var(--space-2) - 1px); border-right: 1px solid var(--color-line-on-dark); font-weight: 500; }
 
-/* The drawing */
+/* The drawing (D18): flat faces per layer. Each piece is two groups: .c lifts (hover, selection), .b builds in. */
 .iso { display: block; width: 100%; height: auto; overflow: visible; }
-.c { cursor: pointer; transform: translateY(calc(var(--lift, 0px) + var(--drop, 0px))); transition: transform var(--dur-2) var(--ease-out), opacity var(--dur-2) var(--ease-out); }
-.band[data-building] .c { transition: none; }
-.c[data-tone="protocol"] { --top: var(--stack-top-protocol); }
-.c[data-tone="intents"] { --top: var(--stack-top-intents); }
-.c[data-tone="ai"] { --top: var(--stack-top-ai); }
-.c[data-tone="com"] { --top: var(--stack-top-com); }
+.c { cursor: pointer; transform: translateY(var(--lift, 0px)); transition: transform var(--dur-2) var(--ease-out); }
+.c[data-tone="protocol"] { --t: var(--stack-protocol-t); --l: var(--stack-protocol-l); --r: var(--stack-protocol-r); }
+.c[data-tone="intents"] { --t: var(--stack-intents-t); --l: var(--stack-intents-l); --r: var(--stack-intents-r); }
+.c[data-tone="ai"] { --t: var(--stack-ai-t); --l: var(--stack-ai-l); --r: var(--stack-ai-r); }
+.c[data-tone="com"] { --t: var(--stack-com-t); --l: var(--stack-com-l); --r: var(--stack-com-r); }
 .iso polygon { stroke-width: 0.9; stroke-linejoin: round; transition: fill var(--dur-2) var(--ease-out), stroke var(--dur-2) var(--ease-out); }
-.t { fill: var(--top); stroke: var(--top); }
-.l { fill: url(#stack-l); stroke: url(#stack-l); }
-.r { fill: url(#stack-r); stroke: url(#stack-r); }
-/* The thread never lifts with the pillar, so it always meets the Chapter 1 hand-off line exactly */
-.c.thread { transform: translateY(var(--drop, 0px)); }
-.thread line { stroke: var(--color-green); stroke-width: 2; display: none; }
-/* The drawing's thread line only shows where Chapter 1's hand-off arrives to continue it (the dot stays) */
-@media (min-width: 1280px) and (prefers-reduced-motion: no-preference) {
-  :global(html[data-js]) .thread line { display: inline; }
-}
+.t { fill: var(--t); stroke: var(--t); }
+.l { fill: var(--l); stroke: var(--l); }
+.r { fill: var(--r); stroke: var(--r); }
+/* Build (D18; whole rings in D20; flat in D21): data-build on the band is how many layers out from the core are
+   shown (0 = the pillar only; -1 = nothing yet). Each ring is one group, so it fades on as a single flat image (no
+   hidden faces showing through) and settles down into place on a long ease to a stop. A ring's pillar cover appears
+   with it at once (it matches what's beneath) and only leaves once the ring has faded out. Without data-build (no JS,
+   reduced motion) every layer shows. */
+.b { opacity: var(--shown, 1); transform: translateY(calc((1 - var(--shown, 1)) * var(--space-7) * -1)); transition: opacity var(--dur-5) var(--ease-settle), transform calc(var(--dur-5) * 1.25) var(--ease-settle); }
+.cover { opacity: var(--shown, 1); transition: opacity 0s linear calc((1 - var(--shown, 1)) * var(--dur-5)); }
+.band[data-build="-1"] .c[data-li],
+.band[data-build="0"] .c:is([data-li="1"], [data-li="2"], [data-li="3"]),
+.band[data-build="1"] .c:is([data-li="2"], [data-li="3"]),
+.band[data-build="2"] .c[data-li="3"] { --shown: 0; pointer-events: none; }
+/* The thread lifts with the pillar (its line only grows into the hand-off above, so they still meet) */
+.thread line { stroke: var(--color-green); stroke-width: 2; }
 .thread circle { fill: var(--color-green); }
+/* The drawing's thread shows only where Chapter 1's hand-off arrives to continue it */
+.c.thread { display: none; }
+@media (min-width: 1280px) and (prefers-reduced-motion: no-preference) {
+  :global(html[data-js]) .c.thread { display: inline; }
+}
 
-/* At rest the list's selection drives the drawing (data-active-layer): the other layers step back to dim greens, so
-   the nesting still reads (D15). Hover or focus (data-hl) takes over: the others drop to charcoal. The selected or
-   highlighted layer lifts in both. */
-.band[data-active-layer="protocol"]:not([data-hl]) .c:not([data-tone="protocol"]) .t,
-.band[data-active-layer="intents"]:not([data-hl]) .c:not([data-tone="intents"]) .t,
-.band[data-active-layer="ai"]:not([data-hl]) .c:not([data-tone="ai"]) .t,
-.band[data-active-layer="com"]:not([data-hl]) .c:not([data-tone="com"]) .t { fill: var(--stack-rest-top); stroke: var(--stack-rest-top); }
-.band[data-active-layer="protocol"]:not([data-hl]) .c:not([data-tone="protocol"]) .l,
-.band[data-active-layer="intents"]:not([data-hl]) .c:not([data-tone="intents"]) .l,
-.band[data-active-layer="ai"]:not([data-hl]) .c:not([data-tone="ai"]) .l,
-.band[data-active-layer="com"]:not([data-hl]) .c:not([data-tone="com"]) .l { fill: var(--stack-rest-l); stroke: var(--stack-rest-l); }
-.band[data-active-layer="protocol"]:not([data-hl]) .c:not([data-tone="protocol"]) .r,
-.band[data-active-layer="intents"]:not([data-hl]) .c:not([data-tone="intents"]) .r,
-.band[data-active-layer="ai"]:not([data-hl]) .c:not([data-tone="ai"]) .r,
-.band[data-active-layer="com"]:not([data-hl]) .c:not([data-tone="com"]) .r { fill: var(--stack-rest-r); stroke: var(--stack-rest-r); }
-.band[data-hl="protocol"] .c:not([data-tone="protocol"]) .t,
-.band[data-hl="intents"] .c:not([data-tone="intents"]) .t,
-.band[data-hl="ai"] .c:not([data-tone="ai"]) .t,
-.band[data-hl="com"] .c:not([data-tone="com"]) .t { fill: var(--stack-dim-top); stroke: var(--stack-dim-top); }
-.band[data-hl="protocol"] .c:not([data-tone="protocol"]) .l,
-.band[data-hl="intents"] .c:not([data-tone="intents"]) .l,
-.band[data-hl="ai"] .c:not([data-tone="ai"]) .l,
-.band[data-hl="com"] .c:not([data-tone="com"]) .l { fill: var(--stack-dim-l); stroke: var(--stack-dim-l); }
-.band[data-hl="protocol"] .c:not([data-tone="protocol"]) .r,
-.band[data-hl="intents"] .c:not([data-tone="intents"]) .r,
-.band[data-hl="ai"] .c:not([data-tone="ai"]) .r,
-.band[data-hl="com"] .c:not([data-tone="com"]) .r { fill: var(--stack-dim-r); stroke: var(--stack-dim-r); }
+/* The selected layer lifts. Hovering a layer (data-hl) lifts that one instead and drops the others to charcoal. */
+.band[data-hl="protocol"] .c:not([data-tone="protocol"]),
+.band[data-hl="intents"] .c:not([data-tone="intents"]),
+.band[data-hl="ai"] .c:not([data-tone="ai"]),
+.band[data-hl="com"] .c:not([data-tone="com"]) { --t: var(--stack-dim-top); --l: var(--stack-dim-l); --r: var(--stack-dim-r); }
 .band:is([data-hl="protocol"], [data-active-layer="protocol"]:not([data-hl])) .c[data-tone="protocol"],
+.band:is([data-hl="protocol"], [data-active-layer="protocol"]:not([data-hl])) .c.thread,
 .band:is([data-hl="intents"], [data-active-layer="intents"]:not([data-hl])) .c[data-tone="intents"],
 .band:is([data-hl="ai"], [data-active-layer="ai"]:not([data-hl])) .c[data-tone="ai"],
-.band:is([data-hl="com"], [data-active-layer="com"]:not([data-hl])) .c[data-tone="com"] { --lift: -10px; }
+.band:is([data-hl="com"], [data-active-layer="com"]:not([data-hl])) .c[data-tone="com"] { --lift: calc(var(--space-3) * -1); }
 
 /* Close and the secondary row */
 /* Each sentence of the close on its own line on phones, so neither breaks mid-phrase */
@@ -147,9 +175,15 @@
 .secondary h3 { margin: 0 0 var(--space-2); }
 .secondary p { margin: 0 0 var(--space-3); font-size: var(--text-small); color: var(--color-on-dark-muted); max-width: 46ch; }
 .more { font-size: var(--text-small); font-weight: 500; color: var(--color-on-dark); text-decoration-line: underline; text-decoration-color: var(--color-on-dark-muted); text-underline-offset: 5px; text-decoration-thickness: 1px; }
-.ext { margin-left: var(--space-1); }
+/* Inline beside the label (preflight makes every svg a block, which dropped the mark onto its own line) */
+.ext { display: inline-block; vertical-align: baseline; margin-left: var(--space-1); }
 .more:hover { text-decoration-color: var(--color-green); text-decoration-thickness: 2px; }
 @media (min-width: 768px) {
   .secondary { grid-template-columns: 1fr 1fr; }
-  .secondary > div:last-child { padding-left: var(--space-6); border-left: 1px solid var(--color-line-on-dark); }
+  .secondary > div:last-child { border-left: 1px solid var(--color-line-on-dark); }
+  /* Each block centred in its column (D20), with even padding so the centre is the column's true centre, and the
+     links on one line whatever each paragraph's length */
+  .secondary > div { display: flex; flex-direction: column; align-items: center; padding-inline: var(--space-6); text-align: center; }
+  .secondary p { margin-inline: auto; }
+  .secondary .more { margin-top: auto; }
 }

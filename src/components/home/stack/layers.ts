@@ -1,5 +1,5 @@
-// The four layers of the Stack (spec/pages/home.md §2, D7, D14), outermost first as the list reads (01 near.com …
-// 04 NEAR Protocol, after Lawrence's Figma layout). Lines are the approved v4 copy. Features and stats come from
+// The four layers of the Stack (spec/pages/home.md §2, D7, D14, D18), core first as the list reads (01 NEAR Protocol …
+// 04 near.com): the drawing builds outwards in the same order. Lines are the approved v4 copy. Features and stats come from
 // PRODUCT.md (F-IDs noted). Anything not yet verified is left out until confirmed (D16), never invented.
 
 export type LayerKey = "com" | "ai" | "intents" | "protocol";
@@ -17,27 +17,17 @@ export type Layer = {
 
 export const LAYERS: Layer[] = [
   {
-    key: "com", name: "near.com", role: "Where you act", url: { label: "near.com", href: "https://near.com" },
-    line: "One account for everything you hold. Swap, send and trade, confidential by default, with every transaction signed on your device.",
+    key: "protocol", name: "NEAR Protocol", role: "Where it settles", url: { label: "nearprotocol.com", href: "https://nearprotocol.com" },
+    line: "Everything settles in about a second. NEAR Protocol is a sharded blockchain that adds capacity as demand grows, with post-⁠quantum signing live and five years on mainnet.",
     features: [
-      { title: "Confidential Swaps and Transfers", detail: "Across 35+ chains, from one account." }, // F3, PRODUCT §3
-      { title: "Perps, Yield and RWAs", detail: "In the same account." }, // PRODUCT §3
-      { title: "Signed on Your Device", detail: "Every transaction." }, // v4 line
+      { title: "Dynamic Resharding", detail: "Shards split and merge with demand. Live on mainnet since Jul 2026." }, // F9
+      { title: "Post-Quantum Signing", detail: "ML-DSA account keys, live on mainnet." }, // F10
     ],
     stats: [
-      { value: "35+", label: "chains" }, // F3
-      { value: "Confidential", label: "by default" }, // v4
-    ],
-  },
-  {
-    key: "ai", name: "NEAR AI", role: "Where your agents think", url: { label: "near.ai", href: "https://near.ai" },
-    line: "Inference and agents run inside hardware enclaves no one can see into: not the host, not the operator, not NEAR. Every request returns a signed proof of what ran.",
-    features: [
-      { title: "NEAR AI Cloud", detail: "Private inference on confidential hardware." }, // F17
-      { title: "Attestation", detail: "A signed proof on every request." }, // F17
-    ],
-    stats: [
-      { value: "Zero", label: "operator access" }, // v4
+      { value: "5+ years", label: "on mainnet" }, // F8
+      { value: "1M+", label: "TPS in a public benchmark" }, // F7
+      { value: "10", label: "shards" }, // F9
+      { value: "1.2 s", label: "finality" }, // F6
     ],
   },
   {
@@ -55,17 +45,27 @@ export const LAYERS: Layer[] = [
     ],
   },
   {
-    key: "protocol", name: "NEAR Protocol", role: "Where it settles", url: { label: "nearprotocol.com", href: "https://nearprotocol.com" },
-    line: "Everything settles in about a second. NEAR Protocol is a sharded blockchain that adds capacity as demand grows, with post-⁠quantum signing live and five years on mainnet.",
+    key: "ai", name: "NEAR AI", role: "Where your agents think", url: { label: "near.ai", href: "https://near.ai" },
+    line: "Inference and agents run inside hardware enclaves no one can see into: not the host, not the operator, not NEAR. Every request returns a signed proof of what ran.",
     features: [
-      { title: "Dynamic Resharding", detail: "Shards split and merge with demand. Live on mainnet since Jul 2026." }, // F9
-      { title: "Post-Quantum Signing", detail: "ML-DSA account keys, live on mainnet." }, // F10
+      { title: "NEAR AI Cloud", detail: "Private inference on confidential hardware." }, // F17
+      { title: "Attestation", detail: "A signed proof on every request." }, // F17
     ],
     stats: [
-      { value: "5+ years", label: "on mainnet" }, // F8
-      { value: "1M+", label: "TPS in a public benchmark" }, // F7
-      { value: "10", label: "shards" }, // F9
-      { value: "1.2 s", label: "finality" }, // F6
+      { value: "Zero", label: "operator access" }, // v4
+    ],
+  },
+  {
+    key: "com", name: "near.com", role: "Where you act", url: { label: "near.com", href: "https://near.com" },
+    line: "One account for everything you hold. Swap, send and trade, confidential by default, with every transaction signed on your device.",
+    features: [
+      { title: "Confidential Swaps and Transfers", detail: "Across 35+ chains, from one account." }, // F3, PRODUCT §3
+      { title: "Perps, Yield and RWAs", detail: "In the same account." }, // PRODUCT §3
+      { title: "Signed on Your Device", detail: "Every transaction." }, // v4 line
+    ],
+    stats: [
+      { value: "35+", label: "chains" }, // F3
+      { value: "Confidential", label: "by default" }, // v4
     ],
   },
 ];

@@ -12,9 +12,9 @@ type Path = { name: string; line: ReactNode; action: string; href: string; exter
 const nb = (s: string) => <span className={styles.nowrap}>{s}</span>;
 
 const PATHS: Path[] = [
-  { name: "Trade on NEAR", line: "Trade, earn yield and go confidential, all from one near.com account.", action: "Open near.com", href: "https://near.com", external: true, image: "/images/home/home-paths-trade-v1.webp" },
-  { name: "Integrate NEAR", line: <>Add {nb("NEAR Intents")} for confidential {nb("cross-chain")} execution, or {nb("NEAR AI")} for private inference you can verify.</>, action: "Integration docs", href: "https://docs.near.org/", external: true, image: "/images/home/home-paths-integrate-v1.webp" },
-  { name: "Build on NEAR", line: <>Build onchain apps and AI agents on battle-tested infrastructure with built-in confidentiality and {nb("cross-chain")} reach.</>, action: "Start building", href: "https://docs.near.org/", external: true, image: "/images/home/home-paths-build-v1.webp" },
+  { name: "Trade on NEAR", line: "Trade, earn yield and go confidential, all from one near.com account.", action: "Open near.com", href: "https://near.com", external: true, image: "/images/home/home-paths-trade-v3.webp" },
+  { name: "Integrate NEAR", line: <>Add {nb("NEAR Intents")} for confidential {nb("cross-chain")} execution, or {nb("NEAR AI")} for private inference you can verify.</>, action: "Integration docs", href: "https://docs.near.org/", external: true, image: "/images/home/home-paths-integrate-v2.webp" },
+  { name: "Build on NEAR", line: <>Build onchain apps and AI agents on battle-tested infrastructure with built-in confidentiality and {nb("cross-chain")} reach.</>, action: "Start building", href: "https://docs.near.org/", external: true, image: "/images/home/home-paths-build-v3.webp" },
 ];
 
 export function GetIntoNear() {

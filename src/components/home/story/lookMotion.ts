@@ -3,12 +3,12 @@ import type { RailLook } from "./RailLooks";
 
 // Each look's moves on the rail's scrubbed timeline (D32; units as in StoryRailMotion: 100 in all), transform and opacity
 // only. Returns what to run on every timeline update: the back layers follow the track's travel at their own depth
-// (data-depth), so the world has parallax; the window rides the track until the box and then hangs back at 0.3×.
+// (data-depth), so the world has parallax; the window rides the track until the layer drawing (the gate) and then hangs back at 0.3×.
 type Ctx = {
   tl: gsap.core.Timeline;
   root: HTMLElement;
   world: HTMLElement;
-  gateX: () => number; // the track's x when the box is centred
+  gateX: () => number; // the track's x when the layer drawing is centred
   steps: number[];
 };
 
@@ -24,12 +24,11 @@ export function addLook(look: RailLook, { tl, root, world, gateX, steps }: Ctx):
 
   if (look === "horizon") {
     const finder = q("finder")!, playhead = q("playhead")!;
-    // A slow camera pull-back across the whole rail; the playhead marks the reader's place except while the box is on
-    // screen (it would sit on it); corners lock onto each station as it reaches the centre
+    // A slow camera pull-back across the whole rail; the playhead marks the reader's place once the stations begin (before
+    // that NEAR's tile and then the layer drawing hold the centre, and it would sit on them); corners lock onto each
+    // station as it reaches the centre
     tl.fromTo(q("plate"), { scale: 1.08 }, { scale: 1, duration: 100, ease: "none" }, 0)
-      .fromTo(playhead, { autoAlpha: 0 }, { autoAlpha: 1, duration: 3, immediateRender: false }, 14)
-      .to(playhead, { autoAlpha: 0, duration: 2 }, 19)
-      .to(playhead, { autoAlpha: 1, duration: 3 }, 52);
+      .fromTo(playhead, { autoAlpha: 0 }, { autoAlpha: 1, duration: 3, immediateRender: false }, 57);
     steps.forEach((at, i) => {
       tl.fromTo(finder, { autoAlpha: 0, scale: 1.14 }, { autoAlpha: 1, scale: 1, duration: 3, ease: "power3.out", immediateRender: false }, at - 2.5);
       if (i < steps.length - 1) tl.to(finder, { autoAlpha: 0, duration: 2, ease: "power1.in" }, steps[i + 1] - 6);
@@ -42,7 +41,7 @@ export function addLook(look: RailLook, { tl, root, world, gateX, steps }: Ctx):
     const zoom = { z: 1.1 };
     gsap.set(frame, { scaleX: WIN.sx, scaleY: WIN.sy });
     // While the problem is read the view goes grey and dark; it clears as the problem goes, and once the answer has
-    // formed (the morph ends at 50) the frame opens out to the whole sky above the line, the picture settling from a
+    // formed (by 50) the frame opens out to the whole sky above the line, the picture settling from a
     // slight zoom; the corners ride the frame's edges and fade once it is open; then the landscape steps back
     tl.to(dark, { opacity: 1, duration: 8 }, 24)
       .to(dark, { opacity: 0, duration: 5 }, 44)
@@ -54,7 +53,7 @@ export function addLook(look: RailLook, { tl, root, world, gateX, steps }: Ctx):
     const setInner = { x: gsap.quickSetter(inner, "x", "px"), sx: gsap.quickSetter(inner, "scaleX"), sy: gsap.quickSetter(inner, "scaleY") };
     const setCorner = corners.map((c) => ({ c: c.dataset.c!, x: gsap.quickSetter(c, "x", "px"), y: gsap.quickSetter(c, "y", "px") }));
     extra = (wx) => {
-      // Until the box, the window travels with the track; from there the frame stays and its picture hangs back at 0.3×
+      // Until the gate, the window travels with the track; from there the frame stays and its picture hangs back at 0.3×
       const d = wx - gateX(), fx = d > 0 ? d : 0;
       const sx = Number(gsap.getProperty(frame, "scaleX")), sy = Number(gsap.getProperty(frame, "scaleY"));
       setFrameX(fx);
@@ -80,7 +79,7 @@ export function addLook(look: RailLook, { tl, root, world, gateX, steps }: Ctx):
     // point's rings step back as the world starts to move
     tl.to(fan, { strokeDashoffset: 0, duration: 6, stagger: 0.15, ease: "power2.inOut" }, 0)
       .to([...qa("fan"), orbits[0]], { autoAlpha: 0, duration: 4 }, 13)
-      // The selection frame locks onto the box while the problem is read, and lets go as it opens
+      // The selection frame locks onto the layer drawing while the problem is read, and lets go as the answer arrives
       .fromTo(q("select"), { autoAlpha: 0, scale: 1.5 }, { autoAlpha: 1, scale: 1, duration: 4, ease: "power3.out", immediateRender: false }, 22)
       .to(q("select"), { autoAlpha: 0, scale: 1.25, duration: 4, ease: "power1.in" }, 45);
     // Rings around the station being read only (its neighbours' would be cut by the screen's edges)

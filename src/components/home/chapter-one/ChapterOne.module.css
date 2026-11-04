@@ -61,7 +61,8 @@
 
   /* Anthem: pinned while its colour wipes on; set at h1 size across the page container, from its left edge */
   :global(html[data-js]) .anthem { position: sticky; top: 0; height: 100vh; height: 100svh; display: flex; align-items: center; width: 100%; }
-  :global(html[data-js]) .statement { font-size: var(--text-h1); line-height: 1.05; letter-spacing: var(--tracking-h1); max-width: none; }
+  /* h1, a touch smaller near 1280 so the line keeps a clear step to the right of the longest line (D35) */
+  :global(html[data-js]) .statement { font-size: min(var(--text-h1), 5.6vw); line-height: 1.05; letter-spacing: var(--tracking-h1); max-width: none; }
   :global(html[data-js]) .lb { display: inline; }
   :global(html[data-js]) .anthemMark { width: 1.78em; height: 1.78em; margin-top: 0.15em; }
   /* "own your intelligence." wipes on in ink and only turns green as each letter goes solid (--g, ChapterOneMotion) */

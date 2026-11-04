@@ -1,0 +1,88 @@
+/* Lab option J (D36), "Credits sheet". Grey band (D15). Hairlines only: dashed rails in --color-line, cell edges in
+   --color-line-strong, no fills except the featured cell's graph paper; no radius (not cards, DESIGN §6). Muted grey
+   fails AA on surface-2, so labels step back by size, not colour. Motion: one entrance (opacity, transform); colour ≤ 200 ms on hover. Tokens only. */
+
+.band { background: var(--color-surface-2); color: var(--color-ink); padding-block: var(--section-pad-y); }
+.inner { position: relative; max-width: var(--content-max); margin-inline: auto; padding-inline: var(--page-margin); }
+
+/* The drawn grid: dashed rails at each column's edges, running the section's height (desktop) */
+.rails { display: none; }
+
+/* The heading on ruled baselines (after Baseten): a hairline under each line of type */
+.title {
+  position: relative; margin: 0 0 var(--space-8); max-width: 16em; font-size: var(--text-h3); font-weight: 500; line-height: 1.25; letter-spacing: var(--tracking-h3); text-wrap: balance;
+  background-image: linear-gradient(to bottom, transparent calc(100% - 1px), var(--color-line) 0); background-size: 100% 1.25em;
+}
+
+.sheet { position: relative; display: grid; grid-template-columns: minmax(0, 1fr); border-top: 1px solid var(--color-line-strong); border-left: 1px solid var(--color-line-strong); }
+.cell {
+  position: relative; display: flex; flex-direction: column; gap: var(--space-5); margin: 0; padding: var(--space-7) var(--space-5) var(--space-5);
+  border-right: 1px solid var(--color-line-strong); border-bottom: 1px solid var(--color-line-strong);
+}
+/* Graph paper on the featured cell (after Zed): 8 px squares, 1 px ink at 5% */
+.cell[data-lead] {
+  background-image: linear-gradient(to right, color-mix(in srgb, var(--color-ink) 5%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--color-ink) 5%, transparent) 1px, transparent 1px);
+  background-size: var(--space-2) var(--space-2); background-position: -1px -1px;
+}
+.quote { margin: 0; }
+.quote p { margin: 0; max-width: 26ch; font-size: var(--text-h4); font-weight: 400; line-height: 1.35; text-wrap: pretty; }
+.cell[data-lead] .quote p, .cell:nth-child(2) .quote p { max-width: 20ch; font-size: var(--text-h3); line-height: 1.15; letter-spacing: var(--tracking-h3); text-wrap: balance; }
+.hang { margin-left: -0.36em; }
+
+/* The word ruler: a baseline with one 6 px tick per word at an 8 px pitch, then the count */
+.ruler { display: flex; align-items: flex-end; gap: var(--space-3); margin: auto 0 0; }
+.ticks {
+  width: calc(var(--n) * var(--space-2) + 1px); height: 7px; border-bottom: 1px solid var(--color-ink);
+  background-image: linear-gradient(to right, var(--color-ink) 1px, transparent 1px); background-size: var(--space-2) 6px; background-repeat: repeat-x; background-position: 0 0;
+  transition: border-color var(--dur-2) var(--ease-out);
+}
+.count { font-size: var(--text-caption); line-height: 1; font-variant-numeric: tabular-nums; }
+@media (hover: hover) and (pointer: fine) {
+  .cell:hover .ticks { background-image: linear-gradient(to right, var(--color-green-text) 1px, transparent 1px); border-color: var(--color-green-text); }
+}
+
+/* Credits (after A24): label over value, columns split by hairlines, on a rule at the cell's foot */
+.credits { padding-top: var(--space-3); border-top: 1px solid var(--color-line-strong); }
+/* two columns that never wrap apart: the name column sizes to the name, the role wraps inside its own column */
+.credits dl { display: grid; grid-template-columns: max-content minmax(0, 1fr); margin: 0; }
+.credits dl > div + div { padding-left: var(--space-5); margin-left: var(--space-5); border-left: 1px solid var(--color-line); }
+.credits dt { font-size: var(--text-caption); line-height: 1.3; }
+.credits dd { margin: var(--space-1) 0 0; font-size: var(--text-body); font-weight: 500; }
+.credits dl > div + div dd { font-weight: 400; }
+
+/* Corner nodes: a 9 px crosshair at each corner of the sheet's cells; the centre one a mint point (desktop 2 × 2) */
+.cross { display: none; }
+
+/* Entrance: the rails and nodes fade in; the cells' contents rise 8 px into place */
+@media (prefers-reduced-motion: no-preference) {
+  :global(html[data-js]) .band:not([data-in]) .rails,
+  :global(html[data-js]) .band:not([data-in]) .cross { opacity: 0; }
+  :global(html[data-js]) .band:not([data-in]) .cell > * { opacity: 0; transform: translateY(var(--space-2)); }
+  .rails, .cross { transition: opacity var(--dur-4) var(--ease-out); }
+  .cell > * { transition: opacity var(--dur-3) var(--ease-out) var(--dur-3), transform var(--dur-4) var(--ease-settle) var(--dur-3); }
+}
+
+@media (min-width: 768px) {
+  .sheet { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 1fr; }
+  .cell { padding: var(--space-8) var(--space-6) var(--space-5); }
+  .cross { display: block; position: absolute; width: 9px; height: 9px; transform: translate(-50%, -50%); }
+  .cross::before, .cross::after { content: ""; position: absolute; background: var(--color-ink); }
+  .cross::before { left: 4px; top: 0; width: 1px; height: 9px; }
+  .cross::after { top: 4px; left: 0; height: 1px; width: 9px; }
+  .cross[data-centre]::before, .cross[data-centre]::after { display: none; }
+  .cross[data-centre] { width: 11px; height: 11px; border-radius: 50%; background: var(--color-green); box-shadow: 0 0 0 3px var(--color-surface-2), 0 0 0 4px var(--color-ink); }
+}
+
+@media (min-width: 1280px) {
+  .rails {
+    /* twelve equal bays with no gutters, so a rail falls exactly on the sheet's centre seam */
+    display: grid; grid-template-columns: repeat(12, minmax(0, 1fr));
+    position: absolute; inset: calc(var(--section-pad-y) * -1) var(--page-margin); pointer-events: none;
+  }
+  .rails span { border-left: 1px dashed var(--color-line); }
+  .rails span:first-child, .rails span:last-child { border-left-style: solid; }
+  .rails span:last-child { border-right: 1px solid var(--color-line); }
+  .title { margin-bottom: var(--space-8); }
+  .cell { padding: var(--space-8) var(--space-7) var(--space-6); }
+}

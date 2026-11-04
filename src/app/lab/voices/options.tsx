@@ -7,16 +7,36 @@ import { VoicesPraise } from "@/components/home/testimonials/VoicesPraise";
 import { VoicesLeader } from "@/components/home/testimonials/VoicesLeader";
 import { VoicesStage } from "@/components/home/testimonials/VoicesStage";
 import { VoicesTiles } from "@/components/home/testimonials/VoicesTiles";
+import { VoicesJunction } from "@/components/home/testimonials/VoicesJunction";
+import { VoicesPlate } from "@/components/home/testimonials/VoicesPlate";
+import { VoicesSheet } from "@/components/home/testimonials/VoicesSheet";
 
-// The testimonial options for Lawrence to compare (D31, D34). Each takes a heading id, so several can share one page.
+// The testimonial options for Lawrence to compare (D31, D34, D36). Each takes a heading id, so several can share one page.
 // Round 2 mimics one real site each; its reference screenshot (references/2026-11-03_quote-sections/) shows beside it.
 export type VoicesOption = {
-  key: string; label: string; name: string; round: 0 | 1 | 2; note: string;
+  key: string; label: string; name: string; round: 0 | 1 | 2 | 3; note: string;
   ref?: { site: string; url: string; img?: string }; needs?: string;
   Section: ComponentType<{ titleId?: string }>;
 };
 
 export const OPTIONS: VoicesOption[] = [
+  {
+    key: "h", label: "H", name: "Junction", round: 3, Section: VoicesJunction,
+    note: "The page’s own drawing language: the thread drops in and lands on a flat plan of the Stack’s rings, N mark at the core. Four fine connectors leave the outer ring and run to the voices, each met by an end node on the voice’s rule and labelled with the speaker’s organisation. Hover a voice and its connector turns mint.",
+    ref: { site: "Tempo’s settlement diagram, with Monad’s frame nodes", url: "https://tempo.xyz", img: "tempo-settlement-connectors.png" },
+    needs: "Asks one question: may the thread reach this section?",
+  },
+  {
+    key: "i", label: "I", name: "Survey plate", round: 3, Section: VoicesPlate,
+    note: "A graded still with a surveyor’s crosshair grid and ruler ticks. Four crossings are live mint nodes; a leader runs from each out to its voice, set as a margin note with a bracket-tick credit.",
+    ref: { site: "PARK Stuttgart (from your board), Tufte’s sidenotes and Works in Progress captions", url: "https://www.instagram.com/p/DdRnpbljv9m/", img: "park-stuttgart-crosshair-grid.jpg" },
+    needs: "Brings an image into this section (the dune from the approved hero round).",
+  },
+  {
+    key: "j", label: "J", name: "Credits sheet", round: 3, Section: VoicesSheet,
+    note: "The grid drawn as dashed rails; four cells cut from it share hairline edges, with crosshair nodes at the corners and a mint centre. Each cell is a credit block: the quote, a ruler with one tick per word, and label-over-value credits. The featured cell is graph paper.",
+    ref: { site: "Payload’s drawn grid, A24’s credits, Zed’s graph paper", url: "https://payloadcms.com", img: "payload-grid-quote-cells.png" },
+  },
   {
     key: "d", label: "D", name: "Praise page", round: 2, Section: VoicesPraise,
     note: "Two staggered columns where the shorter a quote is, the larger it’s set: Horsley’s five words lead at h1. Hairlines, names and roles stacked under each quote. No motion.",

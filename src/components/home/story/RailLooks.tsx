@@ -10,10 +10,10 @@ import styles from "./RailLooks.module.css";
 // Everything is decorative (the stage is aria-hidden), moves only with the reader's scroll, and is transform/opacity.
 // Horizon (after Park Stuttgart and Arc'teryx): the hero's ridges return as a faint panorama sitting on the line, so the
 //   line becomes their horizon; a surveyor's layer of hairlines, nodes and ticks rides the track; corners lock on.
-// Window (after Arc'teryx's framed reveal and Snow Fall): the box is a framed window onto the ridges, greyed and darkened
+// Window (after Arc'teryx's framed reveal and Snow Fall; lab only): a framed window onto the ridges, greyed and darkened
 //   while someone else runs the layer; once the answer has formed, the frame opens out to the whole sky above the line.
 // Drafting (after Monad, Fractalized, Oryzo and Tempo): no photograph; depth from line work: a dot grid, hairlines
-//   converging into NEAR's point, a selection frame that locks onto the box, orbit rings around the station being read.
+//   converging into NEAR's point, a selection frame that locks onto the layer drawing (D38), orbit rings around the station being read.
 export type RailLook = "plain" | "horizon" | "window" | "drafting";
 
 const x = (vw: number) => ({ "--x": `${vw}vw` }) as CSSProperties;
@@ -59,7 +59,7 @@ export function RailBack({ look }: { look: RailLook }) {
 
 export function RailDetail({ look, gate, stations }: { look: RailLook; gate: number; stations: number[] }) {
   if (look === "horizon") {
-    // Survey hairlines every 25vw with a node on the line, kept clear of NEAR's point, the box and the stations
+    // Survey hairlines every 25vw with a node on the line, kept clear of NEAR's tile, the layer drawing and the stations
     const busy = [50, gate, ...stations];
     const survey = Array.from({ length: 19 }, (_, i) => i * 25 + 12.5).filter((v) => busy.every((b) => Math.abs(v - b) > 16));
     return (
@@ -84,7 +84,7 @@ export function RailDetail({ look, gate, stations }: { look: RailLook; gate: num
             <span /><span /><span />
           </span>
         ))}
-        {/* The selection frame that locks onto the box while the problem is read (Oryzo) */}
+        {/* The selection frame that locks onto the layer drawing while the problem is read (Oryzo) */}
         <span className={styles.select} style={x(gate)} data-s="select">
           <span className={styles.ruler} />
           {CORNERS.map((c) => <span key={c} className={`${styles.cross} ${styles[c]}`} />)}

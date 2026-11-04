@@ -1,0 +1,9 @@
+/* The NEAR layer drawing (D38), on top of OwnArt.module.css's strokes. Tokens only. */
+
+/* The mark's group is placed by its own transform attribute (scaled from icon.svg's 639 units), so it must scale
+   about the drawing's origin, not about its own box (OwnArt sets fill-box/centre on everything) */
+.markBox { transform-box: view-box; transform-origin: 0 0; }
+/* The official black N, as supplied (no outline or recolour) */
+.mark { fill: var(--color-ink); }
+/* The end state shows unless the rail's timeline takes over (it sets these opacities itself) */
+.before { opacity: 0; }

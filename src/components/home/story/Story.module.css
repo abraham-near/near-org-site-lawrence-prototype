@@ -13,6 +13,8 @@
 .sentence { display: block; }
 .problem { margin: var(--space-7) 0 0; }
 .answer { margin: var(--space-5) 0 0; max-width: 24ch; }
+/* The layer drawing (D38) between the problem and the answer, at the "Own your" drawings' size */
+.nearArt { margin: var(--space-7) 0 0; }
 .owned { color: var(--color-green-text); }
 .ownList { list-style: none; margin: var(--space-8) 0 0; padding: 0; display: grid; gap: var(--space-7); max-width: 640px; }
 .ownH { margin: 0; }

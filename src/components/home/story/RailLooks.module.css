@@ -22,7 +22,7 @@
 .node { position: absolute; left: -3px; bottom: -3px; width: 7px; height: 7px; border-radius: 50%; background: var(--color-surface); border: 1px solid var(--color-ink); }
 /* Fixed on the stage: the reader's place on the line, and corners that lock onto the station being read */
 .playhead { position: absolute; left: 50%; top: var(--rail-y); width: 20px; height: 20px; margin: -10px 0 0 -10px; border: 1px solid var(--color-ink); border-radius: 50%; opacity: 0; }
-.finder { position: absolute; left: 50%; top: calc(var(--rail-y) - var(--space-6) - 225px - 20px); width: 340px; height: 265px; margin-left: -170px; opacity: 0; }
+.finder { position: absolute; left: 50%; top: calc(var(--rail-y) - var(--space-6) - 240px - 20px); width: 360px; height: 280px; margin-left: -180px; opacity: 0; }
 
 .corner { position: absolute; width: 16px; height: 16px; border: 0 solid var(--color-ink); }
 .tl { left: 0; top: 0; border-left-width: 1px; border-top-width: 1px; }
@@ -53,8 +53,9 @@
 .orbits span:nth-child(1) { width: 380px; height: 380px; }
 .orbits span:nth-child(2) { width: 620px; height: 620px; border-style: dashed; }
 .orbits span:nth-child(3) { width: 900px; height: 900px; }
-/* The selection frame: dashed, crosshair corners, a ruler along its top; it locks onto the box */
-.select { position: absolute; left: var(--x); top: var(--rail-y); width: 200px; height: 200px; margin: -100px 0 0 -100px; border: 1px dashed var(--color-line-strong); opacity: 0; }
+/* The selection frame: dashed, crosshair corners, a ruler along its top; it locks onto the layer drawing (D38: 320 × 240,
+   sitting 12 px above the line) */
+.select { position: absolute; left: var(--x); top: calc(var(--rail-y) - var(--space-3) - 120px); width: 360px; height: 280px; margin: -140px 0 0 -180px; border: 1px dashed var(--color-line-strong); opacity: 0; }
 .ruler { position: absolute; left: 0; right: 0; top: -14px; height: 6px; background: repeating-linear-gradient(90deg, var(--color-ink) 0 1px, transparent 1px 10px); opacity: 0.5; }
 .cross { position: absolute; width: 15px; height: 15px; }
 .cross::before, .cross::after { content: ""; position: absolute; background: var(--color-ink); }

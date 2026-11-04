@@ -1,8 +1,8 @@
 import type { OwnKey } from "../chapter-one/OwnArt";
 
 // The story after the anthem (D29): the mission line and "Own your" as one beat. Copy verbatim from spec/pages/home.md
-// §1.3–1.4. "NEAR is where they connect." recedes while the problem is on, then turns into the answer, which stays up
-// while the four things you own arrive under it.
+// §1.3–1.4. On the rail (D38) the problem flows straight into the answer, which stays up while the four things you own
+// arrive under it; the lab options still turn "NEAR is where they connect." into the answer (morph.ts).
 
 export const CONNECT = ["AI is the frontend.", "Blockchain is the backend."];
 export const MEET = { near: "NEAR", rest: " is where they connect." };

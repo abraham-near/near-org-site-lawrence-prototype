@@ -18,6 +18,19 @@ export type DeeperItem = {
   note?: string; // disclosures
 };
 
+// Customer-story logos (D37): each company's own file, exactly as published (assets/brand/partners/README.md has the
+// sources and terms), set small on the featured item's meta line in place of the name. `h` is the optical height in px,
+// so the different marks sit evenly beside the label. Government of Bermuda stays in text: its terms need written
+// permission to use the Government logo.
+export type Logo = { src: string; w: number; h: number; height: number };
+export const LOGOS: Record<string, Logo> = {
+  abound: { src: "/brand/partners/abound.svg", w: 102, h: 22, height: 14 },
+  ledger: { src: "/brand/partners/ledger.svg", w: 2000.58, h: 669.35, height: 18 },
+  venice: { src: "/brand/partners/venice.svg", w: 467, h: 212, height: 20 },
+  brave: { src: "/brand/partners/brave.png", w: 320, h: 99, height: 18 },
+  zodl: { src: "/brand/partners/zodl.png", w: 320, h: 88, height: 11 },
+};
+
 export const FILTERS: { key: DeeperFilter; label: string }[] = [
   { key: "all", label: "All" },
   { key: "story", label: "Stories" },
@@ -40,7 +53,7 @@ const img = (id: string) => `/images/home/deeper/home-deeper-${id}-v${VERSION[id
 
 export const ITEMS: DeeperItem[] = [
   { id: "agent-economy", type: "read", title: "The Agent Economy: Who Owns the Rails AI Runs On", source: "NEAR blog", image: img("agent-economy") },
-  { id: "abound", type: "story", title: "Abound is bringing agentic payments to cross-border finance with NEAR AI", source: "Abound", url: "https://near.ai/blog/near-ai-and-the-times-of-india-groups-abound-are-bringing-agentic-payments-to-cross-border-finance", image: img("abound"), note: "NEAR Foundation is an investor in Abound." },
+  { id: "abound", type: "story", title: "Abound is bringing agentic payments to cross-border finance with NEAR AI", source: "Abound", url: "https://near.ai/blog/near-ai-and-the-times-of-india-groups-abound-are-bringing-agentic-payments-to-cross-border-finance", image: img("abound") },
   { id: "nearvana", type: "watch", title: "NEARvana", source: "Illia Polosukhin, Inside NEAR", image: img("nearvana") },
   { id: "ledger", type: "story", title: "Ledger Wallet integrates NEAR Intents to power seamless cross-chain swaps", source: "Ledger", url: "https://www.near.org/blog/cross-chain-swaps-near-intents-ledger-wallet", image: img("ledger") },
   { id: "private-money-rail", type: "watch", title: "Private Money Rail", source: "Alex Shevchenko, Inside NEAR", image: img("private-money-rail") },

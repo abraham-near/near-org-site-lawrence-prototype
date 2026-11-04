@@ -40,10 +40,10 @@ export function HeroVideo() {
       }
 
       let target = 0, raf = 0;
-      // The move runs from the top of the page until the photo starts to close on the line (ChapterOneMotion: the
-      // curtains run from -75% to -120%), so almost all of it is seen
+      // The move runs from the top of the page until the photo has closed on the line (ChapterOneMotion: the curtains
+      // run from -75% to -120%), so it keeps moving through the close-in and never freezes on screen (D35)
       const st = ScrollTrigger.create({
-        trigger: root, start: "top top", end: "top -80%",
+        trigger: root, start: "top top", end: "top -120%",
         onUpdate: (s) => { target = s.progress; if (!raf) raf = requestAnimationFrame(tick); },
       });
       const frame = (t: number) => Math.round(t * FPS) / FPS;

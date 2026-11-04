@@ -5,20 +5,21 @@ import styles from "./lab.module.css";
 export const metadata: Metadata = { title: "Lab: testimonial options", robots: { index: false, follow: false } };
 
 const ROUNDS: { round: VoicesOption["round"]; title: string }[] = [
+  { round: 3, title: "Round 3: more detailed and precise" },
   { round: 2, title: "Round 2: each mimics one real site" },
   { round: 0, title: "Today" },
   { round: 1, title: "Round 1" },
 ];
 
-// /lab/voices: every testimonial option on one page, each under a lab label with its reference (D31, D34).
-// /lab/voices-a … -g show one option in context, between Origin and Get into NEAR.
+// /lab/voices: every testimonial option on one page, each under a lab label with its reference (D31, D34, D36).
+// /lab/voices-a … -j show one option in context, between Origin and Get into NEAR.
 export default function VoicesLab() {
   return (
     <main id="main">
       <header className={styles.intro}>
         <h1>What the world is saying: options</h1>
-        <p>The same four quotes, names and roles in every option; nothing is added or reworded. Round 2 follows four real quote sections closely, swapping their portraits, logos and colours for our type, hairlines and one mint. Each sits beside a screenshot of the section it mimics.</p>
-        <p>Recommendation: <strong>E, Speaker, leader, words</strong> (after Craft). All four voices readable at rest, an editorial serif voice, one quiet entrance. It needs one decision: quoted speech in Kepler italic. Runner-up: <strong>F</strong>, if you want a full-screen moment (it needs a second orchestrated scroll moment). See D34.</p>
+        <p>The same four quotes, names and roles in every option; nothing is added or reworded. Round 3 is more detailed and precise, after your board favourites (Tempo, Monad, PARK Stuttgart) and fresh references. Round 2 follows four real quote sections closely. Each option sits beside a screenshot of what it draws on.</p>
+        <p>Recommendation: <strong>H, Junction</strong>. It is the one option whose lines and nodes mean something: the four voices wired into NEAR’s own Stack drawing, in the page’s thread language. It needs one decision: that the thread may reach this section. From round 2, E stays the quieter alternative. See D36.</p>
         <nav className={styles.nav} aria-label="Options">
           {OPTIONS.map((o) => <a key={o.key} href={`#option-${o.key}`}>{o.label} · {o.name}</a>)}
         </nav>

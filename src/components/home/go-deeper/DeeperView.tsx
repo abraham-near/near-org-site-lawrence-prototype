@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
-import { FILTERS, TILE_LABEL, TYPE_LABEL, select, type DeeperFilter, type DeeperItem, type DeeperType } from "./content";
+import { FILTERS, LOGOS, TILE_LABEL, TYPE_LABEL, select, type DeeperFilter, type DeeperItem, type DeeperType } from "./content";
 import styles from "./GoDeeper.module.css";
 
 // The filter tablist and its panels (layout 4C, D9). All panels share one grid cell, so the section always
@@ -143,6 +143,12 @@ const Title = ({ item }: { item: DeeperItem }) => {
   );
 };
 const Source = ({ item }: { item: DeeperItem }) => <>{item.source}</>;
+// A customer story's company, as its own logo (D37), small and in its published colours; the name is its alt text
+const SourceMark = ({ item }: { item: DeeperItem }) => {
+  const logo = item.type === "story" ? LOGOS[item.id] : undefined;
+  if (!logo) return <Source item={item} />;
+  return <Image src={logo.src} alt={item.source ?? ""} width={Math.round((logo.w / logo.h) * logo.height)} height={logo.height} className={styles.logo} style={{ height: logo.height }} unoptimized />;
+};
 // Dates show only once they are real; until then the section note covers them (one marker, not one per item)
 const DateTbd = ({ item }: { item: DeeperItem }) => (item.date ? <time dateTime={item.date}>{item.date}</time> : null);
 
@@ -156,7 +162,7 @@ function Featured({ item, show, eager }: { item: DeeperItem; show: boolean; eage
       </div>
       <div className={styles.featText}>
         {/* One line for the type and the source, above the title (D30: was two lines) */}
-        <p className={styles.meta}><span className={styles.type}>{TYPE_LABEL[item.type]}</span><span><Source item={item} /></span><DateTbd item={item} /></p>
+        <p className={styles.meta}><span className={styles.type}>{TYPE_LABEL[item.type]}</span><span className={styles.source}><SourceMark item={item} /></span><DateTbd item={item} /></p>
         <h3 className={styles.featTitle}><Title item={item} /></h3>
         {item.note && <p className={styles.note}>{item.note}</p>}
       </div>
@@ -175,7 +181,7 @@ function Strip({ id, items, label, stripRef }: { id: string; items: DeeperItem[]
           <li key={it.id} className={styles.tile}>
             <p className={styles.meta}><Glyph type={it.type} /><span>{TILE_LABEL[it.type]}</span><DateTbd item={it} /></p>
             <h3 className={styles.tileTitle}><Title item={it} /></h3>
-            <p className={styles.tileSrc}><Source item={it} /></p>
+            <p className={styles.tileSrc}><SourceMark item={it} /></p>
           </li>
         ))}
       </ol>

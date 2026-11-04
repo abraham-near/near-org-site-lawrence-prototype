@@ -4,7 +4,6 @@ import { useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
-import { addMorph, hideAnswer } from "./morph";
 import { playSteps } from "./steps";
 import { addLook } from "./lookMotion";
 import type { RailLook } from "./RailLooks";
@@ -13,8 +12,8 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 const MOTION = "(min-width: 1280px) and (prefers-reduced-motion: no-preference)";
 
-// Option C's choreography (D29): one scrubbed timeline over the pinned stage, 100 units long (6.2 screens of scroll).
-// The world moves in steps (eased between holds), so each thing on the line stops at the centre to be read.
+// Option C's choreography (D29, D38): one scrubbed timeline over the pinned stage, 100 units long (6.2 screens of
+// scroll). The world moves in steps (eased between holds), so each thing on the line stops at the centre to be read.
 export function StoryRailMotion({ gate, stations, end, look }: { gate: number; stations: number[]; end: number; look: RailLook }) {
   const anchor = useRef<HTMLSpanElement>(null);
 
@@ -26,21 +25,26 @@ export function StoryRailMotion({ gate, stations, end, look }: { gate: number; s
 
     const mm = gsap.matchMedia();
     mm.add(MOTION, () => {
-      const stage = q("stage"), world = q("world"), slot = root.querySelector<HTMLElement>("[data-morph]")!;
-      const connect = slot.parentElement!;
+      const world = q("world"), problem = q("problem"), near = q("near");
+      const pWords = [...problem.children], aWords = [...q("answer").children];
+      const part = (k: string) => [...near.querySelectorAll(`[data-n="${k}"]`)];
       const dots = qa("dot"), stops = qa("station"), arts = [...root.querySelectorAll<HTMLElement>("[data-s='station'] [data-art]")];
       // Bring a point on the track (in vw) to the middle of the screen
       const centre = (at: number) => () => -(window.innerWidth * (at - 50)) / 100;
-      const toTop = () => stage.clientHeight * 0.12 - (connect.offsetTop + slot.offsetTop);
-      // The green beyond the box grows to a point on the track (as a share of its length, from 100vw to the end)
+      // The green beyond the first screen grows to a point on the track (as a share of its length, from 100vw to the end)
       const reach = (at: number) => (at - 100) / (end - 100);
-      hideAnswer(slot);
       gsap.set([q("greenL"), q("greenR"), q("greenOn")], { scaleX: 0 });
       gsap.set(q("greenL"), { transformOrigin: "0% 50%" });
       gsap.set(q("greenR"), { transformOrigin: "100% 50%" });
       gsap.set(q("greenOn"), { transformOrigin: "0% 50%" });
-      gsap.set([q("point"), ...dots], { scale: 0 });
+      gsap.set([q("hub"), ...dots], { scale: 0 });
       gsap.set(qa("end"), { autoAlpha: 0 });
+      gsap.set(problem, { autoAlpha: 0 });
+      gsap.set(aWords, { autoAlpha: 0, y: "0.3em" });
+      // The layer starts as someone else's: dashed wires, an empty tile, no tag
+      gsap.set(part("before"), { opacity: 1 });
+      gsap.set(part("after"), { opacity: 0 });
+      gsap.set(part("tag"), { autoAlpha: 0, y: 6 });
       // Only the station being read shows; its neighbours are just their dots on the line (half-drawings cut by the
       // screen's edges read as bugs, and dimmed text would fail contrast)
       const words = stops.map((st) => [...st.querySelectorAll<HTMLElement>("[data-s='words']")]);
@@ -49,26 +53,24 @@ export function StoryRailMotion({ gate, stations, end, look }: { gate: number; s
       gsap.set(words.flat(), { autoAlpha: 0 });
 
       const tl = gsap.timeline({ defaults: { ease: "power2.inOut" }, scrollTrigger: { trigger: root, start: "top top", end: "bottom bottom", scrub: 0.6, invalidateOnRefresh: true } });
-      // 1. The line draws in from both ends and meets at NEAR's point, under the three lines
+      // 1. The two sides appear and the line draws in from both into NEAR's tile, under the three lines
       tl.to(qa("end"), { autoAlpha: 1, duration: 3, stagger: 1 }, 0)
         .to([q("greenL"), q("greenR")], { scaleX: 1, duration: 7, ease: "power2.inOut" }, 1)
-        .to(q("point"), { scale: 1, duration: 2, ease: "back.out(2)" }, 7.5)
-        .to([q("c0"), q("c1")], { autoAlpha: 0, y: -40, duration: 4, stagger: 1, ease: "power1.in" }, 10)
-        .to(slot, { y: toTop, scale: 0.5, "--mute": 1, duration: 10 }, 12)
-        // 2. The world slides to the box; the problem wipes on as the box shuts
-        .to(world, { x: centre(gate), duration: 12, ease: "power2.inOut" }, 14)
-        //    (the words start once the kicker has finished moving)
-        .to(q("problem").querySelectorAll("span"), { opacity: 1, ease: "none", duration: 2, stagger: 0.7 }, 23)
-        .to([q("gateTop"), q("gateBottom")], { "--shut": 1, duration: 6 }, 24)
-        .to(q("problem"), { autoAlpha: 0, duration: 4, ease: "power1.in" }, 40)
-        // 3. As the problem goes, the kicker turns into the answer and stays; the box splits open, the line runs on green
-        //    past it, and the halves fade away
-        .to(slot, { scale: 0.86, "--mute": 0, duration: 10 }, 41)
-        .to(q("gateTop"), { yPercent: -70, "--shut": 0, duration: 7, ease: "power3.inOut" }, 44)
-        .to(q("gateBottom"), { yPercent: 70, "--shut": 0, duration: 7, ease: "power3.inOut" }, 44)
-        .to(q("greenOn"), { scaleX: reach(gate + 20), duration: 6, ease: "power2.out" }, 46)
-        .to([q("gateTop"), q("gateBottom")], { autoAlpha: 0, duration: 4 }, 51);
-      addMorph(tl, slot, 41, 9);
+        .to(q("hub"), { scale: 1, duration: 2, ease: "back.out(1.6)" }, 7.5)
+        //    (held on screen a while once the tile has landed: the meeting is the beat)
+        .to([q("c0"), q("c1"), q("c2")], { autoAlpha: 0, y: -40, duration: 4, stagger: 1, ease: "power1.in" }, 15)
+        // 2. The world slides to the layer beneath your agents; the problem wipes on at the top and holds
+        .to(world, { x: centre(gate), duration: 12, ease: "power2.inOut" }, 17)
+        .to(problem, { autoAlpha: 1, duration: 3 }, 22)
+        .to(pWords, { opacity: 1, ease: "none", duration: 2, stagger: 0.7 }, 25)
+        // 3. The answer takes the problem's place as it leaves (no empty beat) and stays; the layer turns into NEAR's
+        //    and the line runs on green
+        .to(problem, { autoAlpha: 0, y: -30, duration: 3, ease: "power1.in" }, 41)
+        .to(aWords, { autoAlpha: 1, y: 0, duration: 3, stagger: 0.5, ease: "power2.out" }, 42.5)
+        .to(part("before"), { opacity: 0, duration: 4 }, 43)
+        .to(part("after"), { opacity: 1, duration: 4 }, 43)
+        .to(part("tag"), { autoAlpha: 1, y: 0, duration: 3, ease: "power2.out" }, 47)
+        .to(q("greenOn"), { scaleX: reach(gate + 20), duration: 6, ease: "power2.out" }, 46);
       // 4. Station by station: the world moves on, the green runs ahead to the station, its dot lands and its drawing plays
       const STEPS = [62, 72, 82, 92];
       STEPS.forEach((at, i) => {

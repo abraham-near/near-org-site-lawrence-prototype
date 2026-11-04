@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Generated frozen copies of earlier versions (D39)
+    "public/versions/**",
   ]),
 ]);
 

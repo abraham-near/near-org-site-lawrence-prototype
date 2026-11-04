@@ -5,7 +5,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 const base = process.env.BASE_URL ?? "http://localhost:3000";
-const routes = process.argv.slice(2).length ? process.argv.slice(2) : ["/"];
+const routes = process.argv.slice(2).length ? process.argv.slice(2) : ["/home"];
 const widths = [390, 768, 1440, 1920];
 const stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
 const outDir = path.join(".shots", stamp);

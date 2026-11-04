@@ -42,3 +42,6 @@ next-env.d.ts
 
 # review screenshots
 /.shots/
+
+# frozen copies of earlier versions (npm run versions)
+/public/versions/

@@ -10,7 +10,8 @@
     "typecheck": "next typegen && tsc --noEmit",
     "check": "npm run lint && npm run typecheck && next build",
     "shots": "node scripts/screenshots.mjs",
-    "detect": "../.claude/skills/impeccable/scripts/impeccable detect ${DETECT_URL:-http://localhost:3000}"
+    "versions": "scripts/build-versions.sh",
+    "detect": "../.claude/skills/impeccable/scripts/impeccable detect ${DETECT_URL:-http://localhost:3000/home}"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",

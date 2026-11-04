@@ -1,0 +1,186 @@
+{
+  "$comment": "Every committed version of the site, for the index at / (D39). Newest first. Each commit is built into public/versions/<commit>/ by npm run versions. 'home' is where that copy's homepage lives: empty before D39, 'home' for commits that have src/app/home (the script checks). Text comes from the commit messages and spec/DECISIONS.md only.",
+  "directions": [
+    { "key": "b", "name": "Direction B", "note": "The opening reworked as one story (D29), in three options. C1 Horizon is the pick (D35)." },
+    { "key": "a", "name": "Direction A", "note": "The first full homepage, frozen as tag direction-a." },
+    { "key": "setup", "name": "Setup", "note": "Before the homepage was built." }
+  ],
+  "live": {
+    "title": "Working copy",
+    "summary": "What is on screen now, including anything not yet committed. It changes as we work.",
+    "home": "/home",
+    "options": [
+      { "label": "Testimonial options", "path": "/lab/voices" },
+      { "label": "System", "path": "/system" }
+    ]
+  },
+  "versions": [
+    {
+      "commit": "bfcc365",
+      "date": "2026-11-04T12:49:31-05:00",
+      "direction": "b",
+      "title": "C1 Horizon: a straight story rail",
+      "summary": [
+        "Rail: a green NEAR tile where AI and blockchain meet; the problem leads straight into “On NEAR, that layer is user-owned.”; a line drawing of the layer replaces the black box.",
+        "Stack: the title and lede stay pinned with the tabs; the closing line is gone.",
+        "Customer stories carry each company’s own logo. Testimonial options round 3 (H, I, J)."
+      ],
+      "decisions": ["D35", "D36", "D37", "D38"],
+      "home": "",
+      "options": [
+        { "label": "All testimonial options", "path": "lab/voices" },
+        { "label": "H Junction", "path": "lab/voices-h" },
+        { "label": "I Survey plate", "path": "lab/voices-i" },
+        { "label": "J Credits sheet", "path": "lab/voices-j" }
+      ]
+    },
+    {
+      "commit": "45f5a59",
+      "date": "2026-11-03T17:07:05-05:00",
+      "direction": "b",
+      "tag": "options-2026-11-03",
+      "title": "Every option, side by side",
+      "summary": [
+        "Hero: a scroll-scrubbed camera move down the ridges; the anthem at h1 size.",
+        "The mission and “Own your” as one story, in three options, and the rail in three cinematic looks. The homepage shows option B Sentence.",
+        "Go deeper fits one screen with three featured items. Testimonial options rounds 1 and 2."
+      ],
+      "decisions": ["D29", "D30", "D31", "D32", "D33", "D34"],
+      "home": "",
+      "options": [
+        { "label": "A Layer", "path": "lab/opening-a" },
+        { "label": "B Sentence", "path": "lab/opening-b" },
+        { "label": "C Rail", "path": "lab/opening-c" },
+        { "label": "C1 Horizon", "path": "lab/opening-c1" },
+        { "label": "C2 Window", "path": "lab/opening-c2" },
+        { "label": "C3 Drafting", "path": "lab/opening-c3" },
+        { "label": "Testimonial options", "path": "lab/voices" }
+      ]
+    },
+    {
+      "commit": "e3b6389",
+      "date": "2026-11-03T11:56:02-05:00",
+      "direction": "a",
+      "tag": "direction-a",
+      "title": "Header hides on scroll; six micro-interactions",
+      "summary": [
+        "The header slides away on scroll down and returns on scroll up.",
+        "Small moves: a green packet in the mission, drawings that replay on hover, panels that swap out fast and in slow, a slow zoom on Go deeper images, a rule drawn across Get into NEAR rows, and a chevron that turns into an arrow."
+      ],
+      "decisions": ["D27", "D28"],
+      "home": ""
+    },
+    {
+      "commit": "b6a8d8a",
+      "date": "2026-11-02T20:56:24-05:00",
+      "direction": "a",
+      "title": "Ridges hero still; Pause motion removed",
+      "summary": [
+        "The hero is the layered-ridges still, so nothing auto-plays.",
+        "The “Pause motion” button is gone."
+      ],
+      "decisions": ["D25", "D26"],
+      "home": ""
+    },
+    {
+      "commit": "b248ced",
+      "date": "2026-11-02T20:45:05-05:00",
+      "direction": "a",
+      "title": "Lighter Go deeper hover",
+      "summary": ["Hover and keyboard focus lift a strip tile to white and drop the title underline."],
+      "decisions": ["D24"],
+      "home": ""
+    },
+    {
+      "commit": "e261803",
+      "date": "2026-11-02T20:43:59-05:00",
+      "direction": "a",
+      "title": "Go deeper images, round 2",
+      "summary": [
+        "All 12 Go deeper images re-shot as photographs in real light.",
+        "The Stack’s closing line sits inside the pin."
+      ],
+      "decisions": ["D23"],
+      "home": ""
+    },
+    {
+      "commit": "1909489",
+      "date": "2026-11-02T20:27:15-05:00",
+      "direction": "a",
+      "title": "Flat Stack fade; close as a centred panel",
+      "summary": [
+        "Each Stack ring fades on as one flat image on a long ease.",
+        "The close is a centred panel: the N tile, “NEAR belongs to you”, and the email field and Subscribe button as one pill."
+      ],
+      "decisions": ["D21", "D22"],
+      "home": ""
+    },
+    {
+      "commit": "b05137b",
+      "date": "2026-11-02T19:59:34-05:00",
+      "direction": "a",
+      "title": "Whole-ring Stack build; photographic paths",
+      "summary": [
+        "Each Stack ring drops into place as one piece.",
+        "Every Go deeper item links. Get into NEAR re-shot as daylight photographs. A light close over a meadow photograph."
+      ],
+      "decisions": ["D20"],
+      "home": ""
+    },
+    {
+      "commit": "f412944",
+      "date": "2026-11-02T19:29:07-05:00",
+      "direction": "a",
+      "title": "Stack after your reference; Own your drawings",
+      "summary": [
+        "The Stack’s columns and drawing rebuilt from your Figma reference; on desktop it builds one layer per scroll step.",
+        "“Own your”: one hairline drawing per word on the thread. A new rhythm for the opening."
+      ],
+      "decisions": ["D17", "D18", "D19"],
+      "home": ""
+    },
+    {
+      "commit": "b7b54d1",
+      "date": "2026-11-02T17:41:24-05:00",
+      "direction": "a",
+      "title": "Proof strip without footnotes",
+      "summary": ["Figures and captions only; the sources stay recorded in the spec."],
+      "decisions": [],
+      "home": ""
+    },
+    {
+      "commit": "78d4e3e",
+      "date": "2026-11-02T17:20:53-05:00",
+      "direction": "a",
+      "title": "Polished homepage",
+      "summary": [
+        "Every placeholder marker removed without inventing facts.",
+        "Final imagery for Go deeper, Origin and Get into NEAR."
+      ],
+      "decisions": ["D16"],
+      "home": ""
+    },
+    {
+      "commit": "2f39639",
+      "date": "2026-11-02T16:57:59-05:00",
+      "direction": "a",
+      "title": "The first homepage",
+      "summary": [
+        "Eight sections, the header and the footer, with design-audit fixes.",
+        "The hero with the green thread, the anthem, the mission and “Own your”; the Stack in three columns; Proof; Go deeper; Origin; Testimonials; Get into NEAR; the newsletter close."
+      ],
+      "decisions": ["D11", "D12", "D13", "D14", "D15"],
+      "home": ""
+    },
+    {
+      "commit": "171175f",
+      "date": "2026-11-02T10:46:30-05:00",
+      "direction": "setup",
+      "title": "Scaffold",
+      "summary": ["Next.js, the design tokens, fonts and brand marks. The homepage is a placeholder; the system page shows the tokens."],
+      "decisions": [],
+      "home": "",
+      "options": [{ "label": "System", "path": "system" }]
+    }
+  ]
+}

@@ -6,6 +6,14 @@ const nextConfig: NextConfig = {
   // Keep review screenshots clean (no floating dev badge).
   devIndicators: false,
   partialPrefetching: true,
+  // Frozen copies of earlier versions (D39; scripts/build-versions.sh) are static files under public/versions/<commit>/;
+  // their pages are .html files, so a clean URL finds its file once nothing else matched
+  async rewrites() {
+    return [
+      { source: "/versions/:commit", destination: "/versions/:commit/index.html" },
+      { source: "/versions/:commit/:path+", destination: "/versions/:commit/:path+.html" },
+    ];
+  },
   turbopack: {
     rules: {
       "*.css": {

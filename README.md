@@ -2,7 +2,11 @@
 
 The near.org website. Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS v4.
 
-**Build from the spec, not from this README:** start at `../spec/MASTER-PROMPT.md`. Conventions live in `../README.md`; agent rules in `../CLAUDE.md` and `AGENTS.md`.
+A work-in-progress redesign of the near.org homepage, built section by section from a written spec (the spec and design files live outside this repository).
+
+**Status:** the homepage is built. While the design is under review, `/` is an index of every version (newest first) and the homepage is at `/home`. Inner pages linked from the header and footer don't exist yet, and the newsletter form isn't connected to a provider (it shows a success message but sends nothing).
+
+**Fonts** are licensed for near.org and included for building only; see `src/fonts/README.md`.
 
 ## Commands
 
@@ -10,7 +14,8 @@ The near.org website. Next.js 16 (App Router) · React 19 · TypeScript · Tailw
 |---|---|
 | `npm run dev` | Dev server on http://localhost:3000 |
 | `npm run check` | Lint + typecheck + production build: must pass before any section is "done" |
-| `npm run shots -- / /system` | Screenshots at 390/768/1440/1920 (full page + per section) into `.shots/<timestamp>/` (dev server must be running) |
+| `npm run shots -- /home /system` | Screenshots at 390/768/1440/1920 (full page + per section) into `.shots/<timestamp>/` (dev server must be running) |
+| `npm run versions` | Builds each version listed in `src/versions.json` as a frozen static copy under `public/versions/<commit>/` (git-ignored), so the index at `/` can open it. The commits it lists are from the original development history, which this repository doesn't include, so here the index's links to earlier versions don't open |
 | `npm run detect` | Impeccable design detector against the running dev server (`DETECT_URL=…` to override) |
 
 ## Structure
@@ -20,7 +25,7 @@ src/
 ├── app/                 routes (App Router). `/system` = internal design-token specimen (noindex)
 ├── components/
 │   └── brand/           Logo (official marks only)
-├── fonts/               licensed WOFF2 (PP Neue Montreal, Mono, Kepler subset), keep repo private
+├── fonts/               licensed WOFF2 (PP Neue Montreal, Mono, Kepler); see src/fonts/README.md
 └── styles/
     ├── tokens.css       design tokens, mirror of spec/DESIGN.md
     └── fonts.ts         next/font/local setup

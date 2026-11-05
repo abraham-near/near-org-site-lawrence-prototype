@@ -1,13 +1,12 @@
-import { OwnArt } from "../chapter-one/OwnArt";
-import { OrbitArt } from "./orbit/OrbitArt";
+import { artOf, type RailArt } from "./StoryRail";
 import { ANSWER, CONNECT, MEET, OWN, PROBLEM } from "./copy";
 import { NearArt } from "./NearArt";
 import styles from "./Story.module.css";
 
 // The story as plain reading (D29): every option's words, in order, as real headings and paragraphs. It is what phones,
 // tablets, reduced motion and no-JS show, and what screen readers read in every mode (the moving stage is aria-hidden).
-export function StoryStatic({ titleId, art = "line" }: { titleId: string; art?: "line" | "orbit" }) {
-  const Own = art === "orbit" ? OrbitArt : OwnArt;
+export function StoryStatic({ titleId, art = "line" }: { titleId: string; art?: RailArt }) {
+  const Own = artOf(art);
   return (
     <div className={styles.static}>
       <h2 id={titleId} className={`t-h2 ${styles.connect}`}>
@@ -22,7 +21,7 @@ export function StoryStatic({ titleId, art = "line" }: { titleId: string; art?: 
       <ol className={styles.ownList}>
         {OWN.map((o) => (
           <li key={o.key} className={styles.ownItem}>
-            <Own which={o.key} className={art === "orbit" ? `${styles.ownArt} ${styles.ownArtLarge}` : styles.ownArt} />
+            <Own which={o.key} className={art !== "line" ? `${styles.ownArt} ${styles.ownArtLarge}` : styles.ownArt} />
             <h3 className={`t-h3 ${styles.ownH}`}>Own your <span className="accent">{o.word}</span></h3>
             <p className={`t-body ${styles.ownLine}`}>{o.line}</p>
           </li>

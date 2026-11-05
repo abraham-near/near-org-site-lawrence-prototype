@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { OwnArt } from "../chapter-one/OwnArt";
 import { OrbitArt } from "./orbit/OrbitArt";
+import { liveArt, motionArt } from "./orbit/motion";
 import { OwnReplay } from "../chapter-one/OwnReplay";
 import { ANSWER, CONNECT, MEET, OWN, PROBLEM } from "./copy";
 import { NearArt } from "./NearArt";
@@ -24,10 +25,17 @@ export const RAIL = { gate: 150, stations: [235, 290, 345, 400], end: 470 };
 
 // `art` picks the "Own your" drawings: today's line drawings (D18) or Orbit's rendered chrome and glass (D56), which
 // take a larger 420 × 315 slot
-export type RailArt = "line" | "orbit";
+// D72: "orbit-1|2|3", Orbit with one of the motion options on the data and assets stations
+// "orbit-live": the picks (D73), option 1's data and option 3's assets
+export type RailArt = "line" | "orbit" | "orbit-live" | "orbit-1" | "orbit-2" | "orbit-3";
+
+// The drawing component for each `art`
+export function artOf(art: RailArt) {
+  return art === "line" ? OwnArt : art === "orbit" ? OrbitArt : art === "orbit-live" ? liveArt() : motionArt(Number(art.slice(-1)) as 1 | 2 | 3);
+}
 
 export function StoryRail({ look = "plain", art = "line" }: { look?: RailLook; art?: RailArt }) {
-  const Own = art === "orbit" ? OrbitArt : OwnArt;
+  const Own = artOf(art);
   return (
     <section className={base.story} aria-labelledby="story-title" data-story="rail">
       <StoryStatic titleId="story-title" art={art} />
@@ -54,7 +62,7 @@ export function StoryRail({ look = "plain", art = "line" }: { look?: RailLook; a
 
             {OWN.map((o, i) => (
               <div key={o.key} className={styles.station} style={{ "--x": `${RAIL.stations[i]}vw` } as React.CSSProperties} data-s="station">
-                <div className={styles.artSlot} data-own-stage data-large={art === "orbit" || undefined}>
+                <div className={styles.artSlot} data-own-stage data-large={art !== "line" || undefined}>
                   <Own which={o.key} className={styles.art} />
                 </div>
                 <span className={styles.dot} data-s="dot">

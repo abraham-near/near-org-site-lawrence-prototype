@@ -28,7 +28,7 @@
 .playhead { position: absolute; left: 50vw; top: var(--rail-y); width: calc(var(--space-6) + var(--space-2)); height: calc(var(--space-6) + var(--space-2)); margin: calc((var(--space-6) + var(--space-2)) / -2) 0 0 calc((var(--space-6) + var(--space-2)) / -2); border: 1px solid var(--color-ink); border-radius: calc(var(--radius-md) + var(--space-1)); opacity: 0; }
 .finder { position: absolute; left: 50vw; top: calc(var(--rail-y) - var(--space-6) - 240px - 20px); width: 360px; height: 280px; margin-left: -180px; opacity: 0; }
 /* With Orbit's larger drawings (D56) the corners frame the 420 × 315 slot (StoryRail.module.css), 20 px outside it */
-:global([data-art-kind="orbit"]) > .finder {
+:global([data-art-kind^="orbit"]) > .finder {
   --w: min(420px, calc((54vh - 126px) * 4 / 3));
   top: calc(var(--rail-y) - var(--space-6) - var(--w) * 0.75 - 20px); width: calc(var(--w) + 40px); height: calc(var(--w) * 0.75 + 40px);
   margin-left: calc((var(--w) + 40px) / -2);

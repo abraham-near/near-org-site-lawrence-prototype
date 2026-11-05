@@ -20,6 +20,21 @@
   },
   "versions": [
     {
+      "commit": "212980b",
+      "date": "2026-11-05T12:55:06-05:00",
+      "direction": "b",
+      "title": "Rail motion: the data station in live glass, the assets station in real-time 3D",
+      "summary": [
+        "The rail's data station is animated: a frosted glass disc turns flat to camera as it arrives, easing in and out, while the green ball loops behind it, diffused by the glass.",
+        "The assets station runs in real-time 3D: two equal balls orbit the glass washer in a seamless loop. Three options were built; the other two stay in the lab."
+      ],
+      "decisions": ["D72", "D73"],
+      "home": "home",
+      "options": [
+        { "label": "Rail motion options", "path": "lab/rail-motion" }
+      ]
+    },
+    {
       "commit": "e0fa107",
       "date": "2026-11-05T11:31:16-05:00",
       "direction": "b",

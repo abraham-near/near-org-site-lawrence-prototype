@@ -69,6 +69,9 @@ for c in "${COMMITS[@]}"; do
 # link built from data is written href={`/${...}`} so it is caught too
   find src -type f \( -name '*.ts' -o -name '*.tsx' -o -name '*.css' \) -print0 |
     xargs -0 perl -pi -e "s{([\"'\`(])/(images|videos|brand|lab/voices-refs|lab/hero|lab/directions|lab/own-hybrid|lab/own-styles|directions)/}{\$1/versions/$c/\$2/}g; s{href=(\{\`|\")/(lab|system|\\\$\\{)}{href=\$1/versions/$c/\$2}g"
+  # A copy is served by the main site, whose robots.txt and no-index header (D74) already cover it; a generated
+  # robots route can't be exported, so the copy leaves it out (and its headers(), which an export ignores)
+  rm -f src/app/robots.ts
   mv next.config.ts next.config.base.ts
   cat > next.config.ts <<EOF
 import type { NextConfig } from "next";
@@ -76,6 +79,7 @@ import base from "./next.config.base";
 
 const config: NextConfig = {
   ...base,
+  headers: undefined,
   output: "export",
   // Both rely on partial prerendering, which needs a server
   cacheComponents: false,

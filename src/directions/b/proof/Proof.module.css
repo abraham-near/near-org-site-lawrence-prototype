@@ -1,0 +1,47 @@
+/* Direction B, Proof. Tokens only; glass from glass.module.css. */
+.proof { padding-block: var(--section-pad-y); background: var(--color-surface); }
+.inner { width: 100%; max-width: var(--content-max); margin-inline: auto; padding-inline: var(--page-margin); }
+.band { position: relative; overflow: hidden; border-radius: var(--radius-lg); padding: var(--space-5) var(--space-3); background: var(--color-surface-2); }
+.light { object-fit: cover; object-position: 30% 50%; }
+.bar {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: 1fr 1fr;
+  border-radius: var(--radius-md);
+  --edge-angle: 100deg;
+}
+/* A step more opaque than the page glass over this photograph, so the 13 px captions keep AA with margin */
+.band .bar { background: linear-gradient(172deg, color-mix(in srgb, var(--color-white) 88%, transparent), color-mix(in srgb, var(--color-white) 76%, transparent) 60%, color-mix(in srgb, var(--color-surface) 84%, transparent)); }
+.cell { position: relative; z-index: 3; padding: var(--space-5) var(--space-4); text-align: center; }
+/* Phones: the Intents figure leads full width, then 2 × 2, on hairlines */
+.cell:first-child { grid-column: 1 / -1; }
+.cell + .cell { border-top: 1px solid var(--color-line); }
+.cell:nth-child(3), .cell:nth-child(5) { border-left: 1px solid var(--color-line); }
+.value { margin: 0; font-size: var(--text-h3); font-weight: 400; line-height: 1.1; letter-spacing: var(--tracking-h3); font-variant-numeric: tabular-nums; }
+.unit { margin-left: var(--space-1); font-size: 1rem; color: var(--color-muted); letter-spacing: 0; }
+.caption { margin: var(--space-2) auto 0; max-width: 24ch; font-size: var(--text-caption); line-height: 1.4; color: var(--color-muted); text-wrap-style: balance; }
+
+@media (min-width: 768px) {
+  .band { padding: var(--space-7) var(--space-6); }
+  .bar { grid-template-columns: repeat(6, 1fr); }
+  .cell { grid-column: span 2; }
+  .cell:first-child, .cell:nth-child(2) { grid-column: span 3; }
+  .cell + .cell { border-top: 0; }
+  .cell:nth-child(n + 3) { border-top: 1px solid var(--color-line); }
+  .cell:nth-child(2), .cell:nth-child(4), .cell:nth-child(5) { border-left: 1px solid var(--color-line); }
+  .cell:nth-child(3) { border-left: 0; }
+}
+@media (min-width: 1280px) {
+  .band { padding: var(--space-9) var(--space-8); }
+  .bar { grid-template-columns: repeat(5, 1fr); }
+  .cell, .cell:first-child, .cell:nth-child(2) { grid-column: auto; padding: var(--space-7) var(--space-4) var(--space-6); }
+  .cell:nth-child(n) { border-top: 0; }
+  .cell + .cell { border-left: 1px solid var(--color-line); }
+  /* A fine scale under each figure: technical detail, ink hairlines */
+  .cell::after {
+    content: ""; position: absolute; left: var(--space-5); right: var(--space-5); bottom: var(--space-3); height: 5px;
+    background: repeating-linear-gradient(90deg, var(--color-line-strong) 0 1px, transparent 1px 8px);
+    opacity: 0.6;
+    -webkit-mask: linear-gradient(90deg, transparent, var(--color-ink) 20%, var(--color-ink) 80%, transparent);
+    mask: linear-gradient(90deg, transparent, var(--color-ink) 20%, var(--color-ink) 80%, transparent);
+  }
+}

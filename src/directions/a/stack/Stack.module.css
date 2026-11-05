@@ -1,0 +1,175 @@
+/* Direction A, the Stack: the page's one dark section, on forest, drawn as an engineering plate. Layout as on the live
+   page (a list, the detail, the drawing; pinned on desktop with motion). Local colours: the drawing's ramps
+   (palette.ts) and the tints below, each derived from the tokens. */
+.band {
+  position: relative; overflow-x: clip; color: var(--color-on-dark); padding-block: var(--section-pad-y);
+  background-color: var(--color-forest);
+  /* the plate's graticule: on-dark hairlines at 5% every 96 px (a pattern of hairlines, not a wash) */
+  --a-grid-dark: color-mix(in srgb, var(--color-on-dark) 5%, transparent);
+  /* the selected row: green at 14% over forest */
+  --a-row: color-mix(in srgb, var(--color-green) 14%, var(--color-forest));
+  --label-w: calc(var(--space-11) - var(--space-6)); /* the plate's label column, 160 px */
+  background-image: linear-gradient(to right, var(--a-grid-dark) 1px, transparent 1px), linear-gradient(to bottom, var(--a-grid-dark) 1px, transparent 1px);
+  background-size: var(--space-9) var(--space-9);
+  background-position: calc(50% + var(--space-9) / 2) 0;
+}
+.band :focus-visible { outline-color: var(--color-on-dark); }
+.inner { max-width: var(--content-max); margin-inline: auto; padding-inline: var(--page-margin); }
+
+.track {
+  --list-w: calc(var(--space-11) + var(--space-6));
+  --detail-w: calc(var(--space-11) * 2 + var(--space-6));
+}
+.head { margin-bottom: var(--space-7); }
+.head h2 { margin: 0; }
+.head p { margin: var(--space-5) 0 0; color: var(--color-on-dark-muted); }
+.pin { position: relative; }
+.cols { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-7); }
+.art { width: min(100%, 560px); margin-inline: auto; }
+@media (min-width: 768px) {
+  .cols { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--space-5); }
+  .art { grid-column: 1 / -1; width: min(100%, 620px); }
+  .list { grid-column: 1 / span 4; }
+  .panels { grid-column: 5 / -1; }
+}
+@media (min-width: 1280px) {
+  .pin { display: grid; grid-template-columns: var(--list-w) var(--detail-w) minmax(0, 1fr); grid-template-rows: auto auto; column-gap: var(--space-7); row-gap: var(--space-7); align-content: start; }
+  .head { grid-column: 1 / 3; grid-row: 1; margin: 0; }
+  .cols { display: contents; }
+  .list { grid-column: 1; grid-row: 2; }
+  .panels { grid-column: 2; grid-row: 2; }
+  /* the drawing runs into the right margin (and any room beside the container), as on the live page */
+  /* the drawing plus its label column runs into the right margin (and any room beside the container), stopping
+     16 px short of the viewport edge, as the live page's drawing does */
+  .art {
+    grid-column: 3; grid-row: 1 / 3; align-self: center; justify-self: end;
+    width: calc(100% + var(--page-margin) - var(--space-4) + max(0px, (100vw - var(--content-max)) / 2)); max-width: 900px; margin: 0 calc((var(--page-margin) - var(--space-4) + max(0px, (100vw - var(--content-max)) / 2)) * -1) 0 0;
+  }
+}
+@media (min-width: 1280px) and (min-height: 760px) and (prefers-reduced-motion: no-preference) {
+  :global(html[data-js]) .band { padding-top: 0; }
+  :global(html[data-js]) .track { height: calc(100vh + 3 * 60vh); }
+  /* only as tall as its content, so the secondary row follows the pin without a dead band */
+  :global(html[data-js]) .pin { position: sticky; top: 0; padding: calc(var(--space-9) + var(--space-3)) 0 var(--space-6); }
+  :global(html[data-js]) .secondary { margin-top: var(--space-6); }
+  :global(html[data-js]) .art { max-width: min(900px, calc((100vh - var(--space-10) - var(--space-8)) * var(--ar) + var(--label-w))); }
+}
+@media (min-width: 1280px) and (min-height: 760px) and (max-height: 880px) and (prefers-reduced-motion: no-preference) {
+  :global(html[data-js]) .pin { row-gap: var(--space-6); padding: var(--space-9) 0 var(--space-4); }
+  :global(html[data-js]) .head p { margin-top: var(--space-3); }
+}
+
+/* ---------- The plate ---------- */
+.plate { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) var(--label-w); }
+.labels { position: relative; }
+@media (max-width: 767px) { .plate { grid-template-columns: minmax(0, 1fr); } .labels { display: none; } }
+.iso { display: block; width: 100%; height: auto; overflow: visible; }
+.iso polygon { stroke-width: 0.6; stroke-linejoin: round; }
+.c { cursor: pointer; transform: translateY(var(--lift, 0px)); transition: transform var(--dur-3) var(--ease-settle), opacity var(--dur-2) var(--ease-out); }
+.lit { opacity: 0; transition: opacity var(--dur-2) var(--ease-out); }
+.b { opacity: var(--shown, 1); transform: translateY(calc((1 - var(--shown, 1)) * var(--space-7) * -1)); transition: opacity var(--dur-5) var(--ease-settle), transform calc(var(--dur-5) * 1.25) var(--ease-settle); }
+.cover { opacity: var(--shown, 1); transition: opacity 0s linear calc((1 - var(--shown, 1)) * var(--dur-5)); }
+.band[data-build="-1"] .c[data-li],
+.band[data-build="0"] .c:is([data-li="1"], [data-li="2"], [data-li="3"]),
+.band[data-build="1"] .c:is([data-li="2"], [data-li="3"]),
+.band[data-build="2"] .c[data-li="3"] { --shown: 0; pointer-events: none; }
+.band[data-build="-1"] :is(.leader, .label, .extent),
+.band[data-build="0"] :is(.leader, .label, .extent):is([data-tone="intents"], [data-tone="ai"], [data-tone="com"]),
+.band[data-build="1"] :is(.leader, .label, .extent):is([data-tone="ai"], [data-tone="com"]),
+.band[data-build="2"] :is(.leader, .label, .extent)[data-tone="com"] { opacity: 0; }
+
+/* The one that is lit: hovered, or else selected. It lifts and turns green; while hovering, the others step back */
+.band:is([data-hl="protocol"], [data-sel="protocol"]:not([data-hl])) [data-tone="protocol"],
+.band:is([data-hl="intents"], [data-sel="intents"]:not([data-hl])) [data-tone="intents"],
+.band:is([data-hl="ai"], [data-sel="ai"]:not([data-hl])) [data-tone="ai"],
+.band:is([data-hl="com"], [data-sel="com"]:not([data-hl])) [data-tone="com"] { --lift: calc(var(--space-3) * -1); --on: 1; }
+.band [data-tone] .lit { opacity: var(--on, 0); }
+.band[data-hl] .c:not([data-tone="x"]) { opacity: 0.55; }
+.band[data-hl="protocol"] .c[data-tone="protocol"], .band[data-hl="intents"] .c[data-tone="intents"],
+.band[data-hl="ai"] .c[data-tone="ai"], .band[data-hl="com"] .c[data-tone="com"] { opacity: 1; }
+
+/* Scale, leaders, labels, registration */
+.scale line { stroke: var(--color-line-on-dark); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.extent { fill: var(--color-green); opacity: calc(var(--on, 0)); transition: opacity var(--dur-2) var(--ease-out); }
+.leader { transition: opacity var(--dur-3) var(--ease-out); }
+.leadRest { fill: none; stroke: var(--color-line-on-dark); stroke-width: 1; vector-effect: non-scaling-stroke; }
+/* drawn on with pathLength, so its stroke scales with the plate (non-scaling-stroke would stop the draw short) */
+.leadOn { fill: none; stroke: var(--color-green); stroke-width: 2.2; stroke-dasharray: 1 1; stroke-dashoffset: calc(1 - var(--on, 0)); transition: stroke-dashoffset var(--dur-4) var(--ease-in-out); }
+.anchor { fill: var(--color-forest); stroke: var(--color-on-dark-muted); stroke-width: 1; vector-effect: non-scaling-stroke; transition: fill var(--dur-2) var(--ease-out); }
+[data-tone] > .anchor { fill: color-mix(in srgb, var(--color-green) calc(var(--on, 0) * 100%), var(--color-forest)); }
+.reg :is(circle, path) { fill: none; stroke: var(--color-on-dark-muted); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.label {
+  position: absolute; left: var(--space-2); right: 0; transform: translateY(-50%); display: grid; gap: 2px;
+  font-size: var(--text-caption); line-height: 1.3; color: var(--color-on-dark-muted); pointer-events: auto; cursor: pointer;
+  transition: color var(--dur-2) var(--ease-out), opacity var(--dur-3) var(--ease-out);
+}
+.labelName { font-size: var(--text-small); font-weight: 500; }
+.labelStat { font-size: var(--text-caption); font-variant-numeric: tabular-nums; }
+.labelUnit { color: inherit; }
+.band:is([data-hl="protocol"], [data-sel="protocol"]:not([data-hl])) .label[data-tone="protocol"],
+.band:is([data-hl="intents"], [data-sel="intents"]:not([data-hl])) .label[data-tone="intents"],
+.band:is([data-hl="ai"], [data-sel="ai"]:not([data-hl])) .label[data-tone="ai"],
+.band:is([data-hl="com"], [data-sel="com"]:not([data-hl])) .label[data-tone="com"] { color: var(--color-on-dark); }
+/* Phones: the labels would crowd the plate; the list below names the layers */
+@media (max-width: 767px) { .label, .leader { display: none; } }
+
+/* ---------- The list ---------- */
+.list { display: flex; flex-direction: column; align-self: start; border-bottom: 1px solid var(--color-line-on-dark); }
+.tab {
+  position: relative; display: flex; align-items: center; gap: var(--space-5); white-space: nowrap;
+  min-height: calc(var(--space-7) + var(--space-1) * 1.5); padding: 0 var(--space-4); cursor: pointer;
+  border: 0; border-top: 1px solid var(--color-line-on-dark); background: transparent; color: var(--color-on-dark-muted); font: inherit; text-align: left;
+  transition: color var(--dur-2) var(--ease-out), background-color var(--dur-2) var(--ease-out);
+}
+.tab:hover { color: var(--color-on-dark); }
+.tab::before { content: ""; position: absolute; left: 0; top: -1px; bottom: 0; width: 2px; background: var(--color-green); transform: scaleY(0); transform-origin: 50% 0; transition: transform var(--dur-3) var(--ease-settle); }
+.tab[aria-selected="true"] { background: var(--a-row); color: var(--color-on-dark); }
+.tab[aria-selected="true"]::before { transform: scaleY(1); }
+.tab:focus-visible { outline-offset: -4px; }
+.index { flex: none; width: 2ch; font-family: var(--font-mono); font-size: 13px; font-variant-numeric: tabular-nums; }
+.tabName { font-size: var(--text-h4); font-weight: 400; line-height: 1.2; }
+/* a scale tick at the row's end that draws out when the row is selected */
+.tabTick { margin-left: auto; width: var(--space-5); height: 1px; background: var(--color-green); transform: scaleX(0); transform-origin: 100% 50%; transition: transform var(--dur-4) var(--ease-settle); }
+.tab[aria-selected="true"] .tabTick { transform: scaleX(1); }
+
+/* ---------- The detail ---------- */
+.panels { display: grid; }
+.panel { grid-area: 1 / 1; min-width: 0; }
+@media (max-width: 767px) { :global(html[data-js]) .panel[data-active] { animation: panel-in var(--dur-4) var(--ease-settle); } }
+@keyframes panel-in { from { opacity: 0; transform: translateY(var(--space-2)); } }
+.panel + .panel { margin-top: var(--space-8); }
+:global(html[data-js]) .panel + .panel { margin-top: 0; }
+:global(html[data-js]) .panel:not([data-active]) { display: none; }
+@media (min-width: 768px) {
+  :global(html[data-js]) .panel { transition: opacity var(--dur-3) var(--ease-out) var(--dur-1), transform var(--dur-4) var(--ease-settle) var(--dur-1); }
+  :global(html[data-js]) .panel:not([data-active]) {
+    display: block; visibility: hidden; opacity: 0; transform: translateY(var(--space-2));
+    transition: opacity var(--dur-1) var(--ease-out), visibility 0s linear var(--dur-1), transform 0s linear var(--dur-1);
+  }
+}
+.panelTop { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--space-2) var(--space-5); padding-block: calc(var(--space-4) - 1px); border-bottom: 1px solid var(--color-line-on-dark); }
+.role { margin: 0; font-size: var(--text-label); font-weight: 500; letter-spacing: var(--tracking-label); text-transform: uppercase; }
+.url { display: inline-flex; align-items: center; gap: var(--space-1); min-height: 24px; font-size: var(--text-caption); color: var(--color-on-dark); text-decoration: none; }
+.url:hover, .url:focus-visible { text-decoration: underline; text-decoration-color: var(--color-green); text-underline-offset: 4px; }
+.line { margin: var(--space-6) 0 0; font-size: var(--text-h4); font-weight: 400; line-height: 1.2; text-wrap-style: balance; }
+.features { display: grid; gap: var(--space-4); margin: var(--space-6) 0 0; padding: 0; list-style: none; }
+.features li { position: relative; padding-left: var(--space-5); }
+/* each feature hangs from a small crosshair on a ruled stem */
+.features li::before { content: ""; position: absolute; left: 3px; top: 0.55em; width: 9px; height: 1px; background: var(--color-on-dark-muted); }
+.features li::after { content: ""; position: absolute; left: 7px; top: calc(0.55em - 4px); width: 1px; height: 9px; background: var(--color-on-dark-muted); }
+.features p { margin: 0; }
+.featTitle { font-size: var(--text-body); line-height: 1.3; }
+.featDetail { margin-top: 2px; font-size: var(--text-caption); line-height: 1.35; color: var(--color-on-dark-muted); }
+.stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 var(--space-5); margin: var(--space-6) 0 0; }
+.stat { display: flex; flex-direction: column-reverse; justify-content: flex-end; gap: 2px; padding: var(--space-3) 0; border-top: 1px solid var(--color-line-on-dark); }
+.statValue { margin: 0; font-size: var(--text-h4); font-weight: 500; line-height: 1.2; }
+.statLabel { font-size: var(--text-caption); color: var(--color-on-dark-muted); }
+.stat:first-child .statValue::before { content: ""; display: inline-block; width: 6px; height: 6px; margin-right: var(--space-2); vertical-align: 0.2em; background: var(--color-green); }
+
+/* ---------- Secondary row ---------- */
+.secondary { display: grid; gap: var(--space-7); margin-top: var(--space-9); padding-top: var(--space-5); border-top: 1px solid var(--color-line-on-dark); }
+@media (min-width: 768px) { .secondary { grid-template-columns: 1fr 1fr; } }
+.secondary h3 { margin: 0; }
+.secondary p { margin: var(--space-3) 0 0; max-width: var(--measure); color: var(--color-on-dark-muted); }
+.more { display: inline-flex; align-items: center; gap: var(--space-2); margin-top: var(--space-4); color: var(--color-on-dark); text-decoration: underline; text-decoration-color: var(--color-line-on-dark); text-underline-offset: 5px; transition: text-decoration-color var(--dur-2) var(--ease-out); }
+.more:hover { text-decoration-color: var(--color-green); }

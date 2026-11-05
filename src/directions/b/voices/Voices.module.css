@@ -1,0 +1,39 @@
+/* Direction B, Voices. Tokens only; glass from glass.module.css, a step more opaque here (over a photograph), and the
+   role lines in ink so every line keeps AA with margin whatever the picture does behind. */
+.voices { padding-top: var(--section-pad-y); background: var(--color-surface); }
+.inner { position: relative; width: 100%; max-width: var(--content-max); margin-inline: auto; padding-inline: var(--page-margin); }
+.title { margin: 0 0 var(--space-6); }
+.band { position: relative; overflow: hidden; background: var(--color-surface-2); padding-block: var(--space-8); }
+.bg { object-fit: cover; object-position: 50% 50%; }
+.band .plate {
+  display: grid; border-radius: var(--radius-lg); padding: var(--space-6) var(--space-5);
+  background: linear-gradient(172deg, color-mix(in srgb, var(--color-white) 86%, transparent), color-mix(in srgb, var(--color-white) 72%, transparent) 60%, color-mix(in srgb, var(--color-surface) 80%, transparent));
+}
+.plate > * { position: relative; z-index: 3; }
+.featured { margin: 0; }
+.featQuote { margin: 0; }
+.featQuote p { margin: 0; padding-left: 0.42em; font-size: var(--text-h2); font-weight: 400; line-height: 1.12; letter-spacing: var(--tracking-h2); text-wrap-style: balance; }
+.hang { margin-left: -0.42em; }
+.list { list-style: none; margin: var(--space-6) 0 0; padding: 0; border-top: 1px solid var(--color-line); }
+.list li { border-bottom: 1px solid var(--color-line); }
+.list li:last-child { border-bottom: 0; }
+.quote { margin: 0; padding: var(--space-4) 0; }
+.quote blockquote { margin: 0; }
+.quote p { margin: 0; padding-left: 0.42em; font-size: var(--text-h4); font-weight: 400; line-height: 1.35; }
+.who { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-3); margin-top: var(--space-3); font-size: var(--text-small); }
+.featured .who { margin-top: var(--space-5); padding-top: var(--space-3); border-top: 1px solid var(--color-line); }
+.name { font-weight: 500; }
+.role { color: var(--color-ink); }
+
+@media (min-width: 768px) {
+  .band { padding-block: var(--space-9); }
+  .plate { padding: var(--space-8) var(--space-7); }
+}
+@media (min-width: 1280px) {
+  .band { padding-block: var(--space-10); }
+  .plate { grid-template-columns: 7fr 4fr; column-gap: var(--space-8); align-items: start; padding: var(--space-9) var(--space-8) var(--space-8); }
+  .featQuote p { font-size: var(--text-h1); line-height: 1.06; letter-spacing: var(--tracking-h1); }
+  .list { margin-top: 0; padding-left: var(--space-7); border-top: 0; border-left: 1px solid var(--color-line); }
+  .quote { padding: var(--space-5) 0; }
+  .list li:first-child .quote { padding-top: 0; }
+}

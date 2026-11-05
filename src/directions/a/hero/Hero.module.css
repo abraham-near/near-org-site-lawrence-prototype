@@ -1,0 +1,74 @@
+/* Direction A, the hero. Static (phones, tablets, no JS): a photo band with the instrument frame on it, the claim
+   below. From 1280 the claim sits over the picture's pale left; with motion the stage pins for the camera move and
+   the close-in (HeroMotion). Tokens only. */
+.hero { position: relative; background: var(--color-surface); }
+
+.stage {
+  position: relative; height: 58vh; height: 58svh; overflow: hidden;
+  /* the instrument frame: page margin at the sides, under the floating header at the top */
+  --fl: var(--page-margin); --ft: calc(var(--space-11) * 0.5); --fb: var(--space-4);
+  --close: 0;
+}
+.media { position: absolute; inset: 0; }
+.img { object-fit: cover; object-position: 72% 50%; }
+.video { display: none; }
+
+/* Close-in bars (desktop with motion) */
+.bar { position: absolute; background: var(--color-surface); z-index: 2; will-change: transform; }
+.barT { left: 0; right: 0; top: 0; height: var(--ft); transform-origin: 50% 0; transform: scaleY(var(--close)); }
+.barB { left: 0; right: 0; bottom: 0; height: var(--fb); transform-origin: 50% 100%; transform: scaleY(var(--close)); }
+.barL { top: 0; bottom: 0; left: 0; width: var(--fl); transform-origin: 0 50%; transform: scaleX(var(--close)); }
+.barR { top: 0; bottom: 0; right: 0; width: var(--fl); transform-origin: 100% 50%; transform: scaleX(var(--close)); }
+.frameLine { position: absolute; z-index: 3; top: var(--ft); left: var(--fl); right: var(--fl); bottom: var(--fb); border: 1px solid var(--color-line-strong); opacity: var(--close); pointer-events: none; }
+
+/* The time tape: the move's frames, sliding under a fixed caret at the frame's upper phi point */
+.tape {
+  position: absolute; z-index: 3; top: var(--ft); left: var(--fl); right: var(--fl); height: 40px; overflow: hidden;
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, var(--color-ink) 30%, var(--color-ink) 92%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0%, var(--color-ink) 30%, var(--color-ink) 92%, transparent 100%);
+  --caret: 61.8%;
+}
+.tapeStrip { position: absolute; left: var(--caret); top: 0; overflow: visible; transform: translateX(var(--tape-x, 0px)); will-change: transform; }
+.caret { position: absolute; left: var(--caret); top: 0; width: 1.5px; height: 18px; margin-left: -0.75px; background: var(--color-green); }
+/* In the bottom margin, right-aligned to the frame: light over the forest while the picture is full bleed, ink once
+   the bars have closed in under it (--close) */
+.readout {
+  position: absolute; z-index: 3; right: calc(var(--fl) + var(--space-5)); bottom: calc((var(--fb) - 14px) / 2);
+  display: flex; align-items: baseline; gap: var(--space-2); margin: 0; line-height: 14px;
+  color: color-mix(in srgb, var(--color-ink) calc(var(--close) * 100%), var(--color-on-dark));
+}
+.readOf { opacity: 0.8; }
+.regs { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
+.reg { position: absolute; width: 24px; height: 24px; margin: -12px 0 0 -12px; overflow: visible; }
+.reg:nth-child(1) { left: var(--fl); top: var(--ft); }
+.reg:nth-child(2) { left: calc(100% - var(--fl)); top: var(--ft); }
+.reg:nth-child(3) { left: var(--fl); top: calc(100% - var(--fb)); }
+.reg:nth-child(4) { left: calc(100% - var(--fl)); top: calc(100% - var(--fb)); }
+/* Over the dark forest at the bottom of the still the lower marks read in the page's light ink */
+.reg:nth-child(n + 3) :is(circle, path) { stroke: var(--color-on-dark-muted); }
+
+.claim { position: relative; padding: var(--space-7) var(--page-margin) var(--space-8); }
+.copy { max-width: 640px; }
+.lede { margin-top: var(--space-5); }
+.cta { margin-top: var(--space-6); }
+
+/* Phones: the readout and the lower marks step aside; the tape stays as a still scale */
+@media (max-width: 767px) {
+  .readout { display: none; }
+  .reg:nth-child(n + 3) { display: none; }
+  .tape { --caret: 50%; }
+}
+
+/* Desktop: the claim over the picture's pale left */
+@media (min-width: 1280px) {
+  .stage { height: 100vh; height: 100svh; --ft: calc(var(--space-9) + var(--space-2)); --fb: var(--space-6); }
+  .img { object-position: 30% 50%; }
+  .claim { position: absolute; z-index: 4; top: 0; left: 0; right: 0; height: 100vh; height: 100svh; display: flex; align-items: center; padding: 0 var(--page-margin); max-width: calc(var(--content-max)); margin-inline: auto; }
+  .lede { max-width: 34ch; }
+}
+@media (min-width: 1280px) and (prefers-reduced-motion: no-preference) {
+  :global(html[data-js]) .hero { height: 265vh; }
+  :global(html[data-js]) .stage { position: sticky; top: 0; }
+  :global(html[data-js]) .video { display: block; position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 30% 50%; opacity: 0; transition: opacity var(--dur-4) var(--ease-out); }
+  :global(html[data-js]) .video[data-ready] { opacity: 1; }
+}

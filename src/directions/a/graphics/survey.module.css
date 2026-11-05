@@ -1,0 +1,72 @@
+/* Direction A, "Survey": the shared graphic primitives (research/dir-a.md §4). Hairlines in ink at the line tokens,
+   green only for the one live mark. Every micro-motion waits for its watch area ([data-a-watch]) to be marked
+   [data-in] by Watch.tsx, and only where motion is allowed and JS runs; otherwise every mark shows its final state. */
+
+/* Local values (tokens only, derived): */
+.sheet {
+  /* the faint survey graticule: ink at 6%, half the --color-line hairline */
+  --a-grid: color-mix(in srgb, var(--color-ink) 6%, transparent);
+  /* the "yours" tint: 18% NEAR green on the page surface */
+  --a-mint: color-mix(in srgb, var(--color-green) 18%, var(--color-surface));
+}
+
+/* Lines */
+.hair { fill: none; stroke: var(--color-line-strong); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.faint { fill: none; stroke: var(--color-line); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.ink { fill: none; stroke: var(--color-ink); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.green { fill: none; stroke: var(--color-green); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
+.greenFill { fill: var(--color-green); }
+.inkFill { fill: var(--color-ink); }
+.paper { fill: var(--color-surface); }
+.dash { stroke-dasharray: 2 4; }
+
+/* Numerals: data values only (DESIGN §2), never word labels */
+.num { font-family: var(--font-mono); font-size: 13px; line-height: 1; letter-spacing: 0; font-variant-numeric: tabular-nums; }
+.svgNum { font-family: var(--font-mono); font-size: 13px; fill: var(--color-muted); font-variant-numeric: tabular-nums; }
+.cap { font-size: var(--text-caption); line-height: 1.35; color: var(--color-muted); }
+
+/* Draw-on: give the path pathLength="1". A drawn line scales its stroke with the figure (vector-effect: none):
+   with non-scaling-stroke the dash pattern is measured in screen space and the line stops short of its end. */
+.draw { vector-effect: none; stroke-dasharray: 1 1; stroke-dashoffset: 0; transition: stroke-dashoffset var(--a-dur, 1.4s) var(--ease-in-out) var(--d, 0ms); }
+/* Fade up */
+.fade { transition: opacity var(--dur-4) var(--ease-out) var(--d, 0ms), transform var(--dur-4) var(--ease-settle) var(--d, 0ms); }
+/* A tick counting up: scales from its base, one after another (--i) */
+.tick { transform-box: fill-box; transform-origin: 50% 100%; transition: transform var(--dur-3) var(--ease-out) calc(var(--d, 0ms) + var(--i, 0) * var(--a-step, 18ms)); }
+.tickX { transform-box: fill-box; transform-origin: 0% 50%; transition: transform var(--dur-3) var(--ease-out) calc(var(--d, 0ms) + var(--i, 0) * var(--a-step, 18ms)); }
+/* A node scales in */
+.pop { transform-box: fill-box; transform-origin: 50% 50%; transition: transform var(--dur-4) var(--ease-settle) var(--d, 0ms); }
+/* One ring that expands and fades once on arrival */
+.pulse { transform-box: fill-box; transform-origin: 50% 50%; opacity: 0; }
+
+@media (prefers-reduced-motion: no-preference) {
+  :global(html[data-js]) [data-a-watch]:not([data-in]) .draw { stroke-dashoffset: 1; }
+  :global(html[data-js]) [data-a-watch]:not([data-in]) .fade { opacity: 0; transform: translateY(var(--space-2)); }
+  :global(html[data-js]) [data-a-watch]:not([data-in]) .tick { transform: scaleY(0); }
+  :global(html[data-js]) [data-a-watch]:not([data-in]) .tickX { transform: scaleX(0); }
+  :global(html[data-js]) [data-a-watch]:not([data-in]) .pop { transform: scale(0); }
+  :global(html[data-js]) [data-a-watch][data-in] .pulse { animation: pulse 1.4s var(--ease-out) var(--d, 0ms) 1 both; }
+}
+@keyframes pulse {
+  0% { opacity: 0.9; transform: scale(0.4); }
+  100% { opacity: 0; transform: scale(2.4); }
+}
+
+/* Rolling numerals (Roll.tsx): each digit is a column of 0–9 that rolls to its value */
+.roll { display: inline-flex; align-items: flex-start; white-space: nowrap; }
+.rollCh { display: inline-block; height: 1.1em; line-height: 1.1em; }
+.rollCol { position: relative; display: inline-block; height: 1.1em; line-height: 1.1em; overflow: hidden; }
+/* the column takes its own digit's width; the strip of 0–9 runs inside it, centred */
+.rollSize { visibility: hidden; }
+.rollStrip { position: absolute; left: -0.2em; right: -0.2em; top: 0; text-align: center; display: flex; flex-direction: column; transform: translateY(calc(var(--n) * -1.1em)); transition: transform var(--dur-5) var(--ease-settle) calc(var(--d, 0ms) + var(--i, 0) * 70ms); }
+.rollStrip > span { display: block; height: 1.1em; }
+@media (prefers-reduced-motion: no-preference) {
+  :global(html[data-js]) [data-a-watch]:not([data-in]) .rollStrip { transform: translateY(0); }
+}
+
+/* Plate corners: registration-style marks at the four corners of a figure */
+.corners { position: absolute; inset: calc(var(--space-2) * -1); pointer-events: none; }
+.corners svg { position: absolute; width: 14px; height: 14px; overflow: visible; }
+.corners svg:nth-child(1) { left: 0; top: 0; }
+.corners svg:nth-child(2) { right: 0; top: 0; transform: scaleX(-1); }
+.corners svg:nth-child(3) { left: 0; bottom: 0; transform: scaleY(-1); }
+.corners svg:nth-child(4) { right: 0; bottom: 0; transform: scale(-1, -1); }

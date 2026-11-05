@@ -10,12 +10,33 @@
     "summary": "What is on screen now, including anything not yet committed. It changes as we work.",
     "home": "/home",
     "options": [
+      { "label": "Homepage directions (contact sheet)", "path": "/lab/directions" },
       { "label": "Hero options", "path": "/lab/hero" },
       { "label": "Testimonial options", "path": "/lab/voices" },
       { "label": "System", "path": "/system" }
     ]
   },
   "versions": [
+    {
+      "commit": "8b991ee",
+      "date": "2026-11-04T20:44:31-05:00",
+      "direction": "b",
+      "title": "Homepage directions: Original, A Survey, B Prism, C Field",
+      "summary": [
+        "Three new directions for the whole homepage beside the original, each keeping its flow and content: A Survey (a technical atlas with micrographics), B Prism (vector with frosted glass and refraction), C Field (Swiss editorial from the N's construction).",
+        "Each has its own Stack graphic in the same shape and a new treatment for every section below it.",
+        "A contact sheet shows every section side by side and lets you pick per section; the homepage is unchanged."
+      ],
+      "decisions": ["D52"],
+      "home": "home",
+      "options": [
+        { "label": "Contact sheet", "path": "lab/directions" },
+        { "label": "Original", "path": "lab/dir-o" },
+        { "label": "A Survey", "path": "lab/dir-a" },
+        { "label": "B Prism", "path": "lab/dir-b" },
+        { "label": "C Field", "path": "lab/dir-c" }
+      ]
+    },
     {
       "commit": "c8fecb5",
       "date": "2026-11-04T19:33:20-05:00",

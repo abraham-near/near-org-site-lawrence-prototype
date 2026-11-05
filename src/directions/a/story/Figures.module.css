@@ -1,0 +1,5 @@
+.fig { display: block; width: 100%; height: auto; overflow: visible; }
+.tag { font-family: var(--font-sans); font-size: 13px; fill: var(--color-ink); }
+/* The layer figure starts as someone else's only where the traverse scrubs it (StoryMotion sets the parts' opacity);
+   everywhere else it shows NEAR's, the end state. */
+.before { opacity: 0; }

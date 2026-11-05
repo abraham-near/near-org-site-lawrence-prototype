@@ -1,0 +1,40 @@
+/* Direction B, Close. Tokens only; glass from glass.module.css. The pill is the one approved pill (D22). */
+.close { padding-block: var(--section-pad-y); background: var(--color-surface); }
+.inner { width: 100%; max-width: var(--content-max); margin-inline: auto; padding-inline: var(--page-margin); }
+.panel { position: relative; overflow: hidden; border-radius: var(--radius-xl); background: var(--color-surface-2); padding: var(--space-10) var(--space-3) var(--space-4); display: grid; grid-template-columns: minmax(0, 1fr); }
+.bg { object-fit: cover; object-position: 72% 50%; }
+.pane { justify-self: center; width: 100%; min-width: 0; max-width: 640px; padding: var(--space-6) var(--space-5); border-radius: var(--radius-lg); text-align: center; --edge-angle: 140deg; }
+.pane > * { position: relative; z-index: 3; }
+/* A step more opaque than the page glass: the lamellae behind are high-contrast */
+.panel .pane { background: linear-gradient(172deg, color-mix(in srgb, var(--color-white) 86%, transparent), color-mix(in srgb, var(--color-white) 70%, transparent) 60%, color-mix(in srgb, var(--color-surface) 78%, transparent)); }
+.mark { display: block; margin: 0 auto var(--space-5); border-radius: var(--radius-md); }
+.title { margin: 0; overflow-wrap: break-word; }
+.lede { margin: var(--space-4) auto 0; }
+
+.form { margin-top: var(--space-6); }
+.slot { display: grid; grid-template-columns: minmax(0, 1fr); }
+.row, .status { grid-area: 1 / 1; }
+.row { display: flex; align-items: center; gap: var(--space-1); padding: 4px; background: var(--color-white); border: 1px solid var(--color-line-strong); border-radius: var(--radius-full); transition: opacity var(--dur-2) var(--ease-out); }
+.row[data-done] { opacity: 0; }
+.row:focus-within { border-color: var(--color-ink); }
+.input { flex: 1 1 auto; min-width: 0; width: 100%; height: calc(var(--control-h) - 10px); padding: 0 var(--space-4); border: 0; background: transparent; font-size: var(--text-body); color: var(--color-ink); }
+.input::placeholder { color: var(--color-muted); }
+.input:focus-visible { outline: none; }
+.submit { flex: none; height: calc(var(--control-h) - 10px); border-radius: var(--radius-full); }
+.row { min-width: 0; }
+.status { display: grid; place-items: center; pointer-events: none; }
+.success { display: inline-flex; align-items: center; gap: var(--space-2); margin: 0; font-weight: 500; pointer-events: auto; }
+.success:focus-visible { outline-offset: 4px; }
+.error { display: flex; align-items: center; justify-content: center; gap: var(--space-2); min-height: 1.5em; margin: var(--space-2) 0 0; font-size: var(--text-small); color: var(--color-ink); }
+.note { margin: var(--space-1) 0 0; font-size: var(--text-caption); color: var(--color-ink); } /* ink: muted dips under AA over the lamellae on phones (measured 4.47:1) */
+.note a { color: var(--color-ink); text-decoration: underline; text-underline-offset: 3px; }
+
+@media (min-width: 768px) {
+  .panel { padding: var(--space-10) var(--space-8); min-height: 640px; align-content: center; }
+  .pane { padding: var(--space-8) var(--space-7) var(--space-6); }
+}
+@media (min-width: 1280px) {
+  .panel { min-height: 720px; }
+  /* The pane stands left of centre, over the empty light; the lamellae stay sharp on the right */
+  .pane { justify-self: start; margin-left: 6%; }
+}

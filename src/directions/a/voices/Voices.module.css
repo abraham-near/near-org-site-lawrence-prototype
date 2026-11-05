@@ -1,0 +1,48 @@
+/* Direction A, Voices: quotes as readings on a sheet. Light surface; the leaders and nodes are CSS hairlines that
+   draw (transform) when the row comes into view (Watch.tsx), or simply show. Tokens only. */
+.voices { background: var(--color-surface); padding-block: var(--section-pad-y); }
+.inner { max-width: var(--content-max); margin-inline: auto; padding-inline: var(--page-margin); }
+.title { margin: 0; font-size: var(--text-h3); font-weight: 500; line-height: 1.15; letter-spacing: var(--tracking-h3); }
+
+.featured { position: relative; margin: var(--space-8) 0 0; padding-top: var(--space-6); border-top: 1px solid var(--color-line-strong); }
+/* the reading's mark: a green tick where the rule starts */
+.mark { position: absolute; left: 0; top: -1px; width: var(--space-7); height: 1.5px; background: var(--color-green); transform-origin: 0 50%; transition: transform var(--dur-5) var(--ease-settle); }
+.featQuote { margin: 0; }
+.featQuote p { margin: 0; font-size: var(--text-h2); font-weight: 400; line-height: 1.12; letter-spacing: var(--tracking-h2); max-width: 22ch; text-wrap-style: balance; }
+@media (min-width: 1280px) { .featQuote p { font-size: var(--text-h1); line-height: 1.06; letter-spacing: var(--tracking-h1); max-width: 20ch; } }
+.hang { margin-left: -0.42em; }
+.who { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-1) var(--space-3); margin-top: var(--space-5); font-size: var(--text-small); }
+.who::before { content: ""; align-self: center; width: var(--space-5); height: 1px; background: var(--color-ink); }
+.name { font-weight: 500; }
+.role { color: var(--color-muted); }
+
+/* The row: one baseline, three nodes, three leaders */
+.row { position: relative; list-style: none; margin: var(--space-9) 0 0; padding: 0; display: grid; gap: var(--space-7); }
+.row::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 1px; background: var(--color-line-strong); transform-origin: 0 50%; transition: transform var(--dur-5) var(--ease-in-out); display: none; }
+.item { position: relative; padding-top: var(--space-6); }
+.node { position: absolute; left: 0; top: -7px; width: 15px; height: 15px; margin-left: -7px; transition: transform var(--dur-4) var(--ease-settle) var(--d, 0ms); }
+.node::before, .node::after { content: ""; position: absolute; background: var(--color-ink); }
+.node::before { left: 0; right: 0; top: 7px; height: 1px; }
+.node::after { top: 0; bottom: 0; left: 7px; width: 1px; }
+.leader { position: absolute; left: 0; top: 8px; width: 1px; height: calc(100% - 8px); background: var(--color-line-strong); transform-origin: 50% 0; transition: transform var(--dur-5) var(--ease-in-out) calc(var(--d, 0ms) + 150ms); }
+.quote { margin: 0; padding-left: var(--space-5); }
+.quote blockquote { margin: 0; }
+.quote p { margin: 0; font-size: var(--text-h4); font-weight: 400; line-height: 1.35; max-width: 30ch; }
+.quote .hang { margin-left: -0.4em; }
+.quote .who { margin-top: var(--space-4); }
+.quote, .featQuote, .featured .who { transition: opacity var(--dur-4) var(--ease-out) calc(var(--d, 0ms) + 300ms), transform var(--dur-4) var(--ease-settle) calc(var(--d, 0ms) + 300ms); }
+
+@media (min-width: 768px) {
+  .row { grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: var(--space-6); padding-top: 0; }
+  .row::before { display: block; }
+  .item { padding-top: var(--space-6); }
+  .row { border-top: 0; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :global(html[data-js]) [data-a-watch]:not([data-in]) .mark { transform: scaleX(0); }
+  :global(html[data-js]) .row[data-a-watch]:not([data-in])::before { transform: scaleX(0); }
+  :global(html[data-js]) [data-a-watch]:not([data-in]) .node { transform: scale(0); }
+  :global(html[data-js]) [data-a-watch]:not([data-in]) .leader { transform: scaleY(0); }
+  :global(html[data-js]) [data-a-watch]:not([data-in]) .quote { opacity: 0; transform: translateY(var(--space-2)); }
+}

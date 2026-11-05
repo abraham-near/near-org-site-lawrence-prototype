@@ -1,0 +1,194 @@
+/* Direction B, the story: the anthem slab and the prism rail. Tokens only; glass tints are token alphas.
+   Static by default (phones, reduced motion, no JS): the anthem stacks; the rail is a native sideways scroller.
+   Motion (html[data-js], motion allowed): the anthem pins and wipes on (≥ 1024); the rail pins and slides (≥ 768). */
+
+.story {
+  --inset: max(var(--page-margin), calc((100% - var(--content-max)) / 2 + var(--page-margin)));
+  position: relative;
+  z-index: 1; /* above the hero's last screen: the anthem fades in over its veil (desktop with motion) */
+}
+
+/* ── The anthem ─────────────────────────────────────────────────────────── */
+.anthemTrack { position: relative; }
+.anthemStage { padding: var(--space-8) var(--inset) var(--space-9); }
+.anthemGrid { position: relative; display: grid; }
+.plate { position: relative; margin: 0; aspect-ratio: 4 / 3; border-radius: var(--radius-lg); overflow: hidden; background: var(--color-surface-2); }
+.plateImg { object-fit: cover; object-position: 50% 50%; }
+.slab { position: relative; margin: calc(var(--space-9) * -1) var(--space-3) 0; padding: var(--space-6) var(--space-5); border-radius: var(--radius-lg); }
+.statement { margin: 0; font-size: var(--text-h3); font-weight: 500; line-height: 1.12; letter-spacing: var(--tracking-h3); text-wrap-style: pretty; }
+.tile { float: left; width: 1.9em; height: 1.9em; margin: 0.16em 0.32em 0.05em 0; border-radius: 4px; }
+.wd { display: inline-block; white-space: nowrap; }
+.ch { display: inline-block; }
+.lb { display: none; }
+.hl { color: var(--color-green-text); }
+
+@media (min-width: 768px) {
+  .anthemStage { padding-block: var(--space-9) var(--space-10); }
+  .plate { aspect-ratio: 16 / 9; }
+  .slab { margin: calc(var(--space-10) * -1) var(--space-8) 0 0; padding: var(--space-7) var(--space-7); }
+  .statement { font-size: var(--text-statement); }
+}
+@media (min-width: 1024px) {
+  /* Side by side: the plate holds the right 7 columns, the slab the left 7, overlapping by two */
+  .anthemGrid { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--space-6); align-items: center; }
+  .plate { grid-column: 6 / -1; grid-row: 1; aspect-ratio: auto; height: min(76vh, 720px); min-height: 520px; }
+  .slab { grid-column: 1 / 9; grid-row: 1; margin: 0; padding: var(--space-8) var(--space-8) var(--space-8) var(--space-7); }
+  .statement { font-size: min(var(--text-h2), 3.6vw); line-height: 1.08; letter-spacing: var(--tracking-h2); }
+}
+
+/* ── The rail ───────────────────────────────────────────────────────────── */
+.railTrack { position: relative; }
+.railStage {
+  --H: 700px;
+  --rail-y: 58%;
+  --top-pad: var(--space-6);
+  position: relative;
+  height: var(--H);
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+.railStage::-webkit-scrollbar { display: none; }
+.railStage:focus-visible { outline-offset: -4px; }
+.world { position: relative; display: flex; height: 100%; width: max-content; }
+.panel { position: relative; flex: none; height: 100%; width: 90vw; scroll-snap-align: start; }
+.station { width: 84vw; }
+.tail { position: relative; flex: none; width: var(--space-4); }
+
+/* The green beam, as the rail: it leaves the prism and runs on through every later panel, behind the glass */
+.panelB::before, .station::before, .tail::before {
+  content: ""; position: absolute; left: 0; right: 0; top: var(--rail-y); height: 2px; margin-top: -1px; background: var(--color-green);
+}
+.rail { display: none; }
+
+.top { position: absolute; top: var(--top-pad); left: var(--inset); right: var(--space-5); }
+.panel:not(.panelA) .top { left: var(--space-6); }
+.connect { margin: 0; font-size: var(--text-h3); font-weight: 500; line-height: 1.12; letter-spacing: var(--tracking-h3); }
+
+/* The prism diagram: its rail (svg y = 50%) sits on --rail-y; its right edge meets panel B's beam */
+.prism { position: absolute; right: var(--space-4); width: min(720px, calc(100% - var(--space-4) * 2)); aspect-ratio: 2 / 1; top: var(--rail-y); transform: translateY(-50%); }
+.prismSvg { position: absolute; inset: 0; display: block; width: 100%; height: 100%; overflow: visible; }
+/* The prism's body is real frosted glass, clipped to the triangle: the beams under it soften as they pass through */
+.prismGlass {
+  position: absolute; inset: 0;
+  clip-path: polygon(72.22% 13.89%, 56.94% 80.56%, 87.5% 80.56%);
+  background: linear-gradient(150deg, color-mix(in srgb, var(--color-white) 85%, transparent), color-mix(in srgb, var(--stack-intents-t) 50%, transparent) 62%, color-mix(in srgb, var(--color-surface) 75%, transparent));
+  -webkit-backdrop-filter: blur(6px) saturate(1.2);
+  backdrop-filter: blur(6px) saturate(1.2);
+}
+/* A station's stop on the line, under its pane */
+.stopDot { position: absolute; left: calc(var(--space-6) + var(--pane-w, 168px) / 2); top: var(--rail-y); width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; border-radius: 50%; background: var(--color-surface); border: 1.5px solid var(--color-green-text); z-index: 0; }
+.beamIn { stroke: var(--color-ink); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.node { fill: var(--color-ink); }
+.prismBody { fill: none; stroke: var(--color-green-text); stroke-opacity: 0.55; stroke-width: 1; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
+.beamInside { fill: none; stroke: var(--color-green-text); stroke-opacity: 0.45; stroke-width: 1; vector-effect: non-scaling-stroke; }
+.fringeMint { fill: none; stroke: var(--stack-intents-l); stroke-width: 1; stroke-opacity: 0.8; vector-effect: non-scaling-stroke; }
+.fringeDeep { fill: none; stroke: var(--color-green-text); stroke-width: 1; stroke-opacity: 0.5; vector-effect: non-scaling-stroke; }
+.beamOut { stroke: var(--color-green); stroke-width: 2; vector-effect: non-scaling-stroke; }
+.exitPoint { fill: var(--color-green); }
+.end { position: absolute; margin: 0; font-size: var(--text-caption); font-weight: 500; letter-spacing: 0.01em; white-space: nowrap; }
+.end em { font-style: normal; font-weight: 400; color: var(--color-muted); margin-left: var(--space-1); }
+.endAi { left: 0; top: 11%; transform: translate(0, calc(-100% - 10px)); }
+.endChain { left: 0; top: 89%; transform: translate(0, 10px); }
+.endNear { left: 72.22%; top: 80.56%; transform: translate(-50%, 12px); font-size: var(--text-label); letter-spacing: var(--tracking-label); }
+
+/* Panel B: the problem and the answer; the frosted layer that clears */
+.panelB .top { position: static; }
+.problem, .answer { margin: 0; font-size: var(--text-h3); font-weight: 500; line-height: 1.15; letter-spacing: var(--tracking-h3); }
+.problem { position: absolute; top: var(--top-pad); left: var(--space-6); right: var(--space-5); max-width: 26ch; }
+.answer { position: absolute; top: calc(var(--rail-y) + var(--space-6)); left: var(--space-6); right: var(--space-5); max-width: 26ch; }
+.owned { color: var(--color-green-text); }
+.layer {
+  position: absolute; left: var(--space-6); right: var(--space-5);
+  top: calc(var(--rail-y) - 132px); height: 148px;
+  border-radius: var(--radius-md);
+}
+/* Clear glass (always there) and the frost over it (faded out as the answer arrives; opacity only) */
+.clear { position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(160deg, color-mix(in srgb, var(--color-white) 35%, transparent), color-mix(in srgb, var(--stack-intents-t) 18%, transparent)); box-shadow: inset 0 1px 0 color-mix(in srgb, var(--color-white) 90%, transparent); --edge-angle: 120deg; }
+/* The layer's drawing, twice: crisp (shown once cleared) and softened (inside the frost). The blur is rendered on a
+   small static SVG (a CSS filter that never animates); only the two opacities change. */
+.artCrisp, .artSoft { position: absolute; inset: 8%; width: 84%; height: 84%; overflow: visible; }
+.artCrisp *, .artSoft * { fill: none; stroke: var(--color-ink); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.artCrisp .fill, .artSoft .fill { fill: var(--color-ink); stroke: none; }
+.artCrisp .block { fill: var(--color-surface); }
+.artCrisp .chain, .artCrisp .mine { stroke: var(--color-green-text); stroke-width: 1.5; }
+.artCrisp .mine { fill: var(--color-green); }
+.artSoft { filter: blur(3px); opacity: 0.55; }
+.artSoft .mine { fill: var(--color-ink); fill-opacity: 0.3; }
+.softRail { position: absolute; left: 0; right: 0; top: var(--rail-in, 132px); height: 2px; margin-top: -1px; background: var(--color-green); filter: blur(2.5px); opacity: 0.55; }
+.frost {
+  position: absolute; inset: 0; border-radius: inherit; overflow: hidden;
+  /* the frost itself: an opaque milky tint (no backdrop sampling needed), so what lies behind is only ever soft */
+  background: linear-gradient(172deg, color-mix(in srgb, var(--color-white) 94%, transparent), color-mix(in srgb, var(--color-surface) 92%, transparent));
+  box-shadow: inset 0 1px 0 var(--color-white);
+  opacity: 0;
+  will-change: opacity;
+}
+.artCrisp { opacity: 1; }
+
+/* Stations: a standing pane on the rail, the words below it */
+.pane { position: absolute; left: var(--space-6); bottom: calc(100% - var(--rail-y) + var(--space-5)); width: var(--pane-w, 168px); aspect-ratio: 3 / 4; border-radius: var(--radius-md); display: grid; place-items: center; --edge-angle: 150deg; }
+.glyph { position: relative; z-index: 3; width: 74%; height: auto; overflow: visible; }
+.glyph rect, .glyph line, .glyph path, .glyph ellipse, .glyph circle { fill: none; stroke: var(--color-ink); stroke-width: 1; vector-effect: non-scaling-stroke; stroke-linecap: round; }
+.glyph [data-g] { stroke: var(--color-green-text); stroke-width: 1.5; }
+.glyph circle[data-g] { fill: var(--color-green); stroke: none; }
+.dotted { stroke-dasharray: 1 4; }
+.below { position: absolute; top: calc(var(--rail-y) + var(--space-6)); left: var(--space-6); right: var(--space-5); }
+.ownTitle { margin: 0; font-size: var(--text-h3); font-weight: 500; line-height: 1.1; letter-spacing: var(--tracking-h3); }
+.ownLine { margin-top: var(--space-3); }
+
+.progress { display: none; }
+
+@media (min-width: 768px) {
+  .railStage { --H: 760px; --top-pad: var(--space-8); }
+  .panel { width: 70vw; }
+  .station { width: 52vw; }
+  .connect, .problem, .answer { font-size: var(--text-statement); }
+  .prism { width: min(720px, 92%); }
+  .station { --pane-w: 200px; }
+  .ownTitle { font-size: var(--text-h2); }
+}
+
+/* ── Motion mode: pinned, the world slides sideways ──────────────────────── */
+@media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+  :global(html[data-js]) .railTrack { height: 560vh; }
+  :global(html[data-js]) .railStage { --H: 100svh; --top-pad: max(15vh, 112px); --rail-y: 60%; position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; scroll-snap-type: none; }
+  :global(html[data-js]) .world { will-change: transform; }
+  :global(html[data-js]) .panel { width: calc(var(--w) * 1vw); }
+  :global(html[data-js]) .tail { width: calc(var(--w) * 1vw); }
+  :global(html[data-js]) .prism { right: 0; width: min(760px, 54vw); }
+  :global(html[data-js]) .top { right: auto; max-width: 44vw; }
+  /* B: the problem gives way to the answer in the same place, above the line */
+  :global(html[data-js]) .panelB .top { position: absolute; left: var(--inset); width: min(34vw, 560px); max-width: none; }
+  :global(html[data-js]) .swap { display: grid; }
+  :global(html[data-js]) .problem, :global(html[data-js]) .answer { position: static; grid-area: 1 / 1; max-width: none; }
+  :global(html[data-js]) .answer { opacity: 0; }
+  :global(html[data-js]) .layer { left: 44%; right: 8vw; top: calc(var(--rail-y) - 34vh); height: 46vh; border-radius: var(--radius-lg); }
+  :global(html[data-js]) .frost { opacity: 1; }
+  :global(html[data-js]) .artCrisp { opacity: 0; }
+  :global(html[data-js]) .layer { --rail-in: 34vh; }
+  :global(html[data-js]) .station { --pane-w: min(27vh, 270px); }
+  :global(html[data-js]) .below { right: auto; width: min(36vw, 520px); }
+  :global(html[data-js]) .station > * { opacity: 0.5; transition: opacity var(--dur-3) var(--ease-out); }
+  :global(html[data-js]) .station[data-on] > * { opacity: 1; }
+  :global(html[data-js]) .glyph [data-g] { opacity: 0; transition: opacity var(--dur-4) var(--ease-settle); }
+  :global(html[data-js]) .station[data-on] .glyph [data-g] { opacity: 1; }
+  :global(html[data-js]) .progress { display: block; position: absolute; left: var(--inset); right: var(--inset); bottom: var(--space-7); height: 1px; background: var(--color-line); }
+  :global(html[data-js]) .progress span { position: absolute; inset: 0; background: var(--color-ink); transform: scaleX(0); transform-origin: left; }
+}
+
+/* ── Motion mode, anthem: pinned while its characters wipe on ────────────── */
+@media (min-width: 1024px) and (prefers-reduced-motion: no-preference) {
+  :global(html[data-js]) .anthemTrack { height: 220vh; }
+  :global(html[data-js]) .anthemStage { position: sticky; top: 0; height: 100vh; height: 100svh; display: flex; align-items: center; padding-block: var(--space-9) var(--space-7); }
+  :global(html[data-js]) .anthemGrid { width: 100%; }
+}
+
+/* ── Desktop with motion: the anthem overlaps the hero's last screen and fades in as the veil rises (a crossfade, no
+   empty screen between them; StoryMotion) ─────────────────────────────── */
+@media (min-width: 1280px) and (prefers-reduced-motion: no-preference) {
+  :global(html[data-js]) .story { margin-top: -100vh; margin-top: -100svh; }
+  :global(html[data-js]) .anthemStage { opacity: 0; }
+}

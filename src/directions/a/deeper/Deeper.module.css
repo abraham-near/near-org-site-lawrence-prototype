@@ -1,0 +1,85 @@
+/* Direction A, Go deeper: an atlas index. Tokens only. */
+.deeper { background: var(--color-surface); padding-block: var(--section-pad-y); }
+.inner { max-width: var(--content-max); margin-inline: auto; padding-inline: var(--page-margin); display: grid; grid-template-columns: minmax(0, 1fr); }
+.head h2 { margin: 0; }
+
+/* The filter: a ruled row of tabs; the selected one carries a green rule that draws out under it */
+.filters { display: flex; gap: var(--space-6); margin-top: var(--space-6); border-bottom: 1px solid var(--color-line); overflow-x: auto; scrollbar-width: none; }
+.filter {
+  position: relative; display: inline-flex; align-items: baseline; gap: var(--space-2); flex: none;
+  min-height: 44px; padding: 0; border: 0; background: none; font: inherit; font-size: var(--text-body); color: var(--color-muted); cursor: pointer;
+  transition: color var(--dur-2) var(--ease-out);
+}
+.filter:hover { color: var(--color-ink); }
+.filter[aria-selected="true"] { color: var(--color-ink); }
+.filter::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 1.5px; background: var(--color-green); transform: scaleX(0); transform-origin: 0 50%; transition: transform var(--dur-4) var(--ease-settle); }
+.filter[aria-selected="true"]::after { transform: scaleX(1); }
+.filter:focus-visible { outline-offset: 2px; }
+.count { font-family: var(--font-mono); font-size: 13px; color: var(--color-muted); font-variant-numeric: tabular-nums; }
+
+/* Panels share one cell from tablet up (no jump); out fast, in slow (D28) */
+.panels { display: grid; margin-top: var(--space-7); }
+.panel { grid-area: 1 / 1; min-width: 0; }
+.panel:not([data-active]) { display: none; }
+@media (min-width: 768px) {
+  .panel { transition: opacity var(--dur-3) var(--ease-out) var(--dur-1), transform var(--dur-4) var(--ease-settle) var(--dur-1); }
+  .panel:not([data-active]) { display: block; visibility: hidden; opacity: 0; transform: translateY(var(--space-2)); transition: opacity var(--dur-1) var(--ease-out), visibility 0s linear var(--dur-1), transform 0s linear var(--dur-1); }
+}
+
+/* Plates */
+.plates { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-7) var(--space-4); grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.plate[data-lead] { grid-column: 1 / -1; }
+@media (max-width: 767px) { .plate:not([data-lead]) .title { font-size: var(--text-body); } }
+@media (min-width: 768px) {
+  .plates { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .plate[data-lead] { grid-column: 1 / -1; }
+}
+@media (min-width: 1280px) {
+  .plates { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--space-6); }
+  .plate { grid-column: span 3; }
+  .plate[data-lead] { grid-column: span 6; }
+  .plates[data-n="1"] .plate[data-lead] { grid-column: 1 / span 8; }
+}
+.plateLink { display: grid; gap: var(--space-3); color: inherit; text-decoration: none; }
+.frame { position: relative; display: block; aspect-ratio: 4 / 5; background: var(--color-surface-2); }
+.plate[data-lead] .frame { aspect-ratio: 16 / 10; }
+@media (min-width: 1280px) { .plate[data-lead] .frame { aspect-ratio: auto; height: 100%; min-height: 0; } .plate[data-lead] .plateLink { grid-template-rows: 1fr auto auto auto; height: 100%; } .plate:not([data-lead]) .frame { aspect-ratio: 4 / 5; } }
+.clip { position: absolute; inset: 0; overflow: hidden; }
+.img { object-fit: cover; transition: transform var(--dur-4) var(--ease-settle); }
+.frame { overflow: visible; }
+.frame::after { content: ""; position: absolute; inset: 0; box-shadow: inset 0 0 0 1px var(--color-line); pointer-events: none; }
+.meta { display: inline-flex; align-items: center; gap: var(--space-2); margin-top: var(--space-2); font-size: var(--text-caption); color: var(--color-muted); }
+.title { font-size: var(--text-h4); font-weight: 500; line-height: 1.25; text-wrap-style: balance; text-decoration: underline; text-decoration-color: transparent; text-underline-offset: 4px; transition: text-decoration-color var(--dur-2) var(--ease-out); }
+.plate[data-lead] .title { font-size: var(--text-h3); line-height: 1.15; letter-spacing: var(--tracking-h3); }
+.source { display: flex; align-items: center; min-height: 22px; font-size: var(--text-small); color: var(--color-muted); }
+.logo { height: auto; width: auto; max-height: 20px; }
+.glyph { flex: none; width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1; }
+/* Corners sit in the image frame; they open out a little on hover */
+.frame > span:last-child { transition: transform var(--dur-3) var(--ease-settle); }
+@media (hover: hover) and (pointer: fine) {
+  .plateLink:hover .img { transform: scale(1.03); }
+  .plateLink:hover .title { text-decoration-color: var(--color-green); }
+  .plateLink:hover .frame > span:last-child { transform: scale(1.015); }
+}
+.plateLink:focus-visible { outline-offset: 6px; }
+.plateLink:focus-visible .title { text-decoration-color: var(--color-green); }
+
+/* The gazetteer */
+.index { list-style: none; margin: var(--space-8) 0 0; padding: 0; border-bottom: 1px solid var(--color-line); }
+.row {
+  position: relative; display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-1); padding: var(--space-4) 0 var(--space-4) var(--space-6);
+  border-top: 1px solid var(--color-line); color: inherit; text-decoration: none;
+}
+@media (min-width: 768px) { .row { grid-template-columns: 9rem minmax(0, 1fr) 14rem; align-items: center; gap: var(--space-5); } }
+/* a crosshair at the row's start; on hover its green tick draws out along the row's rule */
+.row::before { content: ""; position: absolute; left: 4px; top: 50%; width: 9px; height: 1px; background: var(--color-ink); }
+.row::after { content: ""; position: absolute; left: 0; right: 0; top: -1px; height: 1.5px; background: var(--color-green); transform: scaleX(0); transform-origin: 0 50%; transition: transform var(--dur-3) var(--ease-settle); }
+.rowType { display: inline-flex; align-items: center; gap: var(--space-2); font-size: var(--text-caption); color: var(--color-muted); }
+.rowTitle { font-size: var(--text-body); line-height: 1.35; }
+.rowSource { display: flex; align-items: center; font-size: var(--text-small); color: var(--color-muted); }
+@media (min-width: 768px) { .rowSource { justify-content: flex-end; text-align: right; } }
+@media (hover: hover) and (pointer: fine) { .row:hover::after { transform: scaleX(1); } }
+.row:focus-visible { outline-offset: -2px; }
+.row:focus-visible::after { transform: scaleX(1); }
+.empty { margin: var(--space-7) 0 0; color: var(--color-muted); }
+.all { margin: var(--space-7) 0 0; }

@@ -1,0 +1,88 @@
+/* Direction B hero. Tokens only; glass tints are token alphas (see glass.module.css).
+   Static (phones, tablets, reduced motion, no JS): a photo band with the monolith, then the claim on the surface.
+   Motion (html[data-js], ≥ 1280, motion allowed): a pinned stage under the claim; the camera move is scrubbed. */
+
+.hero {
+  --mx: 71%; /* the monolith's left edge: right of the plexus focus (HeroLayer's phi point), clear of the headline */
+  --mw: clamp(72px, 9vw, 168px);
+  --mt: 24%; /* where the glass begins (its lit cap) */
+  --hy: 70%; /* where the thread settles */
+  --tx: calc(var(--mx) + var(--mw) * 0.5);
+  position: relative;
+  background: var(--color-surface);
+}
+
+.stage { position: relative; height: 62vh; height: 62svh; min-height: 360px; overflow: hidden; }
+.media { position: absolute; inset: 0; will-change: transform; }
+.poster { object-fit: cover; object-position: 70% 50%; }
+.video { display: none; }
+
+/* ── The monolith ─────────────────────────────────────────────────────────── */
+.monolith { position: absolute; left: var(--mx); top: var(--mt); bottom: 0; width: var(--mw); will-change: transform; }
+.slab {
+  position: absolute; inset: 0;
+  border-radius: 2px 2px 0 0;
+  /* Clear glass over the picture: a whisper of white and a soft refracting blur. The ribs are shading in the glass,
+     kept faint (half strength) so no bright streak runs down the dark forest; nothing is brightened. */
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--color-white) 16%, transparent), color-mix(in srgb, var(--color-white) 3%, transparent) 45%, color-mix(in srgb, var(--stack-intents-t) 12%, transparent) 88%, color-mix(in srgb, var(--color-green) 16%, transparent)),
+    repeating-linear-gradient(90deg, transparent 0, color-mix(in srgb, var(--color-white) 13%, transparent) 2px, color-mix(in srgb, var(--color-white) 3%, transparent) 5px, color-mix(in srgb, var(--color-ink) 6%, transparent) 9px, transparent 12px);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--color-white) 90%, transparent), /* the lit cap */
+    inset 1px 0 0 color-mix(in srgb, var(--color-white) 40%, transparent),
+    inset -1px 0 0 color-mix(in srgb, var(--color-green) 65%, transparent), /* the fringe */
+    inset -3px 0 0 color-mix(in srgb, var(--stack-intents-t) 20%, transparent);
+  --edge-angle: 100deg;
+}
+/* Chromium: real refraction through the ribs (FluteFilter: a gentle ±4 px bend), set by HeroMotion */
+:global(html[data-b-refract]) .slab {
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--color-white) 16%, transparent), color-mix(in srgb, var(--color-white) 3%, transparent) 45%, color-mix(in srgb, var(--stack-intents-t) 12%, transparent) 88%, color-mix(in srgb, var(--color-green) 16%, transparent)),
+    repeating-linear-gradient(90deg, transparent 0, color-mix(in srgb, var(--color-white) 7%, transparent) 2px, transparent 5px, transparent 12px);
+  -webkit-backdrop-filter: url(#b-flute);
+  backdrop-filter: url(#b-flute);
+}
+
+/* ── The thread ───────────────────────────────────────────────────────────── */
+.thread { position: absolute; width: 2px; margin-left: -1px; background: var(--color-green); transform-origin: top; }
+.threadTop { left: var(--tx); top: 0; height: var(--mt); }
+/* Inside the glass the line sits behind the frost, shifted as the light bends: softened, never brightened */
+.threadIn { left: calc(var(--tx) + 7px); top: var(--mt); height: calc(var(--hy) - var(--mt)); }
+.head { position: absolute; z-index: 2; left: calc(var(--tx) + 7px); top: var(--hy); width: 10px; height: 10px; margin: -5px 0 0 -5px; border-radius: 50%; background: var(--color-green); }
+.mark { position: absolute; left: calc(var(--tx) + 7px); top: var(--hy); width: 40px; height: 40px; margin: -20px 0 0 -20px; overflow: visible; z-index: 2; }
+.mark path { fill: none; stroke: var(--color-white); stroke-width: 1.25; }
+.mark .markCorner { stroke: var(--color-green); stroke-width: 1.5; }
+
+.veil { display: none; }
+
+/* ── The claim ────────────────────────────────────────────────────────────── */
+.claim { --inset: max(var(--page-margin), calc((100% - var(--content-max)) / 2 + var(--page-margin))); position: relative; padding: var(--space-7) var(--inset) var(--space-8); }
+.copy { max-width: 640px; }
+.title { margin: 0; }
+.lede { margin-top: var(--space-5); }
+.cta { margin-top: var(--space-6); }
+
+@media (min-width: 768px) {
+  .stage { height: 58vh; height: 58svh; }
+  .claim { padding-block: var(--space-8) var(--space-9); }
+}
+
+/* ── Motion mode ──────────────────────────────────────────────────────────── */
+@media (min-width: 1280px) and (prefers-reduced-motion: no-preference) {
+  :global(html[data-js]) .hero { height: 200vh; height: 200svh; }
+  :global(html[data-js]) .stage { position: sticky; top: 0; height: 100vh; height: 100svh; }
+  :global(html[data-js]) .poster { object-position: 30% 50%; }
+  :global(html[data-js]) .video { display: block; position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 30% 50%; opacity: 0; transition: opacity var(--dur-4) var(--ease-out); }
+  :global(html[data-js]) .video[data-ready] { opacity: 1; }
+  /* The thread starts at nothing and drops in with the scroll (HeroMotion) */
+  :global(html[data-js]) .threadTop, :global(html[data-js]) .threadIn { transform: scaleY(0); }
+  :global(html[data-js]) .head, :global(html[data-js]) .mark { opacity: 0; }
+  :global(html[data-js]) .veil { display: block; position: absolute; inset: 0; z-index: 3; background: var(--color-surface); opacity: 0; }
+  :global(html[data-js]) .claim { position: absolute; top: 0; left: 0; right: 0; height: 100vh; height: 100svh; display: flex; align-items: center; padding-block: 0; }
+  :global(html[data-js]) .lede { max-width: 34ch; }
+}
+
+@media (min-width: 1280px) { .hero { --mx: 70%; } }
+@media (min-width: 1920px) { .hero { --mx: 69%; } }

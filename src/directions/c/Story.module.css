@@ -1,0 +1,127 @@
+/* Field, section 2: the anthem, the mission and the rail. Three modes:
+   - stacked (default: phones, tablets, reduced motion, no JS): plain reading; the rail scrolls sideways natively;
+   - the poster (≥ 1280): the anthem as a staircase on the N's diagonal, the mission beside its diagram;
+   - motion (≥ 1280, JS, motion allowed): each part pins while StoryMotion scrubs it. */
+
+.story {
+  position: relative;
+  --run: 0.8351;
+  --inset: max(var(--page-margin), calc((100vw - var(--content-max)) / 2 + var(--page-margin)));
+  --gap: var(--space-4);
+  --col: calc((min(100vw, var(--content-max)) - 2 * var(--page-margin) - 11 * var(--gap)) / 12);
+}
+@media (min-width: 768px) { .story { --gap: var(--space-5); } }
+@media (min-width: 1280px) { .story { --gap: var(--space-6); } }
+.wrap { position: relative; z-index: 1; width: 100%; max-width: var(--content-max); margin-inline: auto; padding-inline: var(--page-margin); }
+
+/* Drawing parts shared by the diagram and the plates (construction ink, hatch, the one flat green plane) */
+.outline { fill: none; stroke: var(--color-ink); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.base { fill: none; stroke: rgb(38 38 38 / 0.55); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.dash { fill: none; stroke: rgb(38 38 38 / 0.45); stroke-width: 1; stroke-dasharray: 4 5; vector-effect: non-scaling-stroke; }
+.drawLine { fill: none; stroke: var(--color-ink); stroke-width: 1; stroke-dasharray: 1; stroke-dashoffset: 0; }
+.fine { stroke: rgb(38 38 38 / 0.5); stroke-width: 0.6; }
+.req { stroke-width: 1.5; }
+.tick { fill: var(--color-ink); }
+.green { fill: var(--color-green); }
+.paper { fill: var(--color-surface); }
+
+/* ── 1. The anthem ─────────────────────────────── */
+.aStage { position: relative; padding-block: var(--section-pad-y); }
+.anthem {
+  position: relative; margin: 0;
+  font-size: var(--text-statement); font-weight: 500; line-height: 1.1; letter-spacing: var(--tracking-h2);
+  text-wrap-style: pretty;
+}
+.tile { float: left; width: 2.1em; height: 2.1em; margin: 0.08em 0.3em 0 0; }
+.aGreen { color: var(--color-green-text); }
+.aDiag, .aPin { display: none; }
+@media (min-width: 1280px) {
+  .anthem { --step: calc(1.1em * var(--run)); --base: 2.6em; }
+  .tile { position: absolute; left: 0; top: 0.06em; float: none; margin: 0; }
+  .aLine { display: block; width: max-content; white-space: nowrap; margin-left: calc(var(--base) + var(--i) * var(--step)); }
+  /* The construction line through every line's corner, one step past the last */
+  /* The construction line runs parallel to the staircase, offset left by 1.02em: a line box's bottom (1.1em down) is
+     0.92em further right on the diagonal, so this keeps ~0.1em clear of every glyph, descenders included. It starts
+     below the N tile (0.85em down) and runs one line past the last. */
+  .aDiag { display: block; position: absolute; left: calc(var(--base) - 1.02em + 0.85em * var(--run)); top: 0.85em; width: 1px; height: 6.85em; transform-origin: 0 0; transform: skewX(39.87deg); }
+  .aRule { position: absolute; inset: 0; background: rgb(38 38 38 / 0.4); transform-origin: top; }
+  .aPin { display: block; position: absolute; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; background: var(--color-surface); border: 1px solid var(--color-ink); left: calc(var(--base) - 0.27em + var(--i) * var(--step)); top: calc(var(--i) * 1.1em + 0.9em); }
+}
+@media (min-width: 1440px) { .anthem { font-size: var(--text-h2); } }
+
+/* ── 2. The mission ────────────────────────────── */
+.mStage { position: relative; padding-block: var(--section-pad-y); }
+.mGrid { display: grid; gap: var(--space-7); }
+.mText { display: grid; gap: var(--space-7); align-content: center; }
+.connect { margin: 0; }
+.sentence { display: block; }
+.problem { margin: 0; max-width: 22ch; font-size: var(--text-statement); font-weight: 500; line-height: 1.1; letter-spacing: var(--tracking-h2); color: var(--color-muted); }
+.answer { margin: 0; max-width: 14ch; }
+.diagram { position: relative; width: 100%; max-width: 720px; }
+.diagramSvg { display: block; width: 100%; height: auto; overflow: visible; }
+.layerInk { opacity: 0; }
+.reqDash { opacity: 0; }
+.dLabel { position: absolute; display: flex; align-items: center; gap: var(--space-2); white-space: nowrap; font-size: var(--text-caption); line-height: 1.2; color: var(--color-ink); }
+.dLabel b { font-size: var(--text-small); font-weight: 500; }
+.dTile { width: var(--space-6); height: var(--space-6); }
+@media (max-width: 767px) { .dOwned .dTile, .dSub { display: none; } }
+@media (min-width: 1280px) {
+  .mGrid { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--gap); align-items: center; }
+  .mText { grid-column: 1 / 7; }
+  .mArt { grid-column: 7 / 13; justify-self: end; }
+}
+
+/* ── 3. The rail ───────────────────────────────── */
+.rStage { position: relative; padding-block: var(--section-pad-y); }
+.rFixed { display: none; }
+.strip {
+  position: relative; z-index: 1; display: flex; gap: var(--gap); margin: 0; list-style: none;
+  padding: 0 var(--inset) var(--space-5); overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding-inline: var(--inset);
+  overscroll-behavior-x: contain;
+}
+.strip:focus-visible { outline-offset: -2px; }
+.panel { flex: 0 0 min(84vw, 560px); scroll-snap-align: start; padding-top: var(--space-5); border-top: 1px solid var(--color-line-strong); }
+.ownH { margin: 0; white-space: nowrap; }
+.ownLine { margin: var(--space-4) 0 0; max-width: 30ch; }
+.plate { display: block; width: 100%; height: auto; margin-top: var(--space-6); overflow: visible; }
+@media (max-width: 767px) { .ownH { font-size: var(--text-h2); } }
+@media (min-width: 768px) { .panel { flex-basis: min(46vw, 600px); } }
+
+/* ── Motion (≥ 1280, JS, motion allowed) ───────── */
+@media (min-width: 1280px) and (prefers-reduced-motion: no-preference) {
+  /* The story starts under the hero's last screen: the hero (z 2) lifts off the anthem, already in place (no empty
+     screen between them) */
+  :global(html[data-js]) .story { z-index: 1; margin-top: -40vh; }
+  /* Anthem: pinned while its lines step in */
+  :global(html[data-js]) .aTrack { height: 220vh; }
+  :global(html[data-js]) .aStage { position: sticky; top: 0; height: 100vh; display: flex; align-items: center; padding-block: 0; }
+
+  /* Mission: pinned; the three texts share one place and take turns */
+  :global(html[data-js]) .mTrack { height: 260vh; }
+  :global(html[data-js]) .mStage { position: sticky; top: 0; height: 100vh; display: flex; align-items: center; padding-block: var(--space-9) var(--space-6); }
+  :global(html[data-js]) .mText > * { grid-area: 1 / 1; }
+  :global(html[data-js]) .mArt { max-width: min(720px, calc((100vh - var(--space-11)) * 1.4)); }
+
+  /* Rail: pinned; "Own your" holds behind a hatched stem while the strip slides under it */
+  :global(html[data-js]) .rTrack { height: var(--rail-h, 400vh); }
+  :global(html[data-js]) .rStage { position: sticky; top: 0; height: 100vh; overflow: hidden; padding: 0; }
+  :global(html[data-js]) .rFixed {
+    --w: calc(var(--inset) + 4 * var(--col) + 3.5 * var(--gap));
+    display: block; position: absolute; z-index: 2; inset: 0 auto 0 0; width: var(--w); background: var(--color-surface);
+  }
+  :global(html[data-js]) .rOwn { position: absolute; left: var(--inset); top: var(--space-10); margin: 0; white-space: nowrap; }
+  /* The stem: a hatched vertical at the block's edge, a stem's width (0.214 of a 112 px square) */
+  :global(html[data-js]) .rStem {
+    position: absolute; top: 0; bottom: 0; right: 0; width: var(--space-5);
+    border-left: 1px solid var(--color-ink);
+    background: repeating-linear-gradient(-56deg, rgb(38 38 38 / 0.35) 0 1px, transparent 1px 5px);
+  }
+  :global(html[data-js]) .strip {
+    overflow: visible; scroll-snap-type: none; width: max-content;
+    padding: var(--space-10) 0 0 calc(var(--inset) + 4 * var(--col) + 4 * var(--gap) + var(--space-3));
+    gap: var(--space-8);
+  }
+  :global(html[data-js]) .panel { flex-basis: min(40vw, 600px); border-top: 0; padding-top: 0; }
+  :global(html[data-js]) .ownPre { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  :global(html[data-js]) .plate { max-height: calc(100vh - var(--space-10) - var(--space-11) - var(--space-9)); width: auto; max-width: 100%; }
+}

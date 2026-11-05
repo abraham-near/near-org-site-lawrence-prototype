@@ -1,0 +1,159 @@
+/* Direction B, the Stack: the page's one dark section (a forest field), the layer list, a dark glass detail panel and
+   the Stack drawn as glass. Colours: tokens, and mixes of tokens (color-mix) where a gradient needs a step between two;
+   each slab's ramp is noted. No new hues: everything sits between white, the stack greens, green-text and forest. */
+
+.band {
+  position: relative;
+  overflow: hidden;
+  color: var(--color-on-dark);
+  /* forest, lifted by a breath of green where the glass stands (no glow: a 14% mix, wide and soft) */
+  background:
+    radial-gradient(70% 60% at 76% 46%, color-mix(in srgb, var(--color-forest) 86%, var(--color-green)) 0%, transparent 70%),
+    linear-gradient(180deg, var(--color-forest), color-mix(in srgb, var(--color-forest) 82%, var(--color-ink)));
+  padding-block: var(--section-pad-y);
+}
+.inner { width: 100%; max-width: var(--content-max); margin-inline: auto; padding-inline: var(--page-margin); display: grid; gap: var(--space-7); }
+.head h2 { margin: 0; }
+.lede { margin-top: var(--space-4); color: var(--color-on-dark-muted); }
+
+/* ── The drawing ─────────────────────────────────────────────────────────── */
+.art { justify-self: center; width: 100%; max-width: 520px; }
+.iso { display: block; width: 100%; height: auto; overflow: visible; }
+.floor path { fill: none; stroke: var(--color-on-dark); stroke-opacity: 0.09; stroke-width: 1; vector-effect: non-scaling-stroke; }
+.floor .rule { stroke-opacity: 0.35; }
+.thread line { stroke: var(--color-green); stroke-width: 2; vector-effect: non-scaling-stroke; }
+.thread circle { fill: var(--color-green); }
+
+.layer { cursor: pointer; transition: opacity var(--dur-2) var(--ease-out); }
+.lift { transition: transform var(--dur-4) var(--ease-settle); }
+/* Every edge catches light: lit tops, mint left faces, green-fringed right faces */
+.t, .l, .r { stroke-width: 0.9; vector-effect: non-scaling-stroke; stroke-linejoin: round; transition: stroke-opacity var(--dur-2) var(--ease-out); }
+.t { stroke: var(--color-white); stroke-opacity: 0.55; }
+.l { stroke: var(--stack-intents-t); stroke-opacity: 0.3; }
+.r { stroke: var(--color-green); stroke-opacity: 0.4; }
+
+/* Slab ramps, stop 0 → stop 1 (t top, l left side, r right side) */
+/* Protocol, the core: solid NEAR green glass, from a white-lit green to green-text */
+.protocolt0 { stop-color: color-mix(in srgb, var(--color-green) 45%, var(--color-white)); }
+.protocolt1 { stop-color: var(--color-green); }
+.protocoll0 { stop-color: var(--color-green); }
+.protocoll1 { stop-color: color-mix(in srgb, var(--color-green) 55%, var(--color-green-text)); }
+.protocolr0 { stop-color: var(--color-green-text); }
+.protocolr1 { stop-color: color-mix(in srgb, var(--color-green-text) 60%, var(--color-forest)); }
+/* Intents: the clearest glass, white into mint (--stack-intents-*), slightly see-through */
+.intentst0 { stop-color: var(--color-white); stop-opacity: 0.92; }
+.intentst1 { stop-color: var(--stack-intents-t); stop-opacity: 0.82; }
+.intentsl0 { stop-color: var(--stack-intents-l); stop-opacity: 0.86; }
+.intentsl1 { stop-color: color-mix(in srgb, var(--stack-intents-r) 70%, var(--color-forest)); stop-opacity: 0.86; }
+.intentsr0 { stop-color: var(--stack-intents-r); stop-opacity: 0.8; }
+.intentsr1 { stop-color: color-mix(in srgb, var(--stack-intents-r) 45%, var(--color-forest)); stop-opacity: 0.86; }
+/* NEAR AI: mid-green glass (--stack-ai-*), shading into forest */
+.ait0 { stop-color: color-mix(in srgb, var(--stack-ai-t) 75%, var(--color-white)); }
+.ait1 { stop-color: var(--stack-ai-l); }
+.ail0 { stop-color: var(--stack-ai-l); }
+.ail1 { stop-color: color-mix(in srgb, var(--stack-ai-r) 60%, var(--color-forest)); }
+.air0 { stop-color: var(--stack-ai-r); }
+.air1 { stop-color: color-mix(in srgb, var(--stack-ai-r) 40%, var(--color-forest)); }
+/* near.com, the outer wrapper: deep glass (--stack-com-*), nearly forest at its foot */
+.comt0 { stop-color: color-mix(in srgb, var(--stack-com-t) 80%, var(--color-white)); }
+.comt1 { stop-color: var(--stack-com-l); }
+.coml0 { stop-color: var(--stack-com-l); }
+.coml1 { stop-color: color-mix(in srgb, var(--stack-com-r) 55%, var(--color-forest)); }
+.comr0 { stop-color: var(--stack-com-r); }
+.comr1 { stop-color: color-mix(in srgb, var(--stack-com-r) 35%, var(--color-forest)); }
+
+/* The selected layer lifts and its edges brighten; hovering one smokes the others */
+.band[data-active="protocol"] .layer[data-layer="protocol"] .lift,
+.band[data-active="intents"] .layer[data-layer="intents"] .lift,
+.band[data-active="ai"] .layer[data-layer="ai"] .lift,
+.band[data-active="com"] .layer[data-layer="com"] .lift { transform: translateY(-16px); }
+.band[data-active="protocol"] .layer[data-layer="protocol"] :is(.t, .l, .r),
+.band[data-active="intents"] .layer[data-layer="intents"] :is(.t, .l, .r),
+.band[data-active="ai"] .layer[data-layer="ai"] :is(.t, .l, .r),
+.band[data-active="com"] .layer[data-layer="com"] :is(.t, .l, .r) { stroke-opacity: 0.95; }
+.band[data-hover="protocol"] .layer:not([data-layer="protocol"]),
+.band[data-hover="intents"] .layer:not([data-layer="intents"]),
+.band[data-hover="ai"] .layer:not([data-layer="ai"]),
+.band[data-hover="com"] .layer:not([data-layer="com"]) { opacity: 0.2; }
+
+/* Build-in, once, from the core outwards (StackTabs sets data-js-stack, then data-in) */
+@media (prefers-reduced-motion: no-preference) {
+  .band[data-js-stack]:not([data-in]) .layer { opacity: 0; }
+  .band[data-js-stack]:not([data-in]) .layer .lift { transform: translateY(28px); }
+  .band[data-in] .layer { transition: opacity var(--dur-5) var(--ease-settle); }
+  .band[data-in] .layer[data-li="1"] { transition-delay: 240ms; }
+  .band[data-in] .layer[data-li="2"] { transition-delay: 480ms; }
+  .band[data-in] .layer[data-li="3"] { transition-delay: 720ms; }
+  .band[data-in] .layer[data-li="1"] .lift { transition-delay: 240ms; }
+  .band[data-in] .layer[data-li="2"] .lift { transition-delay: 480ms; }
+  .band[data-in] .layer[data-li="3"] .lift { transition-delay: 720ms; }
+  /* Once built, hover and selection answer at their own speed */
+  .band[data-built] .layer { transition: opacity var(--dur-2) var(--ease-out); }
+  .band[data-built] .layer .lift { transition-delay: 0s; }
+}
+
+/* ── List and detail ─────────────────────────────────────────────────────── */
+.ui { display: grid; gap: var(--space-6); }
+.list { display: grid; border-top: 1px solid var(--color-line-on-dark); }
+.tab {
+  display: grid; grid-template-columns: 32px 1fr; align-items: baseline; column-gap: var(--space-2);
+  min-height: 56px; padding: var(--space-3) var(--space-3); text-align: left;
+  border-bottom: 1px solid var(--color-line-on-dark); color: var(--color-on-dark);
+  transition: background-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out);
+}
+.index { font-size: var(--text-caption); color: var(--color-on-dark-muted); }
+.tabName { font-size: var(--text-h4); line-height: 1.2; }
+.tabRole { grid-column: 2; font-size: var(--text-caption); color: var(--color-on-dark-muted); margin-top: 2px; }
+.tab[aria-selected="true"] { background: var(--color-green); color: var(--color-ink); }
+.tab[aria-selected="true"] .index, .tab[aria-selected="true"] .tabRole { color: var(--color-ink); }
+@media (hover: hover) and (pointer: fine) {
+  .tab:not([aria-selected="true"]):hover { background: color-mix(in srgb, var(--color-surface) 6%, transparent); }
+}
+.tab:focus-visible { outline: 2px solid var(--color-on-dark); outline-offset: -2px; }
+/* On the green row the light ring is ~1.6:1; ink is 7.7:1 */
+.tab[aria-selected="true"]:focus-visible { outline-color: var(--color-ink); }
+
+.detail { border-radius: var(--radius-lg); padding: var(--space-6) var(--space-5); --edge-angle: 160deg; }
+.panels { display: grid; }
+.panel { grid-area: 1 / 1; }
+:global(html[data-js]) .panel { opacity: 0; visibility: hidden; transition: opacity var(--dur-1) var(--ease-out), visibility 0s var(--dur-1); }
+:global(html[data-js]) .panel[data-on] { opacity: 1; visibility: visible; transform: none; transition: opacity var(--dur-4) var(--ease-settle) var(--dur-1), transform var(--dur-4) var(--ease-settle) var(--dur-1); }
+@media (prefers-reduced-motion: no-preference) {
+  :global(html[data-js]) .panel { transform: translateY(var(--space-2)); }
+}
+.panelTop { display: flex; justify-content: space-between; gap: var(--space-4); padding-bottom: var(--space-3); border-bottom: 1px solid var(--color-line-on-dark); }
+.role { margin: 0; color: var(--color-on-dark); }
+.url { display: inline-flex; align-items: center; gap: var(--space-1); font-size: var(--text-label); font-weight: 500; letter-spacing: var(--tracking-label); text-transform: uppercase; color: var(--color-on-dark); }
+@media (hover: hover) and (pointer: fine) { .url:hover { color: var(--color-green); } }
+.url:focus-visible { outline-color: var(--color-on-dark); }
+.line { margin: var(--space-5) 0 0; font-size: var(--text-h4); line-height: 1.3; text-wrap-style: balance; }
+.features { list-style: none; margin: var(--space-5) 0 0; padding: 0; display: grid; gap: var(--space-3); }
+.features li { padding-left: var(--space-4); border-left: 1px solid var(--color-line-on-dark); }
+.featTitle { margin: 0; font-size: var(--text-body); }
+.featDetail { margin: 0; font-size: var(--text-caption); color: var(--color-on-dark-muted); }
+.stats { list-style: none; margin: var(--space-5) 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3) var(--space-5); }
+.stats li { display: flex; min-width: 0; align-items: center; gap: var(--space-2); font-size: var(--text-caption); }
+.stats li::before { content: ""; width: 7px; height: 7px; background: var(--color-green); }
+.statValue { font-weight: 500; }
+.statLabel { color: var(--color-on-dark-muted); padding-left: var(--space-2); border-left: 1px solid var(--color-line-on-dark); }
+
+/* ── Secondary row ───────────────────────────────────────────────────────── */
+.secondary { display: grid; gap: var(--space-6); padding-top: var(--space-6); border-top: 1px solid var(--color-line-on-dark); }
+.secondary h3 { margin: 0; }
+.secondary p { margin: var(--space-2) 0 0; color: var(--color-on-dark-muted); max-width: 44ch; }
+.more { display: inline-flex; align-items: center; gap: var(--space-1); margin-top: var(--space-3); font-weight: 500; color: var(--color-on-dark); text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--color-line-on-dark); transition: text-decoration-color var(--dur-2) var(--ease-out); }
+@media (hover: hover) and (pointer: fine) { .more:hover { text-decoration-color: var(--color-green); } }
+.more:focus-visible { outline-color: var(--color-on-dark); }
+
+@media (min-width: 768px) {
+  .ui { grid-template-columns: 4fr 8fr; column-gap: var(--space-6); align-items: start; }
+  .detail { padding: var(--space-7) var(--space-6); }
+  .secondary { grid-template-columns: 1fr 1fr; column-gap: var(--space-6); }
+}
+@media (min-width: 1280px) {
+  .inner { grid-template-columns: 260px 400px minmax(0, 1fr); column-gap: var(--space-7); row-gap: var(--space-8); }
+  .head { grid-column: 1 / 3; }
+  .ui { grid-column: 1 / 3; grid-template-columns: 260px 400px; column-gap: var(--space-7); }
+  .art { grid-column: 3; grid-row: 1 / 3; align-self: center; max-width: 600px; justify-self: end; }
+  .secondary { grid-column: 1 / -1; }
+}

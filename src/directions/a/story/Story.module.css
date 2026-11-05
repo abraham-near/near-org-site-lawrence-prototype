@@ -1,0 +1,133 @@
+/* Direction A, the story: the anthem on a ruled sheet, then the traverse. Static by default (stacked anthem; headings
+   above a native sideways scroller); from 1280 with motion and JS, both pin (StoryMotion). Tokens only. */
+.story { position: relative; background: var(--color-surface); --gut: 0px; }
+
+/* ---------- The anthem ---------- */
+.anthemSheet { padding: var(--section-pad-y) var(--page-margin); max-width: var(--content-max); margin-inline: auto; }
+.anthem { font-size: var(--text-h2); font-weight: 500; line-height: 1.22; letter-spacing: var(--tracking-h2); margin: 0; }
+.anthemLines { display: block; position: relative; }
+.tile { width: 1.1em; height: 1.1em; display: inline-block; vertical-align: -0.18em; margin-right: 0.3em; border-radius: 0; }
+.aLine { display: inline; }
+.aNo, .aRule { display: none; }
+.aGreen { color: var(--color-green-text); }
+.aw { display: inline; }
+
+@media (min-width: 1024px) {
+  .anthemLines { padding-left: var(--space-9); }
+  .aLine { display: block; position: relative; }
+  /* the margin mark: a short ruled tick that arrives as its line goes solid (no numbers: DESIGN §6) */
+  .aNo { display: block; position: absolute; left: calc(var(--space-9) * -1); bottom: -0.02em; width: var(--space-6); height: 1px; background: var(--color-ink); }
+  .aNo::after { content: ""; position: absolute; right: 0; bottom: 0; width: 1px; height: var(--space-2); background: var(--color-ink); }
+  .aRule { display: block; position: absolute; left: 0; right: 0; bottom: -0.02em; height: 1px; background: var(--color-line); transform-origin: 0 50%; }
+  .tile { position: absolute; left: var(--space-9); top: 0.12em; width: 2.02em; height: 2.02em; margin: 0; }
+  .aBeside .aText { padding-left: 2.36em; }
+  .aBeside .aRule { left: 2.36em; }
+  .anthem { width: max-content; max-width: 100%; }
+}
+
+@media (min-width: 1280px) and (prefers-reduced-motion: no-preference) {
+  :global(html[data-js]) .anthemTrack { height: 240vh; }
+  :global(html[data-js]) .anthemSheet { position: sticky; top: 0; height: 100vh; height: 100svh; display: flex; align-items: center; padding-block: 0; }
+}
+
+/* ---------- The traverse ---------- */
+.trStage { position: relative; padding: 0 var(--page-margin) var(--section-pad-y); max-width: var(--content-max); margin-inline: auto; }
+.heads { display: grid; gap: var(--space-5); margin-bottom: var(--space-7); }
+.connect { font-size: var(--text-h2); font-weight: 500; line-height: 1.1; letter-spacing: var(--tracking-h2); margin: 0; }
+.sent { display: block; }
+.problem { font-size: var(--text-lede); line-height: 1.5; max-width: 36ch; margin: 0; color: var(--color-ink); }
+.answer { font-size: var(--text-h3); font-weight: 500; line-height: 1.15; letter-spacing: var(--tracking-h3); margin: 0; }
+.owned { color: var(--color-green-text); }
+
+/* Static: a native sideways scroller with snap */
+.viewport {
+  overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scrollbar-width: thin;
+  margin-inline: calc(var(--page-margin) * -1); padding-inline: var(--page-margin);
+  scroll-padding-inline: var(--page-margin);
+}
+.viewport:focus-visible { outline-offset: -2px; }
+.track { position: relative; display: flex; width: max-content; --fw: 272px; --ly: calc(var(--fw) * 0.625 + var(--space-5)); padding-bottom: var(--space-5); }
+@media (min-width: 768px) { .track { --fw: 320px; } }
+.ownList { display: contents; list-style: none; margin: 0; padding: 0; }
+.line { position: absolute; left: 0; right: 0; top: var(--ly); height: 1px; background: var(--color-line-strong); }
+.lineGreen { display: none; }
+/* chainage: minor ticks every 12 px, majors every 120 px, hung under the line (a repeating hairline, not an image) */
+.chainage {
+  position: absolute; left: 0; right: 0; top: calc(var(--ly) + 1px); height: 12px; pointer-events: none;
+  background-image:
+    linear-gradient(to right, var(--color-line-strong) 1px, transparent 1px),
+    linear-gradient(to right, var(--color-line-strong) 1px, transparent 1px);
+  background-size: 120px 12px, 12px 5px; background-repeat: repeat-x;
+}
+.panel { position: relative; flex: none; width: min(78vw, 380px); padding-top: var(--space-5); scroll-snap-align: start; padding-right: var(--space-6); }
+.figure { width: var(--fw); }
+.node { position: absolute; top: var(--ly); left: calc(var(--fw) / 2); width: 15px; height: 15px; margin: -7px 0 0 -7px; }
+.node::before, .node::after { content: ""; position: absolute; background: var(--color-ink); }
+.node::before { left: 0; right: 0; top: 7px; height: 1px; }
+.node::after { top: 0; bottom: 0; left: 7px; width: 1px; }
+.node svg { position: absolute; inset: -5px; width: 25px; height: 25px; overflow: visible; }
+.pOwn .node::before, .pOwn .node::after { background: var(--color-green); }
+.km { position: absolute; top: calc(var(--ly) + var(--space-5)); left: calc(var(--fw) / 2); transform: translateX(-50%); font-family: var(--font-mono); font-size: 13px; color: var(--color-muted); font-variant-numeric: tabular-nums; }
+.ownTitle { margin: calc(var(--space-9) - var(--space-2)) 0 0; font-size: var(--text-h3); font-weight: 500; line-height: 1.15; letter-spacing: var(--tracking-h3); }
+.ownTitle :global(.accent) { font-family: var(--font-accent); }
+.ownLine { margin: var(--space-3) 0 0; max-width: 34ch; font-size: var(--text-body); line-height: 1.6; }
+.terminus { display: none; }
+
+/* The connect panel, static: AI and blockchain at its ends, NEAR in the middle, on the line */
+/* Static: the heading above already says it; the scroller opens on the layer drawing */
+.pConnect { display: none; }
+.end { position: absolute; top: calc(var(--ly) + var(--space-5)); font-size: var(--text-small); color: var(--color-muted); white-space: nowrap; }
+.end b { font-weight: 500; color: var(--color-ink); margin-right: var(--space-1); }
+.endL { left: 0; }
+.endR { right: var(--space-6); }
+.endL::before, .endR::before { content: ""; position: absolute; top: calc(var(--space-5) * -1 - 4px); width: 7px; height: 7px; border-radius: 50%; background: var(--color-ink); }
+.endL::before { left: -3px; }
+.endR::before { right: -3px; }
+.half { display: none; }
+.hub { position: absolute; top: var(--ly); left: calc(50% - var(--space-6) / 2); width: 44px; height: 44px; margin: -22px 0 0 -22px; background: var(--color-green); border-radius: var(--radius-sm); display: grid; place-items: center; }
+.hub img { width: 30px; height: 30px; }
+.pConnect .km { left: calc(50% - var(--space-6) / 2); top: calc(var(--ly) + var(--space-8)); }
+.readout { display: none; }
+
+/* ---------- Motion: the stage pins and the track slides ---------- */
+@media (min-width: 1280px) and (prefers-reduced-motion: no-preference) {
+  :global(html[data-js]) .trTrack { height: 700vh; }
+  :global(html[data-js]) .trStage {
+    position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; padding: 0; max-width: none; --ly: 66svh;
+    /* the page's 12-column grid: one column, and half the content width (from the centre to the content's edge) */
+    --colw: calc((min(100vw, var(--content-max)) - 2 * var(--page-margin) - 11 * var(--space-6)) / 12);
+    --half: calc(min(50vw, var(--content-max) / 2) - var(--page-margin));
+  }
+  :global(html[data-js]) .heads { position: absolute; z-index: 2; top: calc(var(--space-10) + var(--space-2)); left: 0; right: 0; max-width: var(--content-max); margin: 0 auto; padding-inline: var(--page-margin); display: grid; justify-items: center; text-align: center; }
+  :global(html[data-js]) .heads > * { grid-area: 1 / 1; }
+  :global(html[data-js]) .connect { text-align: left; justify-self: start; }
+  :global(html[data-js]) .problem { font-size: var(--text-h3); font-weight: 500; line-height: 1.2; letter-spacing: var(--tracking-h3); max-width: 24ch; }
+  :global(html[data-js]) .answer { font-size: var(--text-h2); letter-spacing: var(--tracking-h2); }
+  :global(html[data-js]) .viewport { position: absolute; inset: 0; overflow: visible; margin: 0; padding: 0; scroll-snap-type: none; }
+  :global(html[data-js]) .track { position: absolute; top: 0; left: 0; height: 100%; width: var(--end); display: block; padding: 0; --ly: 66svh; --fw: calc(var(--colw) * 4 + var(--space-6) * 3); will-change: transform; }
+  :global(html[data-js]) .line, :global(html[data-js]) .chainage { top: var(--ly); }
+  :global(html[data-js]) .lineGreen { display: block; position: absolute; left: 50vw; width: calc(var(--end) - 80vw); top: calc(var(--ly) - 0.25px); height: 1.5px; background: var(--color-green); transform-origin: 0 50%; transform: scaleX(var(--g, 0)); }
+  :global(html[data-js]) .panel { position: absolute; top: 0; height: 100%; left: calc(var(--x) * 1vw); width: 0; padding: 0; }
+  :global(html[data-js]) .figure { position: absolute; left: 0; bottom: calc(100% - var(--ly) + var(--space-4)); transform: translateX(-50%); }
+  :global(html[data-js]) .node, :global(html[data-js]) .km { left: 0; }
+  :global(html[data-js]) .ownTitle, :global(html[data-js]) .ownLine { position: absolute; left: 0; width: calc(var(--colw) * 4 + var(--space-6) * 3); transform: translateX(-50%); text-align: center; text-wrap-style: balance; }
+  :global(html[data-js]) .ownTitle { top: calc(var(--ly) + var(--space-8)); margin: 0; }
+  :global(html[data-js]) .ownLine { top: calc(var(--ly) + var(--space-8) + var(--space-8) - var(--space-2)); margin: 0; max-width: 36ch; }
+  :global(html[data-js]) .pConnect { display: block; }
+  /* the two ends sit on the content's edges, so the rail lines up with the page's grid at every width */
+  :global(html[data-js]) .end { top: calc(var(--ly) + var(--space-5)); }
+  :global(html[data-js]) .endL { left: calc(var(--half) * -1); right: auto; }
+  :global(html[data-js]) .endR { left: var(--half); right: auto; transform: translateX(-100%); }
+  :global(html[data-js]) .endL::before { left: -3.5px; right: auto; }
+  :global(html[data-js]) .endR::before { right: -3.5px; left: auto; }
+  :global(html[data-js]) .half { display: block; position: absolute; top: calc(var(--ly) - 0.25px); height: 1.5px; width: var(--half); background: var(--color-ink); }
+  :global(html[data-js]) .halfL { left: calc(var(--half) * -1); transform-origin: 0 50%; }
+  :global(html[data-js]) .halfR { left: 0; transform-origin: 100% 50%; }
+  :global(html[data-js]) .hub { left: 0; width: 56px; height: 56px; margin: -28px 0 0 -28px; z-index: 1; }
+  :global(html[data-js]) .hub img { width: 38px; height: 38px; }
+  :global(html[data-js]) .pConnect .km { left: 0; top: calc(var(--ly) + var(--space-8)); }
+  :global(html[data-js]) .terminus { display: block; position: absolute; top: var(--ly); left: calc(var(--end) - 30vw); width: 28px; height: 28px; margin: -14px 0 0 -14px; }
+  :global(html[data-js]) .terminus svg { width: 100%; height: 100%; overflow: visible; }
+  :global(html[data-js]) .readout { display: flex; gap: var(--space-2); align-items: baseline; position: absolute; z-index: 2; right: max(var(--page-margin), (100vw - var(--content-max)) / 2 + var(--page-margin)); bottom: var(--space-6); margin: 0; }
+  :global(html[data-js]) .readLabel { font-size: var(--text-caption); color: var(--color-muted); }
+}

@@ -1,0 +1,45 @@
+/* The directions contact sheet (D52). Lab only; tokens only. */
+.page { padding-block: calc(var(--space-10) + var(--space-6)) calc(var(--section-pad-y) + var(--space-9)); }
+.intro { max-width: 60rem; margin-bottom: var(--space-8); }
+.intro p { margin-top: var(--space-5); max-width: var(--measure); }
+.lede { margin-top: var(--space-3); max-width: var(--measure); color: var(--color-muted); }
+
+.versions { display: grid; gap: var(--space-6); margin-bottom: var(--space-9); border-top: 1px solid var(--color-line-strong); padding-top: var(--space-6); }
+@media (min-width: 1024px) { .versions { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.versionNote { margin-top: var(--space-2); font-size: var(--text-small); line-height: 1.5; color: var(--color-muted); }
+.open { margin-top: var(--space-3); font-size: var(--text-small); }
+.open a { color: var(--color-ink); text-decoration: underline; text-underline-offset: 4px; }
+
+.sections { margin-top: var(--space-7); display: grid; gap: var(--space-8); }
+.section { border-top: 1px solid var(--color-line-strong); padding-top: var(--space-5); }
+.sectionHead { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--space-3) var(--space-6); }
+.noteField input {
+  width: min(28rem, 80vw); height: 40px; padding-inline: var(--space-3); border: 1px solid var(--color-line-strong);
+  border-radius: var(--radius-sm); background: var(--color-white); color: var(--color-ink); font-size: var(--text-small);
+}
+.noteField input:focus-visible { outline: 2px solid var(--color-green); outline-offset: 2px; }
+
+.options { margin-top: var(--space-5); display: grid; gap: var(--space-5); border: 0; padding: 0; }
+@media (min-width: 768px) { .options { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1280px) { .options { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.option { display: grid; align-content: start; gap: var(--space-3); }
+.thumb {
+  display: block; aspect-ratio: 16 / 10; overflow: hidden; border-radius: var(--radius-sm);
+  background: var(--color-surface-2); outline: 1px solid var(--color-line); outline-offset: -1px;
+}
+.thumb img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top; }
+.thumb:focus-visible { outline: 2px solid var(--color-green); outline-offset: 2px; }
+.option[data-chosen] .thumb { outline: 2px solid var(--color-green); outline-offset: 2px; }
+.noThumb { display: grid; place-items: center; height: 100%; font-size: var(--text-small); color: var(--color-ink); text-decoration: underline; text-underline-offset: 4px; }
+.choice { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-small); font-weight: 500; cursor: pointer; }
+.choice input { width: 18px; height: 18px; accent-color: var(--color-green-text); }
+.optionNote { font-size: var(--text-caption); line-height: 1.4; color: var(--color-muted); }
+
+.summary { margin-top: var(--space-9); padding: var(--space-7); border-radius: var(--radius-lg); background: var(--color-surface-2); }
+.summaryText {
+  margin-top: var(--space-5); padding: var(--space-5); border-radius: var(--radius-md); background: var(--color-surface);
+  font-family: var(--font-mono); font-size: var(--text-small); line-height: 1.6; white-space: pre-wrap; color: var(--color-ink);
+}
+.actions { margin-top: var(--space-5); display: flex; flex-wrap: wrap; gap: var(--space-4); align-items: center; }
+.reset { font-size: var(--text-small); color: var(--color-ink); text-decoration: underline; text-underline-offset: 4px; background: none; border: 0; cursor: pointer; }
+.reset:focus-visible { outline: 2px solid var(--color-green); outline-offset: 2px; }

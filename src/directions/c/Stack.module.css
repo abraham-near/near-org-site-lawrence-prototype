@@ -1,0 +1,149 @@
+/* Field, the Stack: light, on the visible grid. The drawing's colours are local to this section (the brief allows it);
+   each derives from the tokens as noted. Breakpoints 768 / 1280 (tokens). */
+
+.band {
+  position: relative; overflow-x: clip; padding-block: var(--section-pad-y);
+  /* Quiet layers: a pale construction drawing */
+  --st-quiet-t: color-mix(in srgb, var(--color-surface) 40%, var(--color-white)); /* surface lifted 60% toward white */
+  --st-quiet-l: var(--color-surface);
+  --st-quiet-hatch: rgb(38 38 38 / 0.3); /* ink 30% */
+  --st-quiet-r1: var(--color-surface-2);
+  --st-quiet-r2: color-mix(in srgb, var(--color-surface-2) 90%, var(--color-ink)); /* surface-2 10% toward ink */
+  --st-quiet-edge: rgb(38 38 38 / 0.5); /* ink 50% */
+  /* The layer being read: the green duotone, from NEAR green down to forest */
+  --st-full-t: var(--color-green);
+  --st-full-l: color-mix(in srgb, var(--color-green) 70%, var(--color-forest));
+  --st-full-hatch: rgb(10 32 24 / 0.45); /* forest 45% */
+  --st-full-r1: color-mix(in srgb, var(--color-green) 50%, var(--color-forest));
+  --st-full-r2: color-mix(in srgb, var(--color-green) 35%, var(--color-forest));
+  --st-full-r3: var(--color-forest);
+  --st-full-edge: rgb(10 32 24 / 0.75); /* forest 75% */
+}
+.inner { position: relative; z-index: 1; max-width: var(--content-max); margin-inline: auto; padding-inline: var(--page-margin); }
+
+/* ── Layout ──────────────────────────────── */
+.pin { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-7); }
+.head { max-width: 40rem; }
+.head h2 { margin: var(--space-4) 0 0; }
+.label { margin: 0; color: var(--color-ink); }
+.lede { margin: var(--space-5) 0 0; color: var(--color-muted); }
+.art { width: min(100%, 560px); margin-inline: auto; }
+@media (min-width: 768px) {
+  .pin { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--space-5); }
+  .head, .art { grid-column: 1 / -1; }
+  .list { grid-column: 1 / 6; }
+  .panels { grid-column: 6 / -1; }
+}
+@media (min-width: 1280px) {
+  .pin { column-gap: var(--space-6); row-gap: var(--space-7); grid-template-rows: auto 1fr; align-content: start; }
+  .head { grid-column: 1 / 8; grid-row: 1; }
+  .list { grid-column: 1 / 4; grid-row: 2; }
+  .panels { grid-column: 4 / 8; grid-row: 2; }
+  /* The drawing: columns 8–12, inside the content edge (clear of the detail column) */
+  .art { grid-column: 8 / -1; grid-row: 1 / 3; align-self: center; width: 100%; max-width: 640px; margin: 0; justify-self: end; }
+}
+/* Pinned (desktop with motion and room): the heading and columns hold for about 60 vh per layer */
+@media (min-width: 1280px) and (min-height: 760px) and (prefers-reduced-motion: no-preference) {
+  :global(html[data-js]) .band { padding-top: 0; }
+  :global(html[data-js]) .track { height: calc(100vh + 3 * 60vh); }
+  :global(html[data-js]) .pin { position: sticky; top: 0; height: 100vh; padding: calc(var(--space-9) + var(--space-4)) 0 var(--space-6); }
+  :global(html[data-js]) .art { max-width: min(640px, calc((100vh - var(--space-11)) * 0.86)); }
+}
+@media (min-width: 1280px) and (min-height: 760px) and (max-height: 880px) and (prefers-reduced-motion: no-preference) {
+  :global(html[data-js]) .pin { row-gap: var(--space-6); padding-top: var(--space-9); }
+  :global(html[data-js]) .lede { margin-top: var(--space-3); }
+}
+
+/* ── The list: rows on hairlines; the selected row is a green field with ink type ── */
+.list { display: flex; flex-direction: column; align-self: start; border-bottom: 1px solid var(--color-line-strong); }
+.tab {
+  display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto auto; column-gap: var(--space-3); row-gap: 2px; align-items: center;
+  min-height: 60px; padding: var(--space-3) var(--space-4) var(--space-3) var(--space-3); cursor: pointer;
+  border: 0; border-top: 1px solid var(--color-line-strong); background: none; color: var(--color-ink); font: inherit; text-align: left;
+  transition: background-color var(--dur-2) var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) { .tab:hover { background: var(--color-surface-2); } }
+.tab[aria-selected="true"] { background: var(--color-green); }
+.tab:focus-visible { outline-offset: -4px; }
+/* A small parallelogram cut on the N's diagonal: outlined at rest, solid when selected */
+.glyph { grid-row: 1 / 3; width: 10px; height: 14px; border: 1px solid var(--color-ink); transform: skewX(-39.87deg); transition: background-color var(--dur-2) var(--ease-out); }
+.tab[aria-selected="true"] .glyph { background: var(--color-ink); }
+.tabName { font-size: var(--text-h4); font-weight: 500; line-height: 1.2; white-space: nowrap; }
+.tabRole { grid-column: 2; font-size: var(--text-caption); line-height: 1.3; color: var(--color-ink); }
+
+/* ── The detail ───────────────────────────── */
+.panels { display: grid; align-self: start; }
+.panel { grid-area: 1 / 1; min-width: 0; }
+.panel + .panel { margin-top: var(--space-8); }
+:global(html[data-js]) .panel + .panel { margin-top: 0; }
+:global(html[data-js]) .panel:not([data-active]) { display: none; }
+@media (max-width: 767px) { :global(html[data-js]) .panel[data-active] { animation: panel-in var(--dur-4) var(--ease-settle); } }
+@keyframes panel-in { from { opacity: 0; transform: translateY(var(--space-2)); } }
+@media (min-width: 768px) {
+  :global(html[data-js]) .panel { transition: opacity var(--dur-3) var(--ease-out) var(--dur-1), transform var(--dur-4) var(--ease-settle) var(--dur-1); }
+  :global(html[data-js]) .panel:not([data-active]) {
+    display: block; visibility: hidden; opacity: 0; transform: translateY(var(--space-2));
+    transition: opacity var(--dur-1) var(--ease-out), visibility 0s linear var(--dur-1), transform 0s linear var(--dur-1);
+  }
+}
+.line { margin: 0; padding-top: var(--space-3); border-top: 1px solid var(--color-ink); font-size: var(--text-h4); font-weight: 400; line-height: 1.3; text-wrap-style: pretty; }
+.features { display: grid; gap: var(--space-3); margin: var(--space-6) 0 0; padding: 0 0 0 var(--space-4); list-style: none; border-left: 1px solid var(--color-line-strong); }
+.features p { margin: 0; }
+.featTitle { font-size: var(--text-body); font-weight: 500; line-height: 1.25; }
+.features .featDetail { margin-top: 2px; font-size: var(--text-caption); line-height: 1.35; color: var(--color-muted); }
+/* Stats as a small Swiss table: label left, value right, on hairlines */
+.stats { margin: var(--space-6) 0 0; }
+.stat { display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-4); padding-block: var(--space-2); border-top: 1px solid var(--color-line-strong); }
+.stat:last-child { border-bottom: 1px solid var(--color-line-strong); }
+.statLabel { font-size: var(--text-caption); color: var(--color-muted); }
+.statValue { margin: 0; font-size: var(--text-body); font-weight: 500; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.url {
+  display: inline-flex; align-items: center; gap: var(--space-2); min-height: 44px; margin-top: var(--space-3);
+  font-size: var(--text-small); font-weight: 500; color: var(--color-ink);
+  text-decoration-line: underline; text-decoration-thickness: 1px; text-underline-offset: 6px;
+}
+.url:hover { text-decoration-thickness: 2px; }
+
+/* ── The drawing ──────────────────────────── */
+.iso { display: block; width: 100%; height: auto; overflow: visible; }
+.c { cursor: pointer; transform: translateY(var(--lift, 0px)); transition: transform var(--dur-3) var(--ease-settle);
+  --face-t: var(--st-quiet-t); --face-l: url(#c-st-hq); --face-r: url(#c-st-gq); --edge: var(--st-quiet-edge); }
+.iso polygon { stroke: var(--edge); stroke-width: 0.6; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.t { fill: var(--face-t); }
+.l { fill: var(--face-l); }
+.r { fill: var(--face-r); }
+.construct path { fill: none; stroke: rgb(38 38 38 / 0.4); stroke-width: 1; stroke-dasharray: 3 4; vector-effect: non-scaling-stroke; }
+.anchors { pointer-events: none; transition: opacity var(--dur-4) var(--ease-out); }
+/* The outer frame's anchors arrive with the outer frame */
+.band:is([data-build="-1"], [data-build="0"], [data-build="1"], [data-build="2"]) .anchors { opacity: 0; }
+
+/* Build: data-build is how many layers out from the core show (0 = the pillar; -1 = none yet). Each ring fades on as
+   one flat group and settles into place on a long ease (D21). Without data-build every layer shows. */
+.b { opacity: var(--shown, 1); transform: translateY(calc((1 - var(--shown, 1)) * var(--space-7) * -1)); transition: opacity var(--dur-5) var(--ease-settle), transform calc(var(--dur-5) * 1.25) var(--ease-settle); }
+.cover { opacity: var(--shown, 1); transition: opacity 0s linear calc((1 - var(--shown, 1)) * var(--dur-5)); }
+.band[data-build="-1"] .c[data-li],
+.band[data-build="0"] .c:is([data-li="1"], [data-li="2"], [data-li="3"]),
+.band[data-build="1"] .c:is([data-li="2"], [data-li="3"]),
+.band[data-build="2"] .c[data-li="3"] { --shown: 0; pointer-events: none; }
+
+/* The layer being read (selected, or hovered) in the full duotone, lifted a step */
+.band:is([data-hl="protocol"], [data-active-layer="protocol"]:not([data-hl])) .c[data-tone="protocol"],
+.band:is([data-hl="intents"], [data-active-layer="intents"]:not([data-hl])) .c[data-tone="intents"],
+.band:is([data-hl="ai"], [data-active-layer="ai"]:not([data-hl])) .c[data-tone="ai"],
+.band:is([data-hl="com"], [data-active-layer="com"]:not([data-hl])) .c[data-tone="com"] {
+  --face-t: var(--st-full-t); --face-l: url(#c-st-hf); --face-r: url(#c-st-gf); --edge: var(--st-full-edge); --lift: calc(var(--space-3) * -1);
+}
+
+/* ── Governance and Economics ─────────────── */
+.secondary { display: grid; gap: var(--space-6); margin-top: var(--space-9); }
+.sec { padding-top: var(--space-4); border-top: 1px solid var(--color-ink); }
+.sec h3 { margin: 0 0 var(--space-2); }
+.sec p { margin: 0 0 var(--space-2); max-width: 44ch; font-size: var(--text-small); color: var(--color-muted); }
+.more {
+  display: inline-flex; align-items: center; gap: var(--space-2); min-height: 44px;
+  font-size: var(--text-small); font-weight: 500; color: var(--color-ink);
+  text-decoration-line: underline; text-decoration-thickness: 1px; text-underline-offset: 6px;
+}
+.more:hover { text-decoration-thickness: 2px; }
+@media (min-width: 768px) { .secondary { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--space-5); } .sec:first-child { grid-column: 1 / 7; } .sec:last-child { grid-column: 7 / -1; } }
+@media (min-width: 1280px) { .secondary { column-gap: var(--space-6); } .sec:first-child { grid-column: 1 / 5; } .sec:last-child { grid-column: 5 / 9; } }

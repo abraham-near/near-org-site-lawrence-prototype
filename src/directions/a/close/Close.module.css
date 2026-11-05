@@ -1,0 +1,52 @@
+/* Direction A, Close: "NEAR belongs to you" on a contour sheet, with the newsletter pill (D22). Tokens only. */
+.close { background: var(--color-surface); padding-block: var(--section-pad-y); }
+.inner { max-width: var(--content-max); margin-inline: auto; padding-inline: var(--page-margin); }
+.panel {
+  position: relative; overflow: hidden; display: grid; place-items: center;
+  min-height: min(620px, 80svh); padding: var(--space-9) var(--space-5);
+  border: 1px solid var(--color-line); border-radius: var(--radius-xl); background: var(--color-surface);
+}
+.terrain { position: absolute; inset: 0; width: 100%; height: 100%; }
+/* the terrain stays off the copy: a radial mask opens a clear field in the middle */
+/* the terrain and graticule stay off the copy: a clear field the size of the copy block, softening outwards */
+.lines {
+  -webkit-mask-image: radial-gradient(ellipse 50% 58% at 50% 50%, transparent 72%, var(--color-ink) 100%);
+  mask-image: radial-gradient(ellipse 50% 58% at 50% 50%, transparent 72%, var(--color-ink) 100%);
+}
+@media (max-width: 767px) {
+  .lines { -webkit-mask-image: radial-gradient(ellipse 120% 52% at 50% 50%, transparent 70%, var(--color-ink) 100%); mask-image: radial-gradient(ellipse 120% 52% at 50% 50%, transparent 70%, var(--color-ink) 100%); }
+}
+.copy { position: relative; display: flex; flex-direction: column; align-items: center; text-align: center; max-width: 640px; }
+.mark { width: 56px; height: 56px; }
+.title { margin: var(--space-6) 0 0; }
+.lede { margin: var(--space-4) auto 0; }
+
+/* The form (the live page's pill, D22) */
+.form { display: flex; flex-direction: column; align-items: center; width: 100%; max-width: calc(var(--space-11) * 2 + var(--space-9)); margin-top: var(--space-7); }
+.form p { margin: 0; }
+/* The pill row and the success line share one cell, so the form's height is the same in both states */
+.slot { display: grid; width: 100%; }
+.slot > * { grid-area: 1 / 1; }
+.row {
+  display: flex; align-items: center; gap: var(--space-2); padding: var(--space-1) var(--space-1) var(--space-1) var(--space-5);
+  border: 1px solid var(--color-line-strong); border-radius: var(--radius-full); background: var(--color-white);
+}
+.row:focus-within { outline: 2px solid var(--color-ink); outline-offset: 2px; }
+.row:has(.input[aria-invalid="true"]) { border: 2px solid var(--color-ink); padding-left: calc(var(--space-5) - 1px); }
+.row[data-done] { visibility: hidden; }
+.statusSlot { align-self: center; }
+.input {
+  flex: 1; min-width: 0; min-height: 44px; padding: 0; border: 0; background: none; outline: none;
+  color: var(--color-ink); font: inherit; font-size: var(--text-body);
+}
+.input::placeholder { color: var(--color-muted); opacity: 1; }
+.submit { flex: none; justify-content: center; min-height: 44px; padding-inline: var(--space-5); border: 0; border-radius: var(--radius-full); cursor: pointer; } /* the primary (green) button, as a pill */
+
+/* Error: ink with an icon (colour alone never carries it); the slot keeps its height so nothing jumps */
+.form .error { display: flex; justify-content: center; align-items: center; gap: var(--space-2); min-height: 1.5em; line-height: 1.5; margin-top: var(--space-2); font-size: var(--text-small); font-weight: 500; }
+.error svg, .success svg { flex: none; }
+.form .formNote { margin-top: var(--space-1); font-size: var(--text-small); } /* ink, as on the live page */
+.formNote a { color: var(--color-ink); text-decoration-line: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.formNote a:hover { text-decoration-thickness: 2px; text-decoration-color: var(--color-green); }
+.form .success { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: var(--space-2); font-size: var(--text-lede); font-weight: 500; }
+.success:focus { outline: none; }

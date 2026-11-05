@@ -1,0 +1,43 @@
+/* Direction C, "Field": shared layout. A strict 12-column grid (DESIGN §3: 16/24/32 gutters, 16/32/64 margins, 1440
+   max), shown on the page as faint column guides. Colours derive from the tokens only; local values say where from. */
+
+.field {
+  /* Column guides: ink at 7% on light, surface at 9% on forest, ink at 14% on green (each derived from a token) */
+  --guide: rgb(38 38 38 / 0.07);
+  /* Construction ink: hairlines and anchors drawn over graphics (ink at 55%) */
+  --construct: rgb(38 38 38 / 0.55);
+  overflow-x: clip;
+}
+
+.wrap { position: relative; width: 100%; max-width: var(--content-max); margin-inline: auto; padding-inline: var(--page-margin); }
+.grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); column-gap: var(--space-4); }
+@media (min-width: 768px) { .grid { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--space-5); } }
+@media (min-width: 1280px) { .grid { column-gap: var(--space-6); } }
+
+/* The visible grid: each column's two edges as hairlines, behind the content */
+.guides { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
+.guides > .wrap { height: 100%; }
+.guides .grid { height: 100%; }
+.guides span { border-inline: 1px solid var(--guide); }
+@media (max-width: 767px) { .guides span:nth-child(n + 5) { display: none; } }
+[data-tone="dark"] .guides { --guide: rgb(245 244 241 / 0.09); }
+[data-tone="green"] .guides { --guide: rgb(38 38 38 / 0.14); }
+
+/* Anchor squares at construction vertices (after Fractalized's construction views) */
+.anchor { fill: var(--color-surface); stroke: var(--color-ink); stroke-width: 1; vector-effect: non-scaling-stroke; }
+
+/* Draw-on strokes (FieldMotion): pathLength="1" with one dash, so the offset runs 1 → 0 */
+.draw { stroke-dasharray: 1; stroke-dashoffset: 0; }
+
+/* The one uppercase label a section may carry (DESIGN §2) */
+.label { margin: 0; }
+
+/* Links in the Field style: an underline that thickens, never an arrow on every link */
+.textLink {
+  display: inline-flex; align-items: center; gap: var(--space-2); min-height: 44px;
+  font-size: var(--text-small); font-weight: 500; color: inherit;
+  text-decoration-line: underline; text-decoration-thickness: 1px; text-underline-offset: 6px;
+  transition: text-decoration-color var(--dur-2) var(--ease-out);
+}
+.textLink:hover { text-decoration-thickness: 2px; }
+.ext { flex: none; }

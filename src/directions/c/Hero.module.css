@@ -1,0 +1,114 @@
+/* Field hero. The cut is the N's diagonal: run 0.8351 across per unit down (construction.ts), i.e. skewX(39.87deg).
+   Phones/tablets/reduced motion: stacked (copy, then the picture with its lower-left corner cut on the diagonal).
+   ≥ 1280: the poster composition, one screen; with motion and JS it pins for 1.2 screens (HeroMotion). */
+
+.hero {
+  position: relative;
+  --run: 0.8351;
+  --inset: max(var(--page-margin), calc((100vw - var(--content-max)) / 2 + var(--page-margin)));
+  /* The hatched band reads on both the pale mist and the dark forest: each hairline is ink (55%) with a surface
+     (60%) line beside it, the way a technical overlay keeps a halo */
+  --hatch: rgb(245 244 241 / 0.6);
+  --hatch-ink: rgb(38 38 38 / 0.55);
+}
+
+/* ── Stacked (default) ─────────────────────────────── */
+.stage { position: relative; display: flex; flex-direction: column; }
+.copy { position: relative; z-index: 5; order: 1; padding: calc(var(--space-10) + var(--space-2)) var(--page-margin) var(--space-7); }
+.title { margin: 0; }
+.lede { margin: var(--space-5) 0 0; }
+.cta { margin-top: var(--space-6); }
+.media {
+  --h: 54svh;
+  position: relative; order: 2; height: var(--h); overflow: hidden;
+  /* The lower-left corner cut on the diagonal: up 30% of the band, across 0.8351 × that */
+  clip-path: polygon(0 0, 100% 0, 100% 100%, calc(var(--h) * 0.3 * var(--run)) 100%, 0 70%);
+}
+.img { object-fit: cover; object-position: 72% 50%; }
+.video { display: none; }
+.moveL, .moveR, .cue { display: none; }
+.guideLayer { position: absolute; inset: 0; z-index: 4; pointer-events: none; }
+
+/* The band on the footage (stacked: parallel to the corner cut, just inside it) */
+.bandGroup { position: absolute; left: 0; right: 0; bottom: 0; height: 54svh; z-index: 1; pointer-events: none; order: 3; }
+.band {
+  position: absolute; top: 30%; left: var(--space-6); width: var(--space-7); height: 46%;
+  transform-origin: top left; transform: skewX(39.87deg);
+  /* Hatch on the hooks' angle (56°, "/"): 33.5° before the skew, so 146.5deg as a gradient */
+  background: repeating-linear-gradient(146.5deg, var(--hatch-ink) 0 1px, var(--hatch) 1px 2px, transparent 2px 6px);
+  border-inline: 1px solid var(--hatch-ink);
+  box-shadow: inset 1px 0 0 var(--hatch), inset -1px 0 0 var(--hatch);
+}
+.pin { position: absolute; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px; background: var(--color-surface); border: 1px solid var(--color-ink); }
+.pinTL { top: 30%; left: var(--space-6); }
+.pinTR { top: 30%; left: calc(var(--space-6) + var(--space-7)); }
+.pinBL { top: 76%; left: calc(var(--space-6) + 54svh * 0.46 * var(--run)); }
+.pinBR { top: 76%; left: calc(var(--space-6) + var(--space-7) + 54svh * 0.46 * var(--run)); }
+
+/* ── The poster (≥ 1280) ───────────────────────────── */
+@media (min-width: 1280px) {
+  .hero {
+    /* Where the cut meets the top of the screen: 400 px into the content, so the headline clears it */
+    --x0: calc(var(--inset) + 400px);
+    --H: max(100svh, 640px);
+    /* The band: from 24% to 80% down the cut, 64 px (a stem's width at this scale) into the footage */
+    --b-top: 0.24; --b-len: 0.56; --b-off: var(--space-5); --b-w: var(--space-8);
+  }
+  .stage { display: block; height: var(--H); overflow: hidden; }
+  .media { position: absolute; inset: 0; height: auto; clip-path: none; }
+  .img { object-position: 64% 50%; }
+  .video { display: block; position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 64% 50%; opacity: 0; transition: opacity var(--dur-4) var(--ease-out); }
+  .video[data-ready] { opacity: 1; }
+
+  .bandGroup { inset: 0; height: auto; }
+  .band {
+    top: calc(var(--H) * var(--b-top)); height: calc(var(--H) * var(--b-len));
+    left: calc(var(--x0) + var(--H) * var(--b-top) * var(--run) + var(--b-off)); width: var(--b-w);
+  }
+  .pinTL, .pinTR { top: calc(var(--H) * var(--b-top)); }
+  .pinBL, .pinBR { top: calc(var(--H) * (var(--b-top) + var(--b-len))); }
+  .pinTL { left: calc(var(--x0) + var(--H) * var(--b-top) * var(--run) + var(--b-off)); }
+  .pinTR { left: calc(var(--x0) + var(--H) * var(--b-top) * var(--run) + var(--b-off) + var(--b-w)); }
+  .pinBL { left: calc(var(--x0) + var(--H) * (var(--b-top) + var(--b-len)) * var(--run) + var(--b-off)); }
+  .pinBR { left: calc(var(--x0) + var(--H) * (var(--b-top) + var(--b-len)) * var(--run) + var(--b-off) + var(--b-w)); }
+
+  /* The surface plane: its right edge runs from (x0, top) down the diagonal */
+  .moveL { display: block; position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+  .panelL {
+    position: absolute; top: 0; height: 100%;
+    width: calc(100vw + var(--H)); left: calc(var(--x0) - 100vw - var(--H));
+    transform-origin: top left; transform: skewX(39.87deg);
+    background: var(--color-surface);
+  }
+  /* A hairline on the cut itself */
+  .panelL::after { content: ""; position: absolute; top: 0; right: 0; width: 1px; height: 100%; background: var(--color-line-strong); }
+
+  .copy {
+    position: absolute; z-index: 5; inset: 0 auto 0 var(--inset); width: min(600px, 42vw); padding: 0;
+    display: flex; flex-direction: column; justify-content: space-between;
+    padding-block: calc(var(--space-10) + var(--space-8)) var(--space-8);
+  }
+  .foot { max-width: 30rem; }
+  .lede { margin: 0; }
+  /* The scroll cue: on the plane, past the copy's right edge, at the foot */
+  .cue {
+    display: flex; flex-direction: column; align-items: center; gap: var(--space-2);
+    position: absolute; right: calc(var(--space-6) * -1); bottom: var(--space-8); margin: 0;
+    font-size: var(--text-caption); color: var(--color-ink);
+  }
+  .cueLine { position: relative; width: 1px; height: var(--space-8); background: var(--color-line-strong); }
+  .cueLine::after { content: ""; position: absolute; left: -3px; bottom: -3px; width: 7px; height: 7px; background: var(--color-surface); border: 1px solid var(--color-ink); }
+}
+
+/* Motion (desktop, JS, motion allowed): the stage pins for 0.8 of a screen; HeroMotion slides the planes. The hero sits
+   above the story so that, once it unpins, it lifts off the anthem (Story.module.css pulls the story up under it). */
+@media (min-width: 1280px) and (prefers-reduced-motion: no-preference) {
+  :global(html[data-js]) .hero { z-index: 2; height: calc(var(--H) + 80vh); }
+  :global(html[data-js]) .stage { position: sticky; top: 0; }
+  :global(html[data-js]) .moveR { display: block; position: absolute; inset: 0; z-index: 3; pointer-events: none; transform: translateX(100vw); }
+  :global(html[data-js]) .panelR {
+    position: absolute; top: 0; left: 0; height: 100%; width: calc(100vw + var(--H) * 2);
+    transform-origin: top left; transform: skewX(39.87deg); background: var(--color-surface);
+  }
+  :global(html[data-js]) .panelR::before { content: ""; position: absolute; top: 0; left: 0; width: 1px; height: 100%; background: var(--color-line-strong); }
+}

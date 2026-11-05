@@ -1,0 +1,48 @@
+/* Direction B, Origin. Tokens only. */
+.origin { padding-block: var(--section-pad-y); background: var(--color-surface); }
+.inner { width: 100%; max-width: var(--content-max); margin-inline: auto; padding-inline: var(--page-margin); display: grid; gap: var(--space-7); }
+.figure { position: relative; margin: 0; aspect-ratio: 4 / 5; max-height: 76vh; border-radius: var(--radius-lg); overflow: hidden; background: var(--color-surface-2); }
+.diagram { position: absolute; inset: 0; width: 100%; height: 100%; }
+.scale { fill: none; stroke: var(--color-ink); stroke-opacity: 0.4; stroke-width: 1; vector-effect: non-scaling-stroke; }
+.tok rect { fill: var(--color-surface); stroke: var(--color-ink); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.tok rect.tokOn { fill: var(--color-green); stroke: var(--color-green-text); }
+.tok line { stroke: var(--color-ink); stroke-opacity: 0.38; stroke-width: 1; vector-effect: non-scaling-stroke; }
+.ring { fill: none; stroke: var(--color-green-text); stroke-opacity: 0.5; stroke-width: 1; vector-effect: non-scaling-stroke; }
+.point { fill: var(--color-green); }
+.beam { stroke: var(--color-green); stroke-width: 2; vector-effect: non-scaling-stroke; }
+/* Reeded glass standing across the converging lines: it bends them where they pass behind (FluteFilter in Chromium) */
+.strip {
+  position: absolute; top: 34%; bottom: 0; left: 58%; width: 18%;
+  border-radius: 2px 2px 0 0;
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--color-white) 40%, transparent), color-mix(in srgb, var(--color-white) 14%, transparent) 50%, color-mix(in srgb, var(--stack-intents-t) 30%, transparent)),
+    repeating-linear-gradient(90deg, transparent 0, color-mix(in srgb, var(--color-white) 30%, transparent) 2px, transparent 6px, color-mix(in srgb, var(--color-ink) 4%, transparent) 10px, transparent 13px);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+  box-shadow:
+    inset 0 1px 0 var(--color-white),
+    inset 1px 0 0 color-mix(in srgb, var(--color-white) 85%, transparent),
+    inset -1px 0 0 color-mix(in srgb, var(--color-green) 60%, transparent),
+    0 24px 40px -28px color-mix(in srgb, var(--color-forest) 35%, transparent);
+}
+:global(html[data-b-refract]) .strip { -webkit-backdrop-filter: url(#b-flute) blur(0.5px); backdrop-filter: url(#b-flute) blur(0.5px); }
+@media (prefers-reduced-motion: no-preference) {
+  .origin[data-armed]:not([data-in]) .tok { opacity: 0; }
+  .origin[data-armed]:not([data-in]) .point, .origin[data-armed]:not([data-in]) .ring { opacity: 0; transform: scale(0.4); }
+  .tok { transition: opacity var(--dur-5) var(--ease-settle) var(--d); }
+  .point, .ring { transform-box: fill-box; transform-origin: center; transition: opacity var(--dur-4) var(--ease-settle) 700ms, transform var(--dur-4) var(--ease-settle) 700ms; }
+}
+.body { align-self: end; }
+.title { margin: 0; max-width: 14em; }
+.lede { margin-top: var(--space-5); }
+.nowrap { white-space: nowrap; }
+.cta { margin: var(--space-6) 0 0; }
+
+@media (min-width: 768px) {
+  .inner { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--space-6); }
+  .figure { grid-column: 1 / 6; max-height: none; }
+  .body { grid-column: 7 / -1; }
+}
+@media (min-width: 1280px) {
+  .body { grid-column: 7 / 12; padding-bottom: var(--space-5); }
+}

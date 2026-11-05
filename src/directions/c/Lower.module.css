@@ -1,0 +1,206 @@
+/* Field, the sections below the Stack: Proof (green field), Go deeper, Origin (forest), Voices, Paths, Close (green
+   field). Tokens only; local values say what they derive from. Breakpoints 768 / 1280. */
+
+.wrap { position: relative; z-index: 1; width: 100%; max-width: var(--content-max); margin-inline: auto; padding-inline: var(--page-margin); }
+.nowrap { white-space: nowrap; }
+.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
+.textLink {
+  display: inline-flex; align-items: center; gap: var(--space-2); min-height: 44px;
+  font-size: var(--text-small); font-weight: 500; color: var(--color-ink);
+  text-decoration-line: underline; text-decoration-thickness: 1px; text-underline-offset: 6px;
+}
+.textLink:hover { text-decoration-thickness: 2px; }
+.inkPlane { fill: var(--color-ink); }
+.inkLine { fill: none; stroke: var(--color-ink); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.grid12 { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--space-5); }
+
+/* ── Proof: a NEAR-green field ─────────────────────── */
+.proof { position: relative; overflow: hidden; background: var(--color-green); color: var(--color-ink); padding-bottom: var(--section-pad-y); }
+.proof :focus-visible { outline-color: var(--color-ink); }
+.frieze { position: relative; height: 160px; overflow: hidden; border-bottom: 1px solid var(--color-ink); }
+@media (min-width: 1280px) { .frieze { height: 200px; } }
+.friezeSvg { position: absolute; left: 0; top: -110px; width: 100%; height: 420px; }
+.proofLabel { margin: var(--space-7) 0 0; }
+.figs { display: grid; gap: var(--space-7); margin-top: var(--space-6); }
+.lead { padding-top: var(--space-4); border-top: 1px solid var(--color-ink); }
+.leadValue { margin: 0; font-size: var(--text-display); font-weight: 400; line-height: 1; letter-spacing: var(--tracking-display); white-space: nowrap; }
+.caption { margin: var(--space-3) 0 0; max-width: 30ch; font-size: var(--text-small); line-height: 1.45; }
+.cells { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-6) var(--space-4); margin: 0; padding: 0; list-style: none; }
+.cell { padding-top: var(--space-4); border-top: 1px solid var(--color-ink); }
+.value { margin: 0; font-size: var(--text-h2); font-weight: 400; line-height: 1; letter-spacing: var(--tracking-h2); white-space: nowrap; }
+.unit { margin-left: 0.3em; font-size: var(--text-body); font-weight: 500; letter-spacing: 0; }
+@media (min-width: 768px) { .cells { grid-template-columns: repeat(4, minmax(0, 1fr)); column-gap: var(--space-5); } }
+@media (min-width: 1280px) {
+  .figs { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--space-6); align-items: start; }
+  .lead { grid-column: 1 / 6; }
+  .cells { grid-column: 6 / -1; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--space-6); }
+}
+
+/* ── Go deeper: an index ───────────────────────────── */
+.deeper { position: relative; padding-block: var(--section-pad-y); }
+.dHeading { margin: 0; }
+.dBody { display: grid; gap: var(--space-6); margin-top: var(--space-7); }
+.dTabs { display: flex; gap: var(--space-6); overflow-x: auto; border-bottom: 1px solid var(--color-line-strong); scrollbar-width: none; }
+.dTab {
+  min-height: 44px; margin-bottom: -1px; padding: 0; cursor: pointer;
+  background: none; border: 0; border-bottom: 2px solid transparent; color: var(--color-ink); font: inherit; font-size: var(--text-body);
+  transition: border-color var(--dur-2) var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) { .dTab:hover { border-bottom-color: var(--color-line-strong); } }
+.dTab[aria-selected="true"] { border-bottom-color: var(--color-ink); font-weight: 500; }
+.dTab:focus-visible { outline-offset: -2px; }
+.dPreview { margin: 0; }
+.dFrame { position: relative; aspect-ratio: 16 / 10; overflow: hidden; background: var(--color-surface-2); }
+/* Out fast, in slow (D28) */
+.dImg { object-fit: cover; opacity: 0; transition: opacity var(--dur-1) var(--ease-out); }
+.dImg[data-on] { opacity: 1; transition: opacity var(--dur-4) var(--ease-settle) var(--dur-1); }
+.dCorner { position: absolute; left: 0; top: 0; width: var(--space-4); height: var(--space-4); background: var(--color-green); border-right: 1px solid var(--color-ink); border-bottom: 1px solid var(--color-ink); }
+.dCap { margin-top: var(--space-2); font-size: var(--text-caption); color: var(--color-muted); }
+.dList { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--color-ink); }
+.dRow { position: relative; border-bottom: 1px solid var(--color-line-strong); }
+/* The row being looked at: a green rule draws across its top */
+.dRow::before { content: ""; position: absolute; left: 0; right: 0; top: -1px; height: 2px; background: var(--color-green); transform: scaleX(0); transform-origin: left; transition: transform var(--dur-3) var(--ease-settle); }
+.dRow[data-on]::before { transform: scaleX(1); }
+.dLink { display: grid; gap: var(--space-1); min-height: 44px; padding: var(--space-4) 0; color: inherit; text-decoration: none; }
+.dLink:focus-visible { outline-offset: -2px; }
+.dType { font-size: var(--text-caption); color: var(--color-muted); }
+.dTitle { font-size: var(--text-h4); font-weight: 500; line-height: 1.25; text-wrap-style: pretty; }
+.dSource { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-caption); color: var(--color-muted); }
+.dLogo { display: block; width: auto; }
+.rowArrow { flex: none; color: var(--color-ink); }
+.dAll { margin: var(--space-6) 0 0; }
+@media (min-width: 768px) {
+  .dLink { grid-template-columns: 8.5rem minmax(0, 1fr) 12rem; align-items: baseline; column-gap: var(--space-5); }
+  .dSource { justify-content: flex-end; align-self: center; }
+}
+@media (min-width: 1280px) {
+  .dBody { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--space-6); row-gap: var(--space-6); }
+  .dTabs { grid-column: 6 / -1; grid-row: 1; }
+  .dPreview { grid-column: 1 / 6; grid-row: 1 / 3; align-self: start; position: sticky; top: calc(var(--space-9) + var(--space-4)); }
+  .dFrame { aspect-ratio: 4 / 5; }
+  .dList { grid-column: 6 / -1; grid-row: 2; }
+}
+
+/* ── Origin: the forest section ────────────────────── */
+.origin { position: relative; overflow: hidden; background: var(--color-forest); color: var(--color-on-dark); padding-block: var(--section-pad-y); }
+.origin :focus-visible { outline-color: var(--color-on-dark); }
+.oGrid { display: grid; gap: var(--space-8); }
+.oArt { position: relative; }
+.oYear { margin: 0; font-weight: 400; color: var(--color-on-dark-muted); }
+.oSvg { display: block; width: 100%; height: auto; margin-top: calc(var(--space-6) * -1); overflow: visible; }
+.oBase { fill: none; stroke: rgb(245 244 241 / 0.5); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.oDash { fill: none; stroke: rgb(245 244 241 / 0.3); stroke-width: 1; stroke-dasharray: 3 4; vector-effect: non-scaling-stroke; }
+.oLine { fill: none; stroke: var(--color-on-dark); stroke-width: 0.8; stroke-dasharray: 1; stroke-dashoffset: 0; }
+.oStrong { stroke: var(--color-green); stroke-width: 1.4; }
+.oTok { fill: rgb(245 244 241 / 0.7); }
+.oTokStrong, .oQuery { fill: var(--color-green); }
+.oSvg .oAnchor { fill: var(--color-forest); stroke: var(--color-on-dark); }
+.oCopy h2 { margin: 0; }
+.oLede { margin: var(--space-5) 0 0; color: var(--color-on-dark); }
+.oBtn { margin-top: var(--space-6); border: 1px solid var(--color-on-dark); color: var(--color-on-dark); }
+.oBtn:hover { background: var(--color-on-dark); color: var(--color-forest); }
+@media (min-width: 768px) { .oArt { max-width: 640px; } }
+@media (min-width: 1280px) {
+  .oGrid { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--space-6); align-items: end; }
+  .oArt { grid-column: 1 / 7; }
+  .oCopy { grid-column: 8 / -1; padding-bottom: var(--space-2); }
+}
+
+/* ── Voices ────────────────────────────────────────── */
+.voices { position: relative; padding-block: var(--section-pad-y) var(--space-8); }
+.vTitle { margin: 0; max-width: 20ch; }
+.vFeat { position: relative; margin: var(--space-8) 0 0; }
+.vFeatQuote { margin: 0; }
+.vFeatQuote p { margin: 0; max-width: 20ch; font-size: var(--text-h2); font-weight: 400; line-height: 1.12; letter-spacing: var(--tracking-h2); }
+/* The opening mark hangs in the margin, so the text edge stays on the grid line */
+.vHang { margin-left: 0; }
+@media (min-width: 768px) { .vHang { margin-left: -0.42em; } }
+.vStem { display: none; }
+.vWho { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-1) var(--space-3); margin-top: var(--space-5); font-size: var(--text-small); }
+.vName { font-weight: 500; }
+.vRole { color: var(--color-muted); }
+.vList { display: grid; gap: var(--space-6); margin: var(--space-8) 0 0; padding: 0; list-style: none; }
+.vQuote { height: 100%; margin: 0; padding-top: var(--space-4); border-top: 1px solid var(--color-ink); }
+.vQuote blockquote { margin: 0; }
+.vQuote p { margin: 0; font-size: var(--text-h4); font-weight: 400; line-height: 1.35; }
+.vHangSm { margin-left: 0; }
+@media (min-width: 768px) { .vHangSm { margin-left: -0.4em; } }
+@media (min-width: 768px) {
+  .vList { grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: var(--space-5); }
+}
+@media (min-width: 1280px) {
+  .vList { column-gap: var(--space-6); }
+  /* The featured quote starts on column 2; column 1 holds a hatched stem the height of the quote */
+  .vFeat { --col: calc((min(100vw, var(--content-max)) - 2 * var(--page-margin) - 11 * var(--space-6)) / 12); padding-left: calc(var(--col) + var(--space-6)); }
+  .vFeatQuote p { max-width: 18ch; font-size: var(--text-h1); line-height: 1.06; letter-spacing: var(--tracking-h1); }
+  .vStem {
+    display: block; position: absolute; left: 0; top: 0.4em; bottom: 0; width: var(--space-5);
+    border-left: 1px solid var(--color-ink);
+    background: repeating-linear-gradient(-56deg, rgb(38 38 38 / 0.35) 0 1px, transparent 1px 5px);
+  }
+}
+
+/* ── Paths ─────────────────────────────────────────── */
+.paths { position: relative; padding-block: var(--section-pad-y); }
+.pHeading { margin: 0; }
+.pList { display: grid; gap: var(--space-8); margin: var(--space-8) 0 0; padding: 0; list-style: none; }
+.pCard { position: relative; display: flex; flex-direction: column; height: 100%; padding-top: var(--space-5); border-top: 1px solid var(--color-ink); color: inherit; text-decoration: none; }
+.pCard:focus-visible { outline-offset: 6px; }
+.pRule { position: absolute; left: 0; right: 0; top: -2px; height: 3px; background: var(--color-green); transform: scaleX(0); transform-origin: left; transition: transform var(--dur-3) var(--ease-settle); }
+.pGlyph { display: block; width: 100%; max-width: 240px; height: auto; margin-bottom: var(--space-6); overflow: visible; }
+.gLine { fill: none; stroke: var(--color-ink); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.gDash { fill: none; stroke: rgb(38 38 38 / 0.45); stroke-width: 1; stroke-dasharray: 3 4; vector-effect: non-scaling-stroke; }
+.gKey { fill: var(--color-surface-2); transition: fill var(--dur-2) var(--ease-out); }
+.pName { margin: 0; }
+.pLine { margin-top: var(--space-3); max-width: 34ch; font-size: var(--text-body); line-height: 1.55; color: var(--color-muted); }
+.pAction {
+  display: inline-flex; align-items: center; gap: var(--space-2); min-height: 44px; margin-top: auto; padding-top: var(--space-4);
+  font-size: var(--text-small); font-weight: 500; text-decoration-line: underline; text-decoration-thickness: 1px; text-underline-offset: 6px;
+}
+.pCard:focus-visible .gKey { fill: var(--color-green); }
+.pCard:focus-visible .pRule { transform: scaleX(1); }
+@media (hover: hover) and (pointer: fine) {
+  .pCard:hover .gKey { fill: var(--color-green); }
+  .pCard:hover .pRule { transform: scaleX(1); }
+  .pCard:hover .pAction { text-decoration-thickness: 2px; }
+}
+@media (min-width: 768px) { .pList { grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: var(--space-5); } }
+@media (min-width: 1280px) { .pList { column-gap: var(--space-6); } }
+
+/* ── Close: the second NEAR-green field ────────────── */
+.close { position: relative; overflow: hidden; background: var(--color-green); color: var(--color-ink); padding-block: var(--section-pad-y) calc(var(--section-pad-y) + var(--space-6)); }
+.close :focus-visible { outline-color: var(--color-ink); }
+.cArt { display: none; }
+.cSvg { display: block; width: 100%; height: 100%; overflow: visible; }
+.cDash { fill: none; stroke: rgb(38 38 38 / 0.5); stroke-width: 1; stroke-dasharray: 3 4; vector-effect: non-scaling-stroke; }
+.cSvg .anchorOnGreen { fill: var(--color-green); }
+.cGrid { display: grid; gap: var(--space-6); }
+.cTitle { margin: 0; max-width: 7.2em; }
+.cLede { margin: 0; }
+.cForm { max-width: 34rem; }
+.cLabel { display: block; margin-bottom: var(--space-2); font-size: var(--text-small); font-weight: 500; }
+.cSlot { display: grid; }
+.cRow, .cStatus { grid-area: 1 / 1; }
+.cRow { display: flex; gap: var(--space-2); }
+.cRow[data-done] { visibility: hidden; }
+.cInput {
+  flex: 1; min-width: 0; height: var(--control-h); padding: 0 var(--space-4);
+  background: var(--color-surface); border: 1px solid var(--color-ink); border-radius: var(--radius-sm);
+  color: var(--color-ink); font: inherit; font-size: var(--text-body);
+}
+.cInput:focus-visible { outline: 2px solid var(--color-ink); outline-offset: 2px; }
+.cSubmit { height: var(--control-h); background: var(--color-ink); color: var(--color-on-dark); }
+.cSubmit:hover { background: var(--color-forest); }
+.cSubmit:focus-visible { outline-offset: 2px; }
+.cSuccess { display: flex; align-items: center; gap: var(--space-2); min-height: var(--control-h); margin: 0; font-weight: 500; }
+.cError { min-height: 1.5em; margin: var(--space-2) 0 0; font-size: var(--text-small); font-weight: 500; }
+.cNote { margin: 0; font-size: var(--text-caption); }
+.cNote a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+@media (min-width: 1280px) {
+  /* Kept right of the form at every width: from 1440 up it sits in the margin beside the content */
+  .cArt { display: block; position: absolute; top: -48px; bottom: -48px; right: calc(max(0px, (100vw - var(--content-max)) / 2) - 200px); width: 600px; pointer-events: none; }
+  .cGrid { grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: var(--space-6); row-gap: var(--space-6); }
+  .cTitle { grid-column: 1 / 10; }
+  .cLede { grid-column: 1 / 6; align-self: start; margin-top: var(--space-5); }
+  .cForm { grid-column: 6 / 11; margin-top: var(--space-5); }
+}

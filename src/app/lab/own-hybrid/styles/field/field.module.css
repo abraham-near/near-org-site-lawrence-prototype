@@ -1,0 +1,28 @@
+/* Field (D54): Ikeda-style hairline fields with rendered frosted glass and thin metal floating in them. Tokens only. */
+.art { position: relative; width: 100%; aspect-ratio: 4 / 3; }
+.art svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+
+/* The field: ink hairlines and dots (dots are zero-length subpaths with round caps) */
+.f { fill: none; stroke: color-mix(in srgb, var(--color-ink) 52%, transparent); stroke-width: 0.35; }
+.fMid { fill: none; stroke: color-mix(in srgb, var(--color-ink) 50%, transparent); stroke-width: 0.6; }
+.fBold { fill: none; stroke: color-mix(in srgb, var(--color-ink) 55%, transparent); stroke-width: 1.05; }
+.faint { fill: none; stroke: color-mix(in srgb, var(--color-ink) 42%, transparent); stroke-width: 0.4; }
+.dots { fill: none; stroke: color-mix(in srgb, var(--color-ink) 80%, transparent); stroke-linecap: round; stroke-width: 1.15; }
+.dotsFine { fill: none; stroke: color-mix(in srgb, var(--color-ink) 70%, transparent); stroke-linecap: round; stroke-width: 0.7; }
+
+/* The frosted copy: the same field, blurred, laid over the glass so the glass reads as frosting it */
+.frost { mix-blend-mode: multiply; opacity: 0.4; }
+
+/* Front layer: hairlines in front of the glass, the green trace, labels */
+.hair { fill: none; stroke: color-mix(in srgb, var(--color-ink) 72%, transparent); stroke-width: 0.6; }
+.thin { fill: none; stroke: color-mix(in srgb, var(--color-ink) 50%, transparent); stroke-width: 0.45; }
+.dash { fill: none; stroke: color-mix(in srgb, var(--color-ink) 80%, transparent); stroke-width: 0.75; stroke-dasharray: 3 2.5; }
+.ink { fill: var(--color-ink); }
+.green { fill: none; stroke: var(--color-green); stroke-width: 1.4; }
+.greenFill { fill: var(--color-green); }
+.label { font-family: var(--font-sans); font-size: 13px; font-weight: 500; fill: var(--color-ink); letter-spacing: -0.005em; }
+.micro { font-family: var(--font-sans); font-size: 13px; fill: var(--color-muted); }
+.mono { font-family: var(--font-mono); font-size: 13px; fill: var(--color-ink); }
+.muted { fill: var(--color-muted); }
+.white { stop-color: var(--color-white); }
+.whiteFill { fill: var(--color-white); }

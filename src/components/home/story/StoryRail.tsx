@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { OwnArt } from "../chapter-one/OwnArt";
+import { OrbitArt } from "./orbit/OrbitArt";
 import { OwnReplay } from "../chapter-one/OwnReplay";
 import { ANSWER, CONNECT, MEET, OWN, PROBLEM } from "./copy";
 import { NearArt } from "./NearArt";
@@ -21,12 +22,17 @@ const words = (s: string) => s.split(" ").map((w, i) => <span key={i} className=
 
 export const RAIL = { gate: 150, stations: [235, 290, 345, 400], end: 470 };
 
-export function StoryRail({ look = "plain" }: { look?: RailLook }) {
+// `art` picks the "Own your" drawings: today's line drawings (D18) or Orbit's rendered chrome and glass (D56), which
+// take a larger 420 × 315 slot
+export type RailArt = "line" | "orbit";
+
+export function StoryRail({ look = "plain", art = "line" }: { look?: RailLook; art?: RailArt }) {
+  const Own = art === "orbit" ? OrbitArt : OwnArt;
   return (
     <section className={base.story} aria-labelledby="story-title" data-story="rail">
-      <StoryStatic titleId="story-title" />
+      <StoryStatic titleId="story-title" art={art} />
       <div className={base.track} style={{ "--story-h": "620vh" } as React.CSSProperties} aria-hidden="true">
-        <div className={`${base.stage} ${styles.stage}`} data-s="stage" data-look={look}>
+        <div className={`${base.stage} ${styles.stage}`} data-s="stage" data-look={look} data-art-kind={art}>
           <RailBack look={look} />
           <div className={styles.world} style={{ "--end": `${RAIL.end}vw` } as React.CSSProperties} data-s="world">
             <RailDetail look={look} gate={RAIL.gate} stations={RAIL.stations} />
@@ -48,10 +54,12 @@ export function StoryRail({ look = "plain" }: { look?: RailLook }) {
 
             {OWN.map((o, i) => (
               <div key={o.key} className={styles.station} style={{ "--x": `${RAIL.stations[i]}vw` } as React.CSSProperties} data-s="station">
-                <div className={styles.artSlot} data-own-stage>
-                  <OwnArt which={o.key} className={styles.art} />
+                <div className={styles.artSlot} data-own-stage data-large={art === "orbit" || undefined}>
+                  <Own which={o.key} className={styles.art} />
                 </div>
-                <span className={styles.dot} data-s="dot" />
+                <span className={styles.dot} data-s="dot">
+                  <Image src="/brand/icon.svg" alt="" width={639} height={639} className={styles.dotMark} unoptimized />
+                </span>
                 <p className={styles.title} data-s="words">Own your <span className="accent">{o.word}</span></p>
                 <p className={`t-lede ${styles.line}`} data-s="words">{o.line}</p>
               </div>

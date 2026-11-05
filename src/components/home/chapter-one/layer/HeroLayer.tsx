@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import TRACKS from "./tracks.json";
 import styles from "./HeroLayer.module.css";
-import { FPS, VW, VH, A4_PALETTE, clamp, smooth, rand, sample, groundAt, point, clearOfCopy, composition, makeInk, type Track, type Pt, type Ctx, type Look, type Plex, type Palette } from "./core";
+import { FPS, VW, VH, A4_PALETTE, clamp, smooth, rand, sample, groundAt, point, clearOfCopy, composition, cornerFade, makeInk, type Track, type Pt, type Ctx, type Look, type Plex, type Palette } from "./core";
 import { dust } from "./dust";
 import { signal } from "./signal";
 
@@ -278,7 +278,7 @@ function notes(host: HTMLElement): Look {
 type Variant = "plexus" | "traces" | "rings" | "plexusTraces" | "plexusBright";
 
 // onFocus: where your node is on screen each frame (the composition's focus, D50), for a layer drawn with it
-function plexus(host: HTMLElement, variant: Variant, PX: Plex, onFocus?: (p: [number, number] | null) => void): Look {
+function plexus(host: HTMLElement, variant: Variant, PX: Plex, onFocus?: (p: [number, number] | null, pockets: number[][]) => void): Look {
   const canvas = document.createElement("canvas");
   canvas.className = styles.canvas;
   host.appendChild(canvas);
@@ -286,7 +286,9 @@ function plexus(host: HTMLElement, variant: Variant, PX: Plex, onFocus?: (p: [nu
   const bright = variant === "plexusBright";
   // D49 (option 1): greens nearer NEAR green. Over pale mist the deep green takes three fifths NEAR green; over the mid-tones
   // it is mostly NEAR green; over the dark forest white keeps a touch of it
-  const BRIGHT_PALETTE: Palette = { pale: [0.62, 0], mid: [0.9, 0], dark: [0.85, 0.75] };
+  // D58 ("greener or brighter so we see more dots and lines clearly"): a deeper, more saturated green over the pale mist
+  // (it reads against it), pure NEAR green over the mid-tones, and NEAR green with less white over the dark forest
+  const BRIGHT_PALETTE: Palette = { pale: [0.45, 0], mid: [1, 0], dark: [0.95, 0.45] };
   const ink = makeInk(g, bright ? BRIGHT_PALETTE : A4_PALETTE), GREEN = ink.GREEN;
   const { points, chains, keys } = PX;
   // Ambient motion (D43, D44), so the layer is never a still with lights running over it. With t = 0 (reduced motion)
@@ -341,6 +343,46 @@ function plexus(host: HTMLElement, variant: Variant, PX: Plex, onFocus?: (p: [nu
     if (rand(key, 7) < 0.5) { p.moveTo(bx + (ax - bx) * s0, by + (ay - by) * s0); p.lineTo(bx + (ax - bx) * s1, by + (ay - by) * s1); return; }
     p.moveTo(ax + (bx - ax) * s0, ay + (by - ay) * s0); p.lineTo(ax + (bx - ax) * s1, ay + (by - ay) * s1);
   };
+  // Pockets (D58): small isolated clusters in the quieter parts of the picture, after the dense knots the plexus forms
+  // over the near forest late in the move ("closer to that level in some other isolated areas"): in the mist right of
+  // the headline, the mist below the far ridges and the bottom left. Each is anchored to the long-lived tracked point
+  // nearest its place at the start (so it rides the land through the move), raises the composition to full around it
+  // (core.ts), and carries seven satellite points of its own, fixed to the anchor at seeded offsets (the mist has few
+  // tracked points to join). Video coordinates.
+  const POCKETS: [number, number][] = [[0.55, 0.4], [0.52, 0.62], [0.2, 0.84]];
+  const pocketTrack = POCKETS.map(([u, v]) => {
+    let best = -1, bd = Infinity;
+    points.forEach((t, i) => {
+      const q = sample(t, 0, PX.step);
+      if (!q || (t.pts.length / 2) * PX.step < PX.frames * 0.6) return;
+      const d = Math.hypot(q[0] - u, q[1] - v);
+      if (d < bd) { bd = d; best = i; }
+    });
+    return bd < 0.08 ? best : -1;
+  });
+  // D59: six satellites each (was seven), with the composition trimmed, about a fifth fewer new elements
+  const SATS = 6;
+  // The foreground trees (D61: "add more dust and connecting lines to the foreground trees that enter as we scroll
+  // down"): they rise into the picture late in the pull-back, dark and barely tracked. Up to five anchors among the
+  // tracked points that sit on them (low in the picture and dark, at 85% of the move), at least 14% of the picture
+  // apart. Each becomes a pocket that fades in as the trees enter (frames from 150), with eight satellites of its own
+  // (joined by the plexus) and fourteen motes of dust around it.
+  const FG_AT = Math.round(PX.frames * 0.85);
+  const fgTrack: number[] = [];
+  points
+    .map((t, i) => ({ i, q: sample(t, FG_AT, PX.step), l: groundAt(t, FG_AT, PX.step), n: t.pts.length }))
+    .filter((o) => o.q && o.q[1] > 0.55 && o.l < 0.3)
+    .sort((a, b) => b.n - a.n)
+    .forEach((o) => {
+      if (fgTrack.length < 5 && fgTrack.every((j) => { const q = sample(points[j], FG_AT, PX.step)!; return Math.hypot(q[0] - o.q![0], q[1] - o.q![1]) > 0.14; })) fgTrack.push(o.i);
+    });
+  const FG_SATS = 8, FG_MOTES = 14;
+  // The very end (D62: "add more to the very end"): the lower trees in the last frames, where nothing is tracked. Six
+  // more anchors, weighted to the lower half, placed where they sit in the final picture (as shares of the layer's width and height), fading in over
+  // the last 70 frames (from frame 170, full by 210). Each rides the trees by the mean motion of the tracked points near it (their displacement from
+  // the final frame), and carries the foreground's satellites and dust.
+  const END_AT: [number, number][] = [[0.25, 0.58], [0.7, 0.62], [0.45, 0.74], [0.15, 0.86], [0.62, 0.88], [0.88, 0.78]];
+  const END = PX.frames - 1;
   const you = keys.reduce((b, t, i) => (Math.abs((sample(t, 0, PX.step)?.[0] ?? 9) - 0.66) < Math.abs((sample(keys[b], 0, PX.step)?.[0] ?? 9) - 0.66) ? i : b), 0);
   // Plexus rules: lines only within reach (in the picture's own scale, growing a little with the scroll), each point to
   // its K nearest, every line fading with its length
@@ -352,7 +394,7 @@ function plexus(host: HTMLElement, variant: Variant, PX: Plex, onFocus?: (p: [nu
   const LINE = variant === "traces" ? 0.5 : variant === "plexusTraces" ? 0.55 : bright ? 1 : 0.7;
   // on a phone the picture is a short band above the copy, where option 1 at full strength crowds it
   const narrow = () => window.innerWidth < 768;
-  const TRACE = bright ? { a: 0.85, w: 1 } : variant === "plexusTraces" ? { a: 0.65, w: 1 } : { a: 0.55, w: 0.75 };
+  const TRACE = bright ? { a: 1, w: 1.1 } : variant === "plexusTraces" ? { a: 0.65, w: 1 } : { a: 0.55, w: 0.75 };
   // Ground this dark (under 5%) is crushed black: no dots there, and traces break (D48)
   const CRUSHED = 0.05;
   let dpr = 1;
@@ -371,6 +413,20 @@ function plexus(host: HTMLElement, variant: Variant, PX: Plex, onFocus?: (p: [nu
     return out;
   };
   const seg = (p: Path2D, ax: number, ay: number, bx: number, by: number) => { p.moveTo(ax, ay); p.lineTo(bx, by); };
+  // D59, the rule for lines that join dots: never one flat tone over the picture. Each is drawn in eight stretches whose
+  // strength follows its place along the line: full at the dots at either end, about a sixth in the middle. Same life
+  // as `part` (the stretch [s0, s1], from the end the key picks); still batched, by the stretches' quantised alphas.
+  const GRAD_N = 8;
+  const along = (t: number) => 0.15 + 0.85 * Math.pow(Math.abs(2 * t - 1), 1.2);
+  const gradPart = (b: Batch, ground: number, a: number, w: number, key: number, s0: number, s1: number, ax: number, ay: number, bx: number, by: number) => {
+    if (s1 <= s0) return;
+    const [sx, sy, ex, ey] = rand(key, 7) < 0.5 ? [bx, by, ax, ay] : [ax, ay, bx, by];
+    for (let k = 0; k < GRAD_N; k++) {
+      const t0 = Math.max(k / GRAD_N, s0), t1 = Math.min((k + 1) / GRAD_N, s1);
+      if (t1 <= t0) continue;
+      for (const p of both(b, ground, a * along((t0 + t1) / 2), w)) seg(p, sx + (ex - sx) * t0, sy + (ey - sy) * t0, sx + (ex - sx) * t1, sy + (ey - sy) * t1);
+    }
+  };
   const cross = (p: Path2D, x: number, y: number, r: number, gap: number) => {
     seg(p, x - r, y, x - gap, y); seg(p, x + gap, y, x + r, y); seg(p, x, y - r, x, y - gap); seg(p, x, y + gap, x, y + r);
   };
@@ -400,9 +456,38 @@ function plexus(host: HTMLElement, variant: Variant, PX: Plex, onFocus?: (p: [nu
       // around the right-hand upper phi point; where the composition is light, the field also thins (below)
       // The focus is your node, where it is this frame
       const yp = bright ? point(keys[you], c, PX) : null, focus: [number, number] | null = yp && [yp.x, yp.y];
-      onFocus?.(focus);
-      const comp = (x: number, y: number) => composition(c, x, y, focus);
-      const clear = (x: number, y: number) => (bright ? clearOfCopy(c, x, y) * (0.15 + 0.85 * comp(x, y)) : 1);
+      // Each pocket's anchor this frame: its tracked point, or its place in the picture where that point isn't on screen
+      const anchors = bright ? POCKETS.map(([u, v], k): GPt => {
+        const t = pocketTrack[k] >= 0 ? points[pocketTrack[k]] : null, p = t && point(t, c, PX);
+        if (p && t) return { ...p, l: groundAt(t, c.f, PX.step) };
+        const [x, y] = c.map(u, v);
+        return { x, y, a: 1, l: 0.75 };
+      }) : [];
+      // the foreground anchors this frame, with how far the trees have entered (D61)
+      const enter = smooth((c.f - (FG_AT - 55)) / 45);
+      const fg = bright && enter > 0 ? fgTrack.map((i): GPt | null => { const p = point(points[i], c, PX); return p && { ...p, a: p.a * enter, l: Math.max(groundAt(points[i], c.f, PX.step), 0.12) }; }).filter((p): p is GPt => !!p) : ([] as GPt[]);
+      const endIn = bright ? smooth((c.f - (END - 70)) / 40) : 0;
+      // placed across the part of the picture still showing between the curtains (the column)
+      const [v0, v1] = c.view ?? [0, c.W];
+      if (endIn > 0) END_AT.forEach(([u, v]) => {
+        // the anchor's place in the video, then the mean motion of the tracked points within 15% of it since the end
+        const vx = (v0 + u * (v1 - v0) - inv.ox) / inv.dw, vy = (v * c.H - inv.oy) / inv.dh;
+        let dx = 0, dy = 0, n = 0;
+        for (const t of points) {
+          const e = sample(t, END, PX.step), q = e && sample(t, c.f, PX.step);
+          if (!e || !q || Math.hypot(e[0] - vx, e[1] - vy) > 0.15) continue;
+          dx += q[0] - e[0]; dy += q[1] - e[1]; n++;
+        }
+        const [x, y] = c.map(vx + (n ? dx / n : 0), vy + (n ? dy / n : 0));
+        const a = endIn * clearOfCopy(c, x, y) * Math.min(clamp((c.H - y) / 30), clamp((v1 - x) / 30), clamp((x - v0) / 30));
+        if (a > 0) fg.push({ x, y, a, l: 0.12 });
+      });
+      const pockets: number[][] = [...anchors.map((p) => [p.x, p.y]), ...fg.map((p) => [p.x, p.y, p.a])];
+      onFocus?.(focus, pockets);
+      const comp = (x: number, y: number) => composition(c, x, y, focus, pockets);
+      // D58: the composition's quietest parts keep three tenths of the layer (was 15%)
+      // D59: and in the bottom left, mixed progressively into the picture towards the left and up (core.ts cornerFade)
+      const clear = (x: number, y: number) => (bright ? clearOfCopy(c, x, y) * (0.3 + 0.7 * comp(x, y)) * cornerFade(c, x, y) : 1);
       // a point is kept where the composition wants it: nearly all of them at the focus, few where it is light
       const thin = (id: number, x: number, y: number) => (bright ? smooth((1.6 * comp(x, y) - 0.25 - rand(id, 40)) / 0.15) : 1);
       const at = (t: Track): GPt | null => { const p = point(t, c, PX); return p && { ...p, a: p.a * clear(p.x, p.y), l: groundAt(t, c.f, PX.step) }; };
@@ -429,7 +514,28 @@ function plexus(host: HTMLElement, variant: Variant, PX: Plex, onFocus?: (p: [nu
         const l = (q.lum[k0] + ((q.lum[k0 + 1] ?? q.lum[k0]) - q.lum[k0]) * ku) / 99;
         return a > 0 ? { x, y, a, l, r: 1.1 * (0.35 + 0.65 * pr), id } : null;
       });
-      const pts = [...tracked, ...air].filter((p): p is Dot => !!p);
+      // Pocket satellites (D58): seven points around each anchor, within about 5% of the picture's width (flattened a
+      // little, like the land), drifting a few pixels on their own; ids from 7000, so like the air points they reach a
+      // little further and show only while a line reaches them
+      const sats = anchors.flatMap((q, k) => Array.from({ length: SATS }, (_, n): Dot | null => {
+        const id = 7000 + k * 10 + n, tau = 2 * Math.PI * c.t * pace(id);
+        const r = inv.dw * 0.05 * (0.3 + 0.7 * Math.sqrt(rand(id, 30))), ang = 2 * Math.PI * rand(id, 31);
+        const x = q.x + r * Math.cos(ang) + 2.5 * Math.sin(tau / (8 + 5 * rand(id, 32))), y = q.y + 0.7 * r * Math.sin(ang) + 2 * Math.sin(tau / (7 + 4 * rand(id, 33)));
+        const pr = presence(id, c.t, 0.35);
+        const a = q.a * Math.min(clamp(y / 40), clamp((c.H - y) / 40), clamp((c.W - x) / 40), clamp(x / 40)) * pr * clear(x, y) * thin(id, x, y);
+        return a > 0 ? { x, y, a, l: q.l, r: (n % 3 === 0 ? 1.6 : 1.1) * 1.1 * (0.35 + 0.65 * pr), id } : null;
+      }));
+      // Foreground satellites (D61): wider (about 8% of the picture), on the trees' own ground (kept above crushed
+      // black, a pale green-white over the dark), ids from 7100
+      const fgSats = fg.flatMap((q, k) => Array.from({ length: FG_SATS }, (_, n): Dot | null => {
+        const id = 7100 + k * 10 + n, tau = 2 * Math.PI * c.t * pace(id);
+        const r = inv.dw * 0.08 * (0.25 + 0.75 * Math.sqrt(rand(id, 30))), ang = 2 * Math.PI * rand(id, 31);
+        const x = q.x + r * Math.cos(ang) + 2.5 * Math.sin(tau / (8 + 5 * rand(id, 32))), y = q.y + 0.8 * r * Math.sin(ang) + 2 * Math.sin(tau / (7 + 4 * rand(id, 33)));
+        const pr = presence(id, c.t, 0.35);
+        const a = q.a * Math.min(clamp(y / 40), clamp((c.H - y) / 40), clamp((c.W - x) / 40), clamp(x / 40)) * pr * clear(x, y);
+        return a > 0 ? { x, y, a, l: q.l, r: (n % 3 === 0 ? 1.6 : 1.1) * 1.1 * (0.35 + 0.65 * pr), id } : null;
+      }));
+      const pts = [...tracked, ...air, ...sats, ...fgSats].filter((p): p is Dot => !!p);
       const lines: Batch = new Map(), dots: Batch = new Map();
 
       // Ridge traces (TRON's line-work that follows the land), worked out first so the plexus can give way to them:
@@ -565,13 +671,15 @@ function plexus(host: HTMLElement, variant: Variant, PX: Plex, onFocus?: (p: [nu
         const ground = variant === "traces" ? 0.2 + 0.8 * smooth((l - 0.22) / 0.2) : 1;
         const offTrace = onTrace ? smooth((Math.max(onTrace[i], onTrace[j]) - 6) / 10) : 1;
         // lighter over pale ground, where the lines stack up against the sky (D45); option 1 only a little lighter there
-        const pale = 1 - (bright ? 0.2 : 0.45) * smooth((l - 0.6) / 0.2);
+        // D58: option 1 no longer lightens over pale ground (the mist is where it was hardest to see)
+        const pale = bright ? 1 : 1 - 0.45 * smooth((l - 0.6) / 0.2);
         // fading with length: option 1 holds a short line at full strength and fades a long one away (D49:
         // "brighter when they are shorter then fade some as they get longer")
-        const fall = bright ? Math.min(1, 1.35 * Math.pow(1 - d / r, 2)) : Math.pow(1 - d / r, 1.6);
+        const fall = bright ? Math.min(1, 1.6 * Math.pow(1 - d / r, 2)) : Math.pow(1 - d / r, 1.6);
         const al = LINE * (bright && narrow() ? 0.7 : 1) * fall * Math.min(a.a, b.a) * keep * ground * offTrace * pale;
         const key = Math.min(a.id, b.id) * 10007 + Math.max(a.id, b.id), [s0, s1, fa] = lineLife(key, c.t);
-        for (const p of both(lines, l, al * fa, bright ? 0.9 : 0.75)) part(p, key, s0, s1, a.x, a.y, b.x, b.y);
+        if (bright) gradPart(lines, l, al * fa, 1.1, key, s0, s1, a.x, a.y, b.x, b.y);
+        else for (const p of both(lines, l, al * fa, 0.75)) part(p, key, s0, s1, a.x, a.y, b.x, b.y);
         linked[i] = Math.max(linked[i], al * fa * (s1 - s0)); linked[j] = Math.max(linked[j], al * fa * (s1 - s0));
       }
       // Depth links (D44): long lines between a near point and a far one (chosen offline by how fast each moves through
@@ -583,14 +691,16 @@ function plexus(host: HTMLElement, variant: Variant, PX: Plex, onFocus?: (p: [nu
         const key = 900000 + n, [s0, s1, fa] = lineLife(key, c.t);
         // thinner than the plexus, and lighter the longer it is (a long line should not outweigh the short ones)
         const len = Math.hypot(b.x - a.x, b.y - a.y), fade = 1 - 0.45 * smooth((len - 2 * reach) / (2 * reach));
-        for (const p of both(lines, (a.l + b.l) / 2, 0.34 * Math.min(a.a, b.a) * fade * fa, 0.6)) part(p, key, s0, s1, a.x, a.y, b.x, b.y);
+        if (bright) gradPart(lines, (a.l + b.l) / 2, 0.45 * Math.min(a.a, b.a) * fade * fa, 0.75, key, s0, s1, a.x, a.y, b.x, b.y);
+        else for (const p of both(lines, (a.l + b.l) / 2, 0.34 * Math.min(a.a, b.a) * fade * fa, 0.6)) part(p, key, s0, s1, a.x, a.y, b.x, b.y);
       });
       // Dots. An air dot or a traveller shows only while a line reaches it (it fades with its strongest line), so the sky
       // has no lone specks (D45) and no bead slides bare along a trace (D46)
       pts.forEach((p, i) => {
         if (p.l < CRUSHED) return;
         const a = p.id >= AIR || (p.id >= 3000 && p.id < 5000) ? p.a * smooth(linked[i] / 0.06) : p.a;
-        for (const path of both(dots, p.l, (bright ? 0.9 : 0.85) * a, 0)) { path.moveTo(p.x + p.r, p.y); path.arc(p.x, p.y, p.r, 0, Math.PI * 2); }
+        const pr = bright ? p.r * 1.25 : p.r;
+        for (const path of both(dots, p.l, (bright ? 1 : 0.85) * a, 0)) { path.moveTo(p.x + pr, p.y); path.arc(p.x, p.y, pr, 0, Math.PI * 2); }
       });
 
       if (traced) {
@@ -601,17 +711,36 @@ function plexus(host: HTMLElement, variant: Variant, PX: Plex, onFocus?: (p: [nu
             const P = r.map((v) => v.p);
             const lens = P.slice(1).map((p, n) => Math.hypot(p.x - P[n].x, p.y - P[n].y)), total = lens.reduce((s, v) => s + v, 0);
             const lo = v0 * total, hi = v1 * total;
+            // D59 (option 1): the gradient rule on the traces too. Their ticked vertices (every third, and the run's
+            // ends) are their dots: each stretch between two is strongest at them and dips to about 30% between (a
+            // gentler dip than the plexus lines', so a ridge still reads as one line)
+            const nodes: number[] = [];
+            let acc = 0;
+            r.forEach((v, n) => { if (n > 0) acc += lens[n - 1]; if (n === 0 || n === r.length - 1 || v.i % 3 === 0) nodes.push(acc); });
+            const along = (s: number) => {
+              if (!bright) return 1;
+              let k = 0;
+              while (k < nodes.length - 2 && s > nodes[k + 1]) k++;
+              const t = clamp((s - nodes[k]) / (nodes[k + 1] - nodes[k] || 1));
+              return 0.3 + 0.7 * Math.pow(Math.abs(2 * t - 1), 1.2);
+            };
             // The trace, drawn only along its living stretch [lo, hi] (it wipes off and draws on now and then)
             let d = 0;
             for (let n = 1; n < r.length; n++) {
-              const a = r[n - 1].p, b = r[n].p, l = lens[n - 1];
+              const a = r[n - 1].p, b = r[n].p, l = lens[n - 1], d0 = d;
               const u0 = clamp((lo - d) / l), u1 = clamp((hi - d) / l);
               d += l;
               if (u1 <= u0) continue;
+              // in four pieces, each at the gradient's strength at its middle
+              for (let m = 0; m < (bright ? 4 : 1); m++) {
+                const pieces = bright ? 4 : 1, ua = u0 + ((u1 - u0) * m) / pieces, ub = u0 + ((u1 - u0) * (m + 1)) / pieces;
+                const qp = clip(a.x + (b.x - a.x) * ua, a.y + (b.y - a.y) * ua, a.x + (b.x - a.x) * ub, a.y + (b.y - a.y) * ub);
+                if (!qp) continue;
+                for (const p of both(lines, (a.l + b.l) / 2, TRACE.a * Math.min(a.a, b.a) * ta * along(d0 + (l * (ua + ub)) / 2), TRACE.w)) seg(p, qp[0], qp[1], qp[2], qp[3]);
+              }
               const q = clip(a.x + (b.x - a.x) * u0, a.y + (b.y - a.y) * u0, a.x + (b.x - a.x) * u1, a.y + (b.y - a.y) * u1);
               if (!q) continue;
               for (const p of both(lines, (a.l + b.l) / 2, TRACE.a * Math.min(a.a, b.a) * ta, TRACE.w)) {
-                seg(p, q[0], q[1], q[2], q[3]);
                 // ticks only where the composition is strong (option 1), so the quieter traces are plain lines
                 if (r[n].i % 3 === 0 && b.x < sweep && d >= lo && d <= hi && (!bright || comp(b.x, b.y) > 0.7)) {
                   const len = l || 1, nx = -(b.y - a.y) / len, ny = (b.x - a.x) / len;
@@ -630,6 +759,18 @@ function plexus(host: HTMLElement, variant: Variant, PX: Plex, onFocus?: (p: [nu
         for (const path of both(lines, p.l, 0.9 * p.a, 1)) {
           cross(path, p.x, p.y, 7, 2.5);
           if (variant === "rings") bracket(path, p.x, p.y, 11, 4);
+        }
+      });
+      // Foreground dust (D61): motes scattered over the trees around each anchor, unlinked, each glimmering slowly on
+      // its own clock (its size and strength breathe; nothing travels)
+      fg.forEach((q, k) => {
+        for (let n = 0; n < FG_MOTES; n++) {
+          const id = 7300 + k * 20 + n, r = inv.dw * 0.11 * Math.sqrt(rand(id, 34)), ang = 2 * Math.PI * rand(id, 35);
+          const x = q.x + r * Math.cos(ang), y = q.y + 0.85 * r * Math.sin(ang);
+          const tw = c.t ? 0.6 + 0.4 * Math.sin((2 * Math.PI * c.t * pace(id)) / (3 + 4 * rand(id, 36)) + 6.3 * rand(id, 37)) : 1;
+          const a = q.a * (0.35 + 0.45 * rand(id, 38)) * tw * clearOfCopy(c, x, y) * Math.min(clamp((c.H - y) / 40), clamp((c.W - x) / 40), clamp(x / 40));
+          const rr = (0.6 + 0.7 * rand(id, 39)) * (0.8 + 0.2 * tw);
+          for (const path of both(dots, q.l, a, 0)) { path.moveTo(x + rr, y); path.arc(x, y, rr, 0, Math.PI * 2); }
         }
       });
       flush(lines);
@@ -702,6 +843,8 @@ export function HeroLayer({ look, settle = false, data = "plexus" }: { look: Lay
     const video = media.querySelector<HTMLVideoElement>("[data-ch='video']");
     const img = media.querySelector<HTMLImageElement>("img");
     const copyEl = host.closest("[data-ch='root']")?.querySelector<HTMLElement>("[data-ch='copy']") ?? null;
+    // the curtains that close the picture into the column (ChapterOneMotion), for Ctx.view
+    const curtains = [stage.querySelector<HTMLElement>("[data-ch='curtain-l']"), stage.querySelector<HTMLElement>("[data-ch='curtain-r']")] as const;
     const playing = () => !!video?.hasAttribute("data-ready");
     const shown = () => (playing() ? video : img) as HTMLElement | null;
     // The thread's head (ChapterOneMotion), in this layer's coordinates; the two boxes only shift on resize
@@ -738,9 +881,10 @@ export function HeroLayer({ look, settle = false, data = "plexus" }: { look: Lay
       else if (variant === "plexusDust") Promise.all([DATA[data](), import("./dust-z-j.json")]).then(([m, d]) => {
         // the dust underneath (its canvas first), A4 over it; D51: the dust at full strength, with particles rising off
         // the land
-        let focus: [number, number] | null = null;
-        const under = dust(host, m.default as Plex, d.default, { strength: 1, weight: (c, x, y) => composition(c, x, y, focus), ribbons: false, risers: 5 });
-        const over = plexus(host, "plexusBright", m.default as Plex, (p) => { focus = p; });
+        let focus: [number, number] | null = null, pockets: number[][] = [];
+        // D58: the dust a third stronger, and shaped by the same pockets as the plexus over it
+        const under = dust(host, m.default as Plex, d.default, { strength: 1.35, weight: (c, x, y) => composition(c, x, y, focus, pockets) * cornerFade(c, x, y), ribbons: false, risers: 5 });
+        const over = plexus(host, "plexusBright", m.default as Plex, (p, k) => { focus = p; pockets = k; });
         ready({ resize: (c) => { under.resize?.(c); over.resize?.(c); }, draw: (c) => { under.draw(c); over.draw(c); } });
       });
       else if (variant === "signal") DATA[data]().then((m) => ready(signal(host, m.default as Plex)));
@@ -775,7 +919,15 @@ export function HeroLayer({ look, settle = false, data = "plexus" }: { look: Lay
         const a = copyEl.getBoundingClientRect(), b = host.getBoundingClientRect();
         if (a.bottom > b.top && a.top < b.bottom) box = [a.left - b.left, a.top - b.top, a.width, a.height];
       }
-      return { host, W, H, f: frameNow(), t, rest: restNow, map: (nx, ny) => [ox + nx * dw, oy + ny * dh], copy: box, thread: headDot()?.[0] ?? null };
+      // the stretch still showing between the curtains, in this layer's coordinates
+      let view: [number, number] = [0, W];
+      const [cl, cr] = curtains;
+      if (cl && cr && cl.offsetParent) {
+        const b = host.getBoundingClientRect(), l = cl.getBoundingClientRect(), r = cr.getBoundingClientRect();
+        view = [clamp(l.right - b.left, 0, W), clamp(r.left - b.left, 0, W)];
+        if (view[1] - view[0] < 40) view = [0, W];
+      }
+      return { host, W, H, f: frameNow(), t, rest: restNow, map: (nx, ny) => [ox + nx * dw, oy + ny * dh], copy: box, thread: headDot()?.[0] ?? null, view };
     };
     const update = () => {
       const w = host.clientWidth, h = host.clientHeight;

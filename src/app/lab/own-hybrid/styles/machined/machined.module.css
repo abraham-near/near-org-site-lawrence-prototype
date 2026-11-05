@@ -1,0 +1,33 @@
+/* "Machined" (D54, after FutureDeluxe for Nothing and Teenage Engineering exploded drawings): bead-blasted aluminium
+   parts with clear glass windows and one anodised green part, rendered (Higgsfield stills), set in an exploded-assembly
+   drawing registered to them: dashed assembly axes behind the parts, leader callouts in tiny mono, ghosted hairline
+   parts, dimension marks. Three layers in one 420 × 315 box: lines behind the render, the render (its glass made partly
+   transparent), lines and labels in front. Tokens only; hairlines stay hairlines at any scale. */
+
+.art { position: relative; width: 100%; aspect-ratio: 4 / 3; }
+.art svg, .render { position: absolute; inset: 0; width: 100%; height: 100%; display: block; overflow: visible; }
+.render { object-fit: fill; pointer-events: none; user-select: none; }
+
+.axis, .hair, .faint, .ghost, .tick, .green, .leader { fill: none; vector-effect: non-scaling-stroke; stroke-linecap: round; }
+/* Assembly axes: long dash, short dot, like a centre line */
+.axis { stroke: color-mix(in oklab, var(--color-ink) 52%, transparent); stroke-width: 0.6; stroke-dasharray: 7 2 1 2; }
+.hair { stroke: color-mix(in oklab, var(--color-ink) 72%, transparent); stroke-width: 0.6; }
+.faint { stroke: color-mix(in oklab, var(--color-ink) 32%, transparent); stroke-width: 0.5; stroke-dasharray: 1 2; }
+.ghost { stroke: color-mix(in oklab, var(--color-ink) 55%, transparent); stroke-width: 0.6; stroke-dasharray: 2.5 2; }
+.tick { stroke: color-mix(in oklab, var(--color-ink) 60%, transparent); stroke-width: 0.5; stroke-linecap: butt; }
+.leader { stroke: color-mix(in oklab, var(--color-ink) 62%, transparent); stroke-width: 0.5; }
+.green { stroke: var(--color-green-text); stroke-width: 0.75; }
+.node { fill: var(--color-surface); stroke: color-mix(in oklab, var(--color-ink) 70%, transparent); stroke-width: 0.6; vector-effect: non-scaling-stroke; }
+.ink { fill: color-mix(in oklab, var(--color-ink) 72%, transparent); }
+
+/* Callouts: the copy's own words in the mono, tiny and tracked */
+.micro { font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.02em; text-transform: uppercase; fill: color-mix(in oklab, var(--color-ink) 78%, transparent); }
+/* The fact: an ink pill with a green dot, the word in the sans at 13 px (at the 420 slot) */
+.pill { fill: var(--color-ink); }
+.pillText { font-family: var(--font-sans); font-size: 13px; font-weight: 500; fill: var(--color-on-dark); }
+.gDot { fill: var(--color-green); }
+/* The name, engraved into the base: a lip of light under a recessed ink letterform */
+.name, .nameLip { font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.04em; }
+.name { fill: color-mix(in oklab, var(--color-ink) 74%, transparent); }
+.nameLip { fill: color-mix(in oklab, var(--color-white) 80%, transparent); }
+.near { fill: var(--color-green-text); }

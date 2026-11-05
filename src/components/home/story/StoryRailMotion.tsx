@@ -84,7 +84,9 @@ export function StoryRailMotion({ gate, stations, end, look }: { gate: number; s
       tl.to({}, { duration: 2 }, 98);
       // The look's own layers and moves (D32), and its parallax on every update
       const parallax = addLook(look, { tl, root, world, gateX: centre(gate), steps: STEPS });
-      return playSteps(tl, arts, STEPS.map((s) => (s - 1) / 100), parallax);
+      // A drawing plays from the moment it starts to fade in (at − 4), so it never shows its end state first and then
+      // resets (D56: Orbit's sequence starts from empty)
+      return playSteps(tl, arts, STEPS.map((s) => (s - 4) / 100), parallax);
     });
     return () => mm.revert();
   }, { scope: anchor });

@@ -1,0 +1,49 @@
+/* Survey (D53): the object as a measured drawing. Hairline object on a faint dot-grid plate, with an instrument layer
+   over it: crosshair nodes, dimension and leader lines to small mono words, registration targets, a tick scale.
+   One green node marks the thing that's yours. Drawn at 240 × 180, shown 320 wide (10 units = 13 px). Tokens only. */
+
+.art { position: relative; width: 100%; container-type: inline-size; }
+.art svg { position: relative; display: block; width: 100%; height: auto; overflow: visible; }
+
+/* The drawing area: a dot grid (every 8 units) on a faint paper wash, feathered on all four sides so it sits in the
+   mist instead of on it. Sizes in cqw of the 240-unit box. */
+.field {
+  position: absolute; left: 2.5%; top: 0; width: 95%; height: 100%;
+  background:
+    radial-gradient(circle, color-mix(in srgb, var(--color-ink) 30%, transparent) 0.55px, transparent 0.95px) 0.8cqw 0.8cqw / 3.333cqw 3.333cqw,
+    color-mix(in srgb, var(--color-surface) 60%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, var(--color-ink) 16%, var(--color-ink) 84%, transparent), linear-gradient(to bottom, transparent, var(--color-ink) 14%, var(--color-ink) 86%, transparent);
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(to right, transparent, var(--color-ink) 16%, var(--color-ink) 84%, transparent), linear-gradient(to bottom, transparent, var(--color-ink) 14%, var(--color-ink) 86%, transparent);
+  mask-composite: intersect;
+}
+.scale { fill: none; stroke: color-mix(in srgb, var(--color-ink) 42%, transparent); stroke-width: 0.5; }
+.reg { fill: none; stroke: color-mix(in srgb, var(--color-ink) 55%, transparent); stroke-width: 0.5; }
+
+/* The object */
+.obj { fill: color-mix(in srgb, var(--color-white) 92%, transparent); stroke: color-mix(in srgb, var(--color-ink) 82%, transparent); stroke-width: 0.75; stroke-linejoin: round; stroke-linecap: round; }
+.edge { fill: none; stroke: color-mix(in srgb, var(--color-ink) 82%, transparent); stroke-width: 0.75; stroke-linejoin: round; stroke-linecap: round; }
+.fine { fill: none; stroke: color-mix(in srgb, var(--color-ink) 40%, transparent); stroke-width: 0.5; stroke-linecap: round; }
+.hidden { fill: none; stroke: color-mix(in srgb, var(--color-ink) 45%, transparent); stroke-width: 0.6; stroke-dasharray: 3 2; stroke-linejoin: round; }
+.centre { fill: none; stroke: color-mix(in srgb, var(--color-ink) 40%, transparent); stroke-width: 0.5; stroke-dasharray: 5 1.5 1 1.5; }
+.phantom { fill: none; stroke: color-mix(in srgb, var(--color-ink) 58%, transparent); stroke-width: 0.6; stroke-dasharray: 5 1.5 1 1.5; stroke-linejoin: round; }
+.ink { fill: color-mix(in srgb, var(--color-ink) 82%, transparent); }
+
+/* The instrument layer */
+.dim { fill: none; stroke: color-mix(in srgb, var(--color-ink) 55%, transparent); stroke-width: 0.5; stroke-linecap: round; }
+.node { fill: var(--color-white); stroke: var(--color-ink); stroke-width: 0.6; }
+.arm { fill: none; stroke: var(--color-ink); stroke-width: 0.6; stroke-linecap: round; }
+.label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em; fill: var(--color-ink); }
+
+/* Callout tags: a paper box with a hairline and a small index square */
+.tag rect { fill: var(--color-white); stroke: var(--color-ink); stroke-width: 0.75; }
+.tag .idx { fill: var(--color-ink); stroke: none; }
+.tag text { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em; fill: var(--color-ink); }
+
+.name { font-family: var(--font-sans); font-size: 12px; font-weight: 500; fill: var(--color-ink); }
+.near { font-family: var(--font-sans); font-size: 11px; fill: var(--color-muted); }
+
+/* The thing that's yours */
+.gNode { fill: var(--color-green); stroke: var(--color-forest); stroke-width: 0.6; }
+.gFill { fill: var(--color-green); stroke: color-mix(in srgb, var(--color-forest) 80%, transparent); stroke-width: 0.75; }
+.gRim { fill: none; stroke: color-mix(in srgb, var(--color-forest) 40%, transparent); stroke-width: 0.5; }

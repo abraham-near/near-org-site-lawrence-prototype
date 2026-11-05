@@ -43,3 +43,10 @@
 .actions { margin-top: var(--space-5); display: flex; flex-wrap: wrap; gap: var(--space-4); align-items: center; }
 .reset { font-size: var(--text-small); color: var(--color-ink); text-decoration: underline; text-underline-offset: 4px; background: none; border: 0; cursor: pointer; }
 .reset:focus-visible { outline: 2px solid var(--color-green); outline-offset: 2px; }
+
+/* The "Own your" illustration options (D56) */
+.illos { margin-top: var(--space-10); border-top: 1px solid var(--color-line-strong); padding-top: var(--space-6); }
+.illoList { margin-top: var(--space-6); display: grid; gap: var(--space-6); grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); list-style: none; padding: 0; }
+.illo { display: grid; align-content: start; gap: var(--space-2); }
+.illo .thumb { aspect-ratio: 4 / 3; margin-bottom: var(--space-2); }
+.status { font-size: var(--text-caption); font-weight: 500; color: var(--color-ink); }

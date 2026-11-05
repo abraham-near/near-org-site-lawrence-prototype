@@ -11,12 +11,33 @@
     "home": "/home",
     "options": [
       { "label": "Homepage directions (contact sheet)", "path": "/lab/directions" },
+      { "label": "Original + Orbit", "path": "/lab/orbit" },
+      { "label": "Illustration renders", "path": "/lab/own-hybrid" },
       { "label": "Hero options", "path": "/lab/hero" },
       { "label": "Testimonial options", "path": "/lab/voices" },
       { "label": "System", "path": "/system" }
     ]
   },
   "versions": [
+    {
+      "commit": "cdcf8f5",
+      "date": "2026-11-05T10:20:05-05:00",
+      "direction": "b",
+      "title": "Own-your illustrations, Orbit on the rail, the station dot, a stronger hero layer",
+      "summary": [
+        "Illustration styles for the rail's four stations: eight flat styles and five rendered glass-and-metal hybrids, kept on the contact sheet; Orbit built into the Original with micro-animations and a hover parallax.",
+        "The rail's station dot is a green disc with the NEAR mark, the playhead ring centred on it.",
+        "The hero's tracked lines are stronger and greener, with isolated clusters, gradients on every line, a softer bottom left and detail on the foreground trees."
+      ],
+      "decisions": ["D53", "D54", "D55", "D56", "D57", "D58", "D59", "D60", "D61", "D62"],
+      "home": "home",
+      "options": [
+        { "label": "Original + Orbit", "path": "lab/orbit" },
+        { "label": "Hybrid renders", "path": "lab/own-hybrid" },
+        { "label": "Flat styles", "path": "lab/own-styles" },
+        { "label": "Contact sheet", "path": "lab/directions" }
+      ]
+    },
     {
       "commit": "8b991ee",
       "date": "2026-11-04T20:44:31-05:00",

@@ -1,0 +1,51 @@
+/* Fine line (D53): Tempo's card language, refined. 0.75 hairlines in ink at reduced strength, white card fills,
+   stacked tabs with small mono labels, dotted paths with end ticks, tiny black pill tags, one green element.
+   Drawn at 240 × 180, shown 320 wide, so 10-unit type lands at 13 px. Tokens only. */
+
+.art { width: 100%; }
+.art svg { display: block; width: 100%; height: auto; overflow: visible; }
+
+/* Card faces: white paper with a hairline rim. Three strengths so the stack recedes. */
+.card, .card2, .card3 { fill: var(--color-white); stroke-width: 0.75; stroke-linejoin: round; }
+.card2 { fill: color-mix(in srgb, var(--color-surface) 45%, var(--color-white)); }
+.card3 { fill: color-mix(in srgb, var(--color-surface) 80%, var(--color-white)); }
+/* The faint inset panel inside the front card */
+.panel { fill: color-mix(in srgb, var(--color-surface) 55%, var(--color-white)); stroke: color-mix(in srgb, var(--color-ink) 10%, transparent); stroke-width: 0.75; }
+.card { stroke: color-mix(in srgb, var(--color-ink) 62%, transparent); }
+.card2 { stroke: color-mix(in srgb, var(--color-ink) 40%, transparent); }
+.card3 { stroke: color-mix(in srgb, var(--color-ink) 26%, transparent); }
+
+/* The second rim under the front card (Tempo's double bottom) and the faint inner rim */
+.under { fill: var(--color-white); stroke: color-mix(in srgb, var(--color-ink) 34%, transparent); stroke-width: 0.75; }
+.rim { fill: none; stroke: color-mix(in srgb, var(--color-ink) 12%, transparent); stroke-width: 0.75; }
+
+.line { fill: none; stroke: color-mix(in srgb, var(--color-ink) 62%, transparent); stroke-width: 0.75; stroke-linecap: round; stroke-linejoin: round; }
+.soft { fill: none; stroke: color-mix(in srgb, var(--color-ink) 30%, transparent); stroke-width: 0.75; stroke-linecap: round; stroke-linejoin: round; }
+.face { fill: var(--color-white); stroke: color-mix(in srgb, var(--color-ink) 62%, transparent); stroke-width: 0.75; stroke-linejoin: round; }
+.dot { fill: none; stroke: color-mix(in srgb, var(--color-ink) 45%, transparent); stroke-width: 0.75; stroke-dasharray: 0.75 2.25; stroke-linecap: round; }
+.ghost { fill: none; stroke: color-mix(in srgb, var(--color-ink) 30%, transparent); stroke-width: 0.75; stroke-dasharray: 2 2; stroke-linecap: round; stroke-linejoin: round; }
+.ink { fill: color-mix(in srgb, var(--color-ink) 78%, transparent); }
+.head { fill: color-mix(in srgb, var(--color-ink) 62%, transparent); }
+
+/* Tab labels: small mono caps, fading with the stack */
+.label, .label2, .label3 { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em; }
+.label { fill: var(--color-muted); }
+.label2 { fill: color-mix(in srgb, var(--color-muted) 90%, transparent); }
+.label3 { fill: color-mix(in srgb, var(--color-muted) 82%, transparent); } /* ≥ 3:1 on the tinted tab */
+
+.name { font-family: var(--font-sans); font-size: 12px; font-weight: 500; fill: var(--color-ink); }
+.near { font-family: var(--font-sans); font-size: 11px; fill: var(--color-muted); }
+
+/* Tiny black pill tags */
+.pill rect { fill: var(--color-ink); }
+.pill text { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.06em; fill: var(--color-on-dark); }
+
+/* The one green element per drawing */
+.g { fill: var(--color-green); }
+.gRing { fill: var(--color-green); stroke: var(--color-green-text); stroke-width: 0.75; }
+.gLine { fill: none; stroke: var(--color-green-text); stroke-width: 1; stroke-linecap: round; stroke-linejoin: round; }
+.gInner { fill: none; stroke: color-mix(in srgb, var(--color-forest) 35%, transparent); stroke-width: 0.75; }
+.tick { fill: none; stroke: var(--color-forest); stroke-width: 1; stroke-linecap: round; stroke-linejoin: round; }
+.gShaft { fill: var(--color-green); stroke: var(--color-green-text); stroke-width: 0.75; stroke-linejoin: round; }
+/* The old key, turned away: a dashed outline on a paper wash so it holds against the mist */
+.oldKey { fill: color-mix(in srgb, var(--color-white) 70%, transparent); stroke: color-mix(in srgb, var(--color-ink) 42%, transparent); stroke-width: 0.75; stroke-dasharray: 2 1.6; stroke-linejoin: round; }

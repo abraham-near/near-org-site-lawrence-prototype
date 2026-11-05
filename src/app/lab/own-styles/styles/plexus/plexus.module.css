@@ -1,0 +1,33 @@
+/* Plexus (D53): the hero's lines and dust touching each object. Tokens only. */
+.art { width: calc(var(--space-11) + var(--space-10)); max-width: 100%; } /* 320 */
+.art svg { display: block; width: 100%; height: auto; overflow: visible; }
+
+/* Objects: plain hairlines over a veil of paper, so the mist still shows a little through them */
+.object { fill: var(--color-surface); fill-opacity: 0.82; stroke: var(--color-ink); stroke-width: 0.65; stroke-linejoin: round; stroke-linecap: round; }
+.mid { fill: var(--color-surface); fill-opacity: 0.82; stroke: var(--color-ink); stroke-opacity: 0.6; stroke-width: 0.6; }
+.back { fill: var(--color-surface); fill-opacity: 0.6; stroke: var(--color-ink); stroke-opacity: 0.38; stroke-width: 0.6; stroke-linejoin: round; }
+.inner { fill: none; stroke: var(--color-ink); stroke-opacity: 0.45; stroke-width: 0.6; }
+.text { fill: none; stroke: var(--color-line-strong); stroke-width: 1.6; stroke-linecap: round; }
+.dash { fill: none; stroke: var(--color-ink); stroke-opacity: 0.55; stroke-width: 0.6; stroke-dasharray: 2 3; }
+.slit { fill: none; stroke: var(--color-ink); stroke-width: 1.6; stroke-linecap: round; }
+.slotFill { fill: var(--color-ink); }
+.ringLine { fill: none; stroke: var(--color-ink); stroke-width: 0.65; }
+.old { opacity: 0.35; }
+
+/* The hero's lines and dust */
+.line { fill: none; stroke: var(--color-ink); stroke-linecap: butt; }
+.gline { fill: none; stroke: var(--color-green-text); stroke-linecap: round; }
+.dot { fill: var(--color-ink); }
+.ring { fill: var(--color-surface); stroke: var(--color-ink); stroke-width: 0.6; }
+
+/* The owned point: a green node in a ring of ticks (the hero's green node) */
+.you { fill: var(--color-green); }
+.youRing { fill: var(--color-surface); stroke: var(--color-green); stroke-width: 0.9; }
+.youTicks { fill: none; stroke: var(--color-green-text); stroke-width: 0.6; stroke-linecap: round; }
+
+/* Tags: mono labels in a hairline box, hung off a leader */
+.leader { fill: none; stroke: var(--color-ink); stroke-width: 0.6; stroke-opacity: 0.7; }
+.tag rect { fill: var(--color-surface); stroke: var(--color-ink); stroke-width: 0.6; }
+.tag text { font-family: var(--font-mono); font-size: 10px; fill: var(--color-ink); }
+.name { font-family: var(--font-sans); font-size: 12px; font-weight: 500; fill: var(--color-ink); }
+.muted { fill: var(--color-muted); font-weight: 400; }

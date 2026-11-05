@@ -1,0 +1,34 @@
+/* "Lamella" (D54, after ManvsMachine's Microsoft Pixel R&D): rendered fluted glass with fine hairline fields that pass
+   behind it and come out broken into the flutes' rhythm. Three layers registered to one 420 × 315 box: lines behind
+   the render, the render (glass made partly transparent, so the ridges and lines show through), lines and labels in
+   front. Tokens only; hairlines stay hairlines at any scale (non-scaling strokes), type scales with the drawing. */
+
+.art { position: relative; width: 100%; aspect-ratio: 4 / 3; }
+.art svg, .render { position: absolute; inset: 0; width: 100%; height: 100%; display: block; overflow: visible; }
+.render { object-fit: fill; pointer-events: none; user-select: none; }
+
+/* Ink is the drawing's only colour besides green; lines are hairlines */
+.field, .hair, .faint, .dash, .edge, .tick, .green, .ghost { fill: none; vector-effect: non-scaling-stroke; stroke-linecap: round; }
+.field { stroke: color-mix(in oklab, var(--color-ink) 54%, transparent); stroke-width: 0.6; }
+.hair { stroke: color-mix(in oklab, var(--color-ink) 70%, transparent); stroke-width: 0.6; }
+.faint { stroke: color-mix(in oklab, var(--color-ink) 34%, transparent); stroke-width: 0.5; }
+.tick { stroke: color-mix(in oklab, var(--color-ink) 55%, transparent); stroke-width: 0.5; stroke-linecap: butt; }
+.dash { stroke: color-mix(in oklab, var(--color-ink) 48%, transparent); stroke-width: 0.6; stroke-dasharray: 2 3; }
+.edge { stroke: color-mix(in oklab, var(--color-ink) 38%, transparent); stroke-width: 0.5; stroke-dasharray: 1 2.5; }
+.ghost { stroke: color-mix(in oklab, var(--color-ink) 58%, transparent); stroke-width: 0.6; stroke-dasharray: 3 2.5; }
+.green { stroke: var(--color-green-text); stroke-width: 0.75; }
+/* Data rhythm: the incoming lines carry packets (gaps) at different cadences */
+.p1 { stroke-dasharray: 22 2 4 2; }
+.p2 { stroke-dasharray: 9 1.5; }
+.p3 { stroke-dasharray: 34 2 2 2 2 2; }
+.dot { fill: color-mix(in oklab, var(--color-ink) 70%, transparent); }
+.gFill { fill: var(--color-green); }
+.inkFill { fill: var(--color-ink); }
+
+/* Labels: the fact in the sans at 13 px (at the 420 slot) beside a green index square; micro words in the mono */
+.label { font-family: var(--font-sans); font-size: 13.5px; font-weight: 500; letter-spacing: -0.005em; fill: var(--color-ink); }
+.micro { font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.01em; fill: color-mix(in oklab, var(--color-ink) 74%, transparent); }
+.name { font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.02em; fill: var(--color-ink); }
+.near { fill: var(--color-green-text); }
+/* A soft plate of the ground colour behind a label, so it reads over the ridges */
+.plate { fill: color-mix(in oklab, var(--color-surface) 78%, transparent); }

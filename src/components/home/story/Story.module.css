@@ -20,6 +20,8 @@
 .ownH { margin: 0; }
 .ownLine { margin: var(--space-3) 0 0; }
 .ownArt { margin: 0 0 var(--space-4); }
+/* Orbit's rendered drawings (D56) are drawn at 420 × 315 */
+.ownArtLarge { width: min(420px, 100%); }
 @media (min-width: 1024px) {
   .ownList { max-width: none; gap: var(--space-8); }
   .ownItem { display: grid; grid-template-columns: minmax(0, 28rem) auto; column-gap: var(--space-8); align-items: center; }

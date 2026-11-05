@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { LabSwitch } from "@/components/home/story/LabSwitch";
-import { VERSIONS } from "./data";
+import { ILLUSTRATIONS, VERSIONS, illoThumb } from "./data";
 import { DIR_SWITCH } from "./switch";
 import { Picker } from "./Picker";
 import styles from "./directions.module.css";
@@ -10,6 +10,9 @@ export const metadata: Metadata = { title: "Lab: homepage directions", robots: {
 
 // /lab/directions (D52): the contact sheet for the homepage directions. The four versions, what changed in each, and a
 // picker to combine sections across them.
+// A plain href string here would be prefixed twice in the frozen copies (scripts/build-versions.sh and basePath)
+const ORBIT = "/lab/orbit";
+
 export default function Directions() {
   return (
     <main id="main" className={`container-page ${styles.page}`}>
@@ -36,6 +39,26 @@ export default function Directions() {
         <h2 id="by-section" className="t-h3">Section by section</h2>
         <p className={styles.lede}>Each picture opens that section in context in a new tab. Choose one version per section.</p>
         <Picker />
+      </section>
+      <section className={styles.illos} aria-labelledby="illos">
+        <h2 id="illos" className="t-h3">“Own your” illustrations</h2>
+        <p className={styles.lede}>
+          The options for the rail’s four station drawings, kept for future use. Orbit is built into the Original for
+          review at <Link href={ORBIT}>/lab/orbit</Link>.
+        </p>
+        <ul className={styles.illoList}>
+          {ILLUSTRATIONS.map((o) => (
+            <li key={o.key} className={styles.illo}>
+              <Link className={styles.thumb} href={o.href}>
+                {/* eslint-disable-next-line @next/next/no-img-element -- static lab thumbnails, sized by CSS */}
+                <img src={illoThumb(o.key)} alt={`${o.name}: the assets station`} loading="lazy" />
+              </Link>
+              <p className="t-h4">{o.name}</p>
+              <p className={styles.status}>{o.status}</p>
+              <p className={styles.versionNote}>{o.note}</p>
+            </li>
+          ))}
+        </ul>
       </section>
       <LabSwitch current="sheet" options={DIR_SWITCH} label="Directions" />
     </main>

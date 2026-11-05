@@ -21,8 +21,17 @@
 .survey { position: absolute; left: var(--x); top: calc(var(--rail-y) - 26vh); height: 26vh; width: 1px; background: var(--color-line-strong); mask-image: linear-gradient(to bottom, transparent, var(--color-ink) 60%); }
 .node { position: absolute; left: -3px; bottom: -3px; width: 7px; height: 7px; border-radius: 50%; background: var(--color-surface); border: 1px solid var(--color-ink); }
 /* Fixed on the stage: the reader's place on the line, and corners that lock onto the station being read */
-.playhead { position: absolute; left: 50%; top: var(--rail-y); width: 20px; height: 20px; margin: -10px 0 0 -10px; border: 1px solid var(--color-ink); border-radius: 50%; opacity: 0; }
-.finder { position: absolute; left: 50%; top: calc(var(--rail-y) - var(--space-6) - 240px - 20px); width: 360px; height: 280px; margin-left: -180px; opacity: 0; }
+/* Both centred on 50vw, not 50%: the track brings each station to the middle of the window (vw, scrollbar included), and
+   with a visible scrollbar 50% sits half its width to the left (D57). The playhead ring is 8 px wider than the station
+   dot (StoryRail.module.css), so it lands around it with an even 4 px gap. */
+.playhead { position: absolute; left: 50vw; top: var(--rail-y); width: 36px; height: 36px; margin: -18px 0 0 -18px; border: 1px solid var(--color-ink); border-radius: 50%; opacity: 0; }
+.finder { position: absolute; left: 50vw; top: calc(var(--rail-y) - var(--space-6) - 240px - 20px); width: 360px; height: 280px; margin-left: -180px; opacity: 0; }
+/* With Orbit's larger drawings (D56) the corners frame the 420 × 315 slot (StoryRail.module.css), 20 px outside it */
+:global([data-art-kind="orbit"]) > .finder {
+  --w: min(420px, calc((54vh - 126px) * 4 / 3));
+  top: calc(var(--rail-y) - var(--space-6) - var(--w) * 0.75 - 20px); width: calc(var(--w) + 40px); height: calc(var(--w) * 0.75 + 40px);
+  margin-left: calc((var(--w) + 40px) / -2);
+}
 
 .corner { position: absolute; width: 16px; height: 16px; border: 0 solid var(--color-ink); }
 .tl { left: 0; top: 0; border-left-width: 1px; border-top-width: 1px; }

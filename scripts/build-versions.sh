@@ -68,7 +68,7 @@ for c in "${COMMITS[@]}"; do
   # and plain <a href> attributes to its own pages (next/link hrefs, written as object fields, get it already). A plain
 # link built from data is written href={`/${...}`} so it is caught too
   find src -type f \( -name '*.ts' -o -name '*.tsx' -o -name '*.css' \) -print0 |
-    xargs -0 perl -pi -e "s{([\"'\`(])/(images|videos|brand|lab/voices-refs|lab/hero|lab/directions|directions)/}{\$1/versions/$c/\$2/}g; s{href=(\{\`|\")/(lab|system|\\\$\\{)}{href=\$1/versions/$c/\$2}g"
+    xargs -0 perl -pi -e "s{([\"'\`(])/(images|videos|brand|lab/voices-refs|lab/hero|lab/directions|lab/own-hybrid|lab/own-styles|directions)/}{\$1/versions/$c/\$2/}g; s{href=(\{\`|\")/(lab|system|\\\$\\{)}{href=\$1/versions/$c/\$2}g"
   mv next.config.ts next.config.base.ts
   cat > next.config.ts <<EOF
 import type { NextConfig } from "next";

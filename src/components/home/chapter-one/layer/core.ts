@@ -12,9 +12,12 @@ export type Pt = { x: number; y: number; a: number };
 // rest: 0-1, how far A4s has eased to its settled state (every line whole, every dot full size); 0 otherwise
 // copy: the headline block's box in the layer's coordinates (x, y, w, h), for the looks that keep clear of it
 // themselves (D49) rather than fading out across the left of the picture; thread: the green thread's x, where it shows
+// view: the stretch of the layer's width still showing between the curtains as the picture closes into the column
+// (D62), [left, right]; the whole width when they are open
 export type Ctx = {
   host: HTMLElement; W: number; H: number; f: number; t: number; rest: number;
   map: (nx: number, ny: number) => [number, number]; copy: [number, number, number, number] | null; thread: number | null;
+  view?: [number, number];
 };
 export type Look = { draw: (c: Ctx) => void; resize?: (c: Ctx) => void };
 // sky: the upper scene's displacement through the move (every `step` frames, x 10000); air: untracked points in the
@@ -74,14 +77,36 @@ export function clearOfCopy(c: Ctx, x: number, y: number, pad = 28, soft = 90) {
 // around the focus (a soft ellipse), about a third as strong far from it. D51: the spiral's wide arc sweeps through
 // the bottom left before it curls in to the focus, so the bottom left (below the headline) carries a secondary band of
 // detail, a little under half the focus's strength ("30% stronger towards the bottom left").
+// D58 ("the graphic effect overall can be stronger"; "more visible details in the bottom left"; "closer to that level in
+// some other isolated areas"): the left keeps a fifth of the layer (not 8%), the field away from the focus half (not a
+// third), the bottom-left band three quarters, and `pockets` (points on screen, from the plexus) add small isolated
+// clusters at full strength, each a soft disc about 6% of the frame's width across. D59 ("remove about 20% of the new
+// elements"): the left keeps 16% and the field away from the focus 44%.
 export const PHI = 0.618;
-export function composition(c: Ctx, x: number, y: number, focus: [number, number] | null = null) {
+// a pocket may carry a third value, its strength (0-1; D61's foreground clusters fade in as the trees enter)
+export function composition(c: Ctx, x: number, y: number, focus: [number, number] | null = null, pockets: number[][] = []) {
   const u = x / c.W, v = y / c.H;
   const [fu, fv] = focus ? [clamp(focus[0] / c.W, 0.55, 0.75), clamp(focus[1] / c.H, 0.3, 0.5)] : [PHI, 1 - PHI];
-  const left = 0.08 + 0.92 * smooth((u - 0.3) / 0.4);
+  const left = 0.16 + 0.84 * smooth((u - 0.28) / 0.4);
   const near = Math.exp(-(((u - fu) / 0.2) ** 2 + ((v - fv) / 0.22) ** 2) / 2);
-  const sweep = 0.45 * smooth((v - 0.55) / 0.2) * smooth((0.7 - u) / 0.2);
-  return Math.max(left * (0.35 + 0.65 * near), sweep);
+  const sweep = 0.75 * smooth((v - 0.5) / 0.2) * smooth((0.75 - u) / 0.22);
+  let pocket = 0;
+  const sd = 0.06 * c.W;
+  for (const [px, py, pw = 1] of pockets) pocket = Math.max(pocket, pw * Math.exp(-((x - px) ** 2 + (y - py) ** 2) / (2 * sd * sd)));
+  return Math.max(left * (0.44 + 0.56 * near), sweep, pocket);
+}
+
+// The bottom left (D59: "should not be so opaque… mixed into the background progressively as we move to the left and
+// up in that area"): a strength factor, 1 everywhere else; inside the area (left of about 45%, below about 55%) it falls
+// from three quarters at the area's lower right to a fifth at its left and upper edges
+export function cornerFade(c: Ctx, x: number, y: number) {
+  const u = x / c.W, v = y / c.H;
+  // only while the picture is wide (the hero): once it narrows into the column at the end of the move (D62) its lower
+  // left is no longer the screen's bottom-left corner, and the trees there should carry their detail
+  const wide = smooth((c.W / c.H - 1) / 0.4);
+  const inside = wide * smooth((0.5 - u) / 0.12) * smooth((v - 0.52) / 0.1);
+  const fade = 0.2 + 0.55 * smooth(u / 0.42) * smooth((v - 0.58) / 0.34);
+  return 1 - inside * (1 - fade);
 }
 
 // Batched, token-coloured ink: every stroke or fill goes into a path per shade, alpha step and width, so a frame is a

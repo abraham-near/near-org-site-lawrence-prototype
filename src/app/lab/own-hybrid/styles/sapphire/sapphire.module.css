@@ -1,0 +1,34 @@
+/* Sapphire (D54): a watch-movement drawing registered to a rendered sapphire part. Hairlines at 0.5–0.75 in ink at
+   reduced strength, dash-dot axes, dashed hidden edges, dot rows; green only for the jewel's marks. Drawn at 420 × 315,
+   so 13-unit type lands at 13 px in the large slot (a zoomed station divides type and strokes by --k). Tokens only. */
+
+.art { --k: 1; position: relative; width: 100%; aspect-ratio: 4 / 3; }
+.svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.img { object-fit: fill; }
+
+.hair, .fine, .faint, .dash, .hidden, .axis, .ghost, .dots, .dotsSoft, .gLine, .gHair { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.hair { stroke: color-mix(in srgb, var(--color-ink) 62%, transparent); stroke-width: calc(0.6px / var(--k)); }
+.fine { stroke: color-mix(in srgb, var(--color-ink) 42%, transparent); stroke-width: calc(0.5px / var(--k)); }
+.faint { stroke: color-mix(in srgb, var(--color-ink) 24%, transparent); stroke-width: calc(0.5px / var(--k)); }
+.dash { stroke: color-mix(in srgb, var(--color-ink) 36%, transparent); stroke-width: calc(0.5px / var(--k)); stroke-dasharray: 2.5 2.5; }
+.hidden { stroke: color-mix(in srgb, var(--color-ink) 34%, transparent); stroke-width: calc(0.5px / var(--k)); stroke-dasharray: 3 2.2; }
+/* the centre line: long dash, dot, long dash */
+.axis { stroke: color-mix(in srgb, var(--color-ink) 40%, transparent); stroke-width: calc(0.5px / var(--k)); stroke-dasharray: 9 2.5 1 2.5; stroke-linecap: butt; }
+.ghost { stroke: color-mix(in srgb, var(--color-ink) 48%, transparent); stroke-width: calc(0.6px / var(--k)); stroke-dasharray: 1.6 1.8; }
+.dots { stroke: color-mix(in srgb, var(--color-ink) 70%, transparent); stroke-width: calc(1.3px / var(--k)); stroke-dasharray: 0 3.6; }
+.dotsSoft { stroke: color-mix(in srgb, var(--color-ink) 40%, transparent); stroke-width: calc(1.1px / var(--k)); stroke-dasharray: 0 3.6; }
+.ink { fill: color-mix(in srgb, var(--color-ink) 72%, transparent); }
+
+/* green: the jewel's marks only */
+.gLine { stroke: var(--color-green-text); stroke-width: calc(0.75px / var(--k)); }
+.gHair { stroke: var(--color-green-text); stroke-width: calc(0.5px / var(--k)); }
+.gFill { fill: var(--color-green); }
+
+/* labels: plain, no knockout; 13 px at any zoom */
+.label, .muted, .gLabel, .name { font-family: var(--font-sans); font-size: calc(13px / var(--k)); letter-spacing: 0.01em; }
+.label { fill: var(--color-ink); }
+.muted { fill: var(--color-muted); }
+.gLabel { fill: var(--color-green-text); }
+/* the name, engraved: a cut in the crystal, lighter than the labels */
+.name { fill: color-mix(in srgb, var(--color-ink) 66%, transparent); font-weight: 500; letter-spacing: 0.04em; }
+.near { fill: var(--color-green-text); font-weight: 400; }

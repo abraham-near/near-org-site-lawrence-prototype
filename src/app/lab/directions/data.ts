@@ -57,3 +57,15 @@ export const sectionHref = (v: VersionKey, s: (typeof SECTIONS)[number]) => {
 
 // Section thumbnails, captured from each page at 1440 wide (scripts in the scratchpad; see D52)
 export const thumb = (v: VersionKey, s: string) => `/lab/directions/${v}-${s}.webp`;
+
+// The "Own your" illustration options (D53–D56), kept for future use: the rendered hybrids Lawrence kept (round two)
+// and the flat styles (round one). Orbit is the one built into the page for review (/lab/orbit).
+export const ILLUSTRATIONS: { key: string; name: string; href: string; note: string; status: string }[] = [
+  { key: "orbit", name: "Orbit", href: "/lab/own-hybrid#orbit", status: "In review on /lab/orbit", note: "Chrome and frosted-glass spheres and rings threaded by atlas orbits, graduated arcs and fine markers." },
+  { key: "lamella", name: "Lamella", href: "/lab/own-hybrid#lamella", status: "Kept", note: "Fluted glass after Microsoft Pixel R&D: lines break flute by flute behind it; identity front-on." },
+  { key: "lamella-flat", name: "Lamella, front-on", href: "/lab/own-hybrid#lamella-flat", status: "Kept", note: "All four stations in fluted glass, flat to camera like the original drawings." },
+  { key: "materialise", name: "Materialise", href: "/lab/own-hybrid#materialise", status: "Kept", note: "Each object half patent drawing, half render, the drawn edges landing on the real ones." },
+  { key: "sapphire", name: "Sapphire", href: "/lab/own-hybrid#sapphire", status: "Maybe", note: "Sapphire crystal and steel with dense watchmaker linework; no shadows, one tag per station." },
+  { key: "flat", name: "Round one: eight flat styles", href: "/lab/own-styles", status: "Earlier round", note: "Fine line, Survey, Stipple, Plexus, Frosted, Window, Axonometric, Construction." },
+];
+export const illoThumb = (key: string) => `/lab/directions/illo-${key}.webp`;

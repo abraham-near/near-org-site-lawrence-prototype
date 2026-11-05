@@ -31,9 +31,13 @@
 /* 320 wide, so the drawings' 10-unit tags render at the 13 px floor (DESIGN §2; OwnArt.module.css) */
 .artSlot { position: absolute; left: 0; bottom: calc(100% - var(--rail-y) + var(--space-6)); width: calc(var(--space-11) + var(--space-10)); transform: translateX(-50%); }
 /* The layer drawing sits on the line itself (its slab is the layer) */
+/* Orbit's rendered drawings (D56): 420 × 315, smaller on short screens so they stay clear of the answer above */
+.artSlot[data-large] { width: min(420px, calc((54vh - 126px) * 4 / 3)); }
 .gateSlot { left: var(--x); bottom: calc(100% - var(--rail-y) + var(--space-3)); }
 .art { width: 100%; }
-.dot { position: absolute; left: 0; top: var(--rail-y); width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; background: var(--color-green); }
+/* The station dot (D57): a green disc carrying the official black N (icon.svg, unaltered), the playhead ring around it */
+.dot { position: absolute; left: 0; top: var(--rail-y); width: 28px; height: 28px; margin: -14px 0 0 -14px; display: grid; place-items: center; border-radius: 50%; background: var(--color-green); }
+.dotMark { display: block; width: 26px; height: 26px; }
 .title { position: absolute; left: 0; top: calc(var(--rail-y) + var(--space-6)); width: 40rem; margin: 0; transform: translateX(-50%); text-align: center; font-size: var(--text-h2); font-weight: 500; line-height: 1.1; letter-spacing: var(--tracking-h2); }
 .line { position: absolute; left: 0; top: calc(var(--rail-y) + var(--space-6) + 1.5 * var(--text-h2)); width: 34ch; margin: 0; transform: translateX(-50%); text-align: center; }
 

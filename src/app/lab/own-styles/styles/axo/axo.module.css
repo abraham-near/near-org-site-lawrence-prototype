@@ -1,0 +1,55 @@
+/* Axonometric (D53). Tokens only. Flat tones by facing: top white, the left-facing side paper, the right-facing side
+   surface-2; ink hairlines on true edges; the owned piece's face green. Drawn at 240 × 180, shown 320 wide. */
+
+.art { width: 100%; }
+.art svg { display: block; width: 100%; height: auto; overflow: visible; }
+
+/* Side faces: a hairline of their own fill closes the seams between facets */
+.st { fill: var(--color-white); stroke: var(--color-white); stroke-width: 0.4; }
+.sl { fill: var(--color-surface); stroke: var(--color-surface); stroke-width: 0.4; }
+.sr { fill: var(--color-surface-2); stroke: var(--color-surface-2); stroke-width: 0.4; }
+
+/* Caps (and anything else that wants a face with an edge) */
+.cap { stroke: var(--color-ink); stroke-width: 0.75; stroke-linejoin: round; }
+.ct { fill: var(--color-white); }
+.cl { fill: var(--color-surface); }
+.cr { fill: var(--color-surface-2); }
+.cg { fill: var(--color-green); }
+
+.edge { fill: none; stroke: var(--color-ink); stroke-width: 0.75; stroke-linejoin: round; stroke-linecap: round; }
+.sr.edge { fill: var(--color-surface-2); }
+.ct.edge { fill: var(--color-white); }
+
+/* Drafting lines */
+.proj { fill: none; stroke: var(--color-ink); stroke-width: 0.6; stroke-dasharray: 2 2.5; opacity: 0.55; }
+.plan { fill: none; stroke: var(--color-line-strong); stroke-width: 0.6; stroke-dasharray: 2 2.5; }
+.ext { fill: none; stroke: var(--color-line-strong); stroke-width: 0.5; }
+.reed { fill: none; stroke: var(--color-line-strong); stroke-width: 0.5; }
+
+/* Content on faces */
+.text { fill: none; stroke: var(--color-line-strong); stroke-width: 1.6; stroke-linecap: round; }
+.head { fill: none; stroke: var(--color-ink); stroke-width: 2; stroke-linecap: round; }
+.dashes { fill: none; stroke: var(--color-line-strong); stroke-width: 1.6; stroke-dasharray: 4 3; }
+.fold { fill: var(--color-surface-2); stroke: var(--color-ink); stroke-width: 0.6; stroke-linejoin: round; }
+.dots circle { fill: var(--color-green); stroke: var(--color-forest); stroke-width: 0.5; }
+.ink circle { fill: var(--color-ink); }
+.ink2 { fill: none; stroke: var(--color-forest); stroke-width: 1.4; stroke-linecap: round; }
+.tick { fill: none; stroke: var(--color-forest); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.ring { fill: none; stroke: var(--color-ink); stroke-width: 0.6; }
+.ringG { fill: none; stroke: var(--color-forest); stroke-width: 0.6; }
+.slot { fill: var(--color-ink); }
+.slotSoft { fill: var(--color-surface-2); stroke: var(--color-ink); stroke-width: 0.6; }
+.avatar { fill: var(--color-surface-2); stroke: var(--color-ink); stroke-width: 0.6; }
+.line { fill: none; stroke: var(--color-ink); stroke-width: 0.75; stroke-linecap: round; }
+.name { font-family: var(--font-sans); font-size: 12px; font-weight: 500; letter-spacing: -0.01em; fill: var(--color-ink); text-rendering: geometricPrecision; }
+.muted { fill: var(--color-muted); font-weight: 400; }
+.arc { fill: none; stroke: var(--color-ink); stroke-width: 0.9; stroke-dasharray: 3 3; }
+.arrow { fill: none; stroke: var(--color-ink); stroke-width: 0.9; stroke-linecap: round; stroke-linejoin: round; }
+.oldKey { fill: none; stroke: var(--color-ink); stroke-width: 0.7; stroke-dasharray: 2.2 1.8; opacity: 0.75; }
+
+/* Callouts */
+.leader { fill: none; stroke: var(--color-ink); stroke-width: 0.6; }
+.node { fill: var(--color-white); stroke: var(--color-ink); stroke-width: 0.75; }
+.tag rect { fill: var(--color-ink); }
+.tag text { font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.02em; fill: var(--color-on-dark); }
+.frost { fill: var(--color-white); fill-opacity: 0.6; }

@@ -1,0 +1,24 @@
+/* Materialise (D54): a patent drawing that becomes the rendered object. Tokens only. */
+.art { position: relative; width: 100%; aspect-ratio: 4 / 3; }
+.art svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+
+/* The drawing, in the render's own pixels (scaled by --k), so its strokes are divided by --k to stay hairlines */
+.draw { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.line { stroke: color-mix(in srgb, var(--color-ink) 88%, transparent); stroke-width: calc(0.8px / var(--k)); }
+.hidden { stroke: color-mix(in srgb, var(--color-ink) 62%, transparent); stroke-width: calc(0.55px / var(--k)); stroke-dasharray: calc(2.6px / var(--k)) calc(1.8px / var(--k)); stroke-linecap: butt; }
+.axis { stroke: color-mix(in srgb, var(--color-ink) 55%, transparent); stroke-width: calc(0.45px / var(--k)); stroke-dasharray: calc(7px / var(--k)) calc(1.6px / var(--k)) calc(1px / var(--k)) calc(1.6px / var(--k)); stroke-linecap: butt; }
+.hatch { stroke: color-mix(in srgb, var(--color-ink) 50%, transparent); stroke-width: calc(0.4px / var(--k)); }
+.fine { stroke: color-mix(in srgb, var(--color-ink) 58%, transparent); stroke-width: calc(0.4px / var(--k)); }
+
+/* Annotation, in box units */
+.hair { fill: none; stroke: color-mix(in srgb, var(--color-ink) 75%, transparent); stroke-width: 0.6; }
+.thin { fill: none; stroke: color-mix(in srgb, var(--color-ink) 50%, transparent); stroke-width: 0.45; }
+.dash { fill: none; stroke: color-mix(in srgb, var(--color-ink) 60%, transparent); stroke-width: 0.55; stroke-dasharray: 2.6 1.8; }
+.dots { fill: none; stroke: color-mix(in srgb, var(--color-ink) 78%, transparent); stroke-width: 1; stroke-linecap: round; }
+.ink { fill: var(--color-ink); }
+.green { fill: none; stroke: var(--color-green); stroke-width: 1.3; }
+.greenFill { fill: var(--color-green); }
+.label { font-family: var(--font-sans); font-size: 13px; font-weight: 500; fill: var(--color-ink); }
+.micro { font-family: var(--font-sans); font-size: 13px; fill: var(--color-muted); }
+.engrave { font-family: var(--font-mono); font-size: 13px; fill: color-mix(in srgb, var(--color-ink) 72%, transparent); mix-blend-mode: multiply; }
+.white { stop-color: var(--color-white); }

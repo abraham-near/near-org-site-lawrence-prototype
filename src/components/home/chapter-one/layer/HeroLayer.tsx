@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import TRACKS from "./tracks.json";
 import styles from "./HeroLayer.module.css";
-import { FPS, VW, VH, A4_PALETTE, clamp, smooth, rand, sample, groundAt, point, clearOfCopy, composition, cornerFade, makeInk, type Track, type Pt, type Ctx, type Look, type Plex, type Palette } from "./core";
+import { FPS, VW, VH, A4_PALETTE, clamp, smooth, rand, sample, groundAt, point, clearOfCopy, nearCopy, composition, cornerFade, toneOf, makeInk, type Track, type Pt, type Ctx, type Look, type Plex, type Palette } from "./core";
 import { dust } from "./dust";
 import { signal } from "./signal";
 
@@ -349,7 +349,8 @@ function plexus(host: HTMLElement, variant: Variant, PX: Plex, onFocus?: (p: [nu
   // nearest its place at the start (so it rides the land through the move), raises the composition to full around it
   // (core.ts), and carries seven satellite points of its own, fixed to the anchor at seeded offsets (the mist has few
   // tracked points to join). Video coordinates.
-  const POCKETS: [number, number][] = [[0.55, 0.4], [0.52, 0.62], [0.2, 0.84]];
+  // D64: two more nearer the text, right of the headline's last line and right of the button
+  const POCKETS: [number, number][] = [[0.55, 0.4], [0.52, 0.62], [0.2, 0.84], [0.43, 0.48], [0.39, 0.7]];
   const pocketTrack = POCKETS.map(([u, v]) => {
     let best = -1, bd = Infinity;
     points.forEach((t, i) => {
@@ -402,9 +403,10 @@ function plexus(host: HTMLElement, variant: Variant, PX: Plex, onFocus?: (p: [nu
   type Batch = Map<string, Path2D>;
   const add = ink.add, flush = ink.flush;
   const out: Path2D[] = [];
-  const both = (b: Batch, ground: number, a: number, width: number) => {
+  // `tone` (D68): option 1's marks vary in saturation and brightness (core.ts toneOf); the other looks keep one tone
+  const both = (b: Batch, ground: number, a: number, width: number, tone = 0) => {
     out.length = 0;
-    const p = ink.inked(b, ground, a, width);
+    const p = ink.inked(b, ground, a, width, bright ? tone : 0);
     if (p) out.push(p);
     return out;
   };
@@ -414,13 +416,13 @@ function plexus(host: HTMLElement, variant: Variant, PX: Plex, onFocus?: (p: [nu
   // as `part` (the stretch [s0, s1], from the end the key picks); still batched, by the stretches' quantised alphas.
   const GRAD_N = 8;
   const along = (t: number) => 0.15 + 0.85 * Math.pow(Math.abs(2 * t - 1), 1.2);
-  const gradPart = (b: Batch, ground: number, a: number, w: number, key: number, s0: number, s1: number, ax: number, ay: number, bx: number, by: number) => {
+  const gradPart = (b: Batch, ground: number, a: number, w: number, key: number, s0: number, s1: number, ax: number, ay: number, bx: number, by: number, tone = toneOf(key)) => {
     if (s1 <= s0) return;
     const [sx, sy, ex, ey] = rand(key, 7) < 0.5 ? [bx, by, ax, ay] : [ax, ay, bx, by];
     for (let k = 0; k < GRAD_N; k++) {
       const t0 = Math.max(k / GRAD_N, s0), t1 = Math.min((k + 1) / GRAD_N, s1);
       if (t1 <= t0) continue;
-      for (const p of both(b, ground, a * along((t0 + t1) / 2), w)) seg(p, sx + (ex - sx) * t0, sy + (ey - sy) * t0, sx + (ex - sx) * t1, sy + (ey - sy) * t1);
+      for (const p of both(b, ground, a * along((t0 + t1) / 2), w, tone)) seg(p, sx + (ex - sx) * t0, sy + (ey - sy) * t0, sx + (ex - sx) * t1, sy + (ey - sy) * t1);
     }
   };
   const cross = (p: Path2D, x: number, y: number, r: number, gap: number) => {
@@ -469,7 +471,9 @@ function plexus(host: HTMLElement, variant: Variant, PX: Plex, onFocus?: (p: [nu
       // D59: and in the bottom left, mixed progressively into the picture towards the left and up (core.ts cornerFade)
       const clear = (x: number, y: number) => (bright ? clearOfCopy(c, x, y) * (0.3 + 0.7 * comp(x, y)) * cornerFade(c, x, y) : 1);
       // a point is kept where the composition wants it: nearly all of them at the focus, few where it is light
-      const thin = (id: number, x: number, y: number) => (bright ? smooth((1.6 * comp(x, y) - 0.25 - rand(id, 40)) / 0.15) : 1);
+      // D66: in proportion (about 1.4x the composition's strength is kept), so density tapers off towards the headline
+      // rather than cutting off below a threshold (was: nothing kept under 16%)
+      const thin = (id: number, x: number, y: number) => (bright ? smooth((1.4 * comp(x, y) - rand(id, 40)) / 0.12) : 1);
       const at = (t: Track): GPt | null => { const p = point(t, c, PX); return p && { ...p, a: p.a * clear(p.x, p.y), l: groundAt(t, c.f, PX.step) }; };
       // the near trees' points (D63, the reverse track) are their own field: never thinned, and at least 60% strong
       // wherever the headline allows, so the trees carry lines as well as dust as they rise into the picture
@@ -491,7 +495,8 @@ function plexus(host: HTMLElement, variant: Variant, PX: Plex, onFocus?: (p: [nu
         const [x, y] = c.map(q.x / 1e4 + sx + dx, q.y / 1e4 + sy + dy);
         const pr = presence(id, c.t, 0.5);
         // Option 1: few air points in the sky beside the headline (D49: "less in the red")
-        const sky = bright ? 1 - 0.85 * smooth((0.34 - y / c.H) / 0.08) * smooth((x / c.W - 0.38) / 0.05) * smooth((0.7 - x / c.W) / 0.05) : 1;
+        // D64: eased to half (was 85%), so the effect comes closer to the headline
+        const sky = bright ? 1 - 0.5 * smooth((0.34 - y / c.H) / 0.08) * smooth((x / c.W - 0.38) / 0.05) * smooth((0.7 - x / c.W) / 0.05) : 1;
         const a = Math.min(clamp(y / 40), clamp((c.H - y) / 40), clamp((c.W - x) / 40), clamp(x / 40)) * pr * sky * clear(x, y) * thin(id, x, y);
         // the ground under it along its path through the move (measured offline), so its colour follows what it drifts over
         const l = (q.lum[k0] + ((q.lum[k0 + 1] ?? q.lum[k0]) - q.lum[k0]) * ku) / 99;
@@ -640,6 +645,8 @@ function plexus(host: HTMLElement, variant: Variant, PX: Plex, onFocus?: (p: [nu
         const keep = Math.max(smooth((cut[i] - d) / soft), smooth((cut[j] - d) / soft));
         if (keep <= 0) continue;
         const a = pts[i], b = pts[j], l = (a.l + b.l) / 2;
+        // D67 ("remove 30% of the lines here"): near the headline about three in ten lines are left out (fixed per pair)
+        if (bright && rand(Math.min(a.id, b.id) * 10007 + Math.max(a.id, b.id), 90) < 0.3 * nearCopy(c, (a.x + b.x) / 2, (a.y + b.y) / 2)) continue;
         // Traces: the detail stays with the ridges and the mist; the dark foreground forest keeps only its dots
         const ground = variant === "traces" ? 0.2 + 0.8 * smooth((l - 0.22) / 0.2) : 1;
         const offTrace = onTrace ? smooth((Math.max(onTrace[i], onTrace[j]) - 6) / 10) : 1;
@@ -661,6 +668,7 @@ function plexus(host: HTMLElement, variant: Variant, PX: Plex, onFocus?: (p: [nu
       PX.links.forEach(([i, j], n) => {
         const a = tracked[i], b = tracked[j];
         if (!a || !b) return;
+        if (bright && rand(900000 + n, 90) < 0.3 * nearCopy(c, (a.x + b.x) / 2, (a.y + b.y) / 2)) return;
         const key = 900000 + n, [s0, s1, fa] = lineLife(key, c.t);
         // thinner than the plexus, and lighter the longer it is (a long line should not outweigh the short ones)
         const len = Math.hypot(b.x - a.x, b.y - a.y), fade = 1 - 0.45 * smooth((len - 2 * reach) / (2 * reach));
@@ -673,7 +681,9 @@ function plexus(host: HTMLElement, variant: Variant, PX: Plex, onFocus?: (p: [nu
         if (p.l < CRUSHED) return;
         const a = p.id >= AIR || (p.id >= 3000 && p.id < 5000) ? p.a * smooth(linked[i] / 0.06) : p.a;
         const pr = bright ? p.r * 1.25 : p.r;
-        for (const path of both(dots, p.l, (bright ? 1 : 0.85) * a, 0)) { path.moveTo(p.x + pr, p.y); path.arc(p.x, p.y, pr, 0, Math.PI * 2); }
+        // D67: the dots nearest the headline 40% more transparent
+        const near = bright ? 1 - 0.4 * nearCopy(c, p.x, p.y) : 1;
+        for (const path of both(dots, p.l, (bright ? 1 : 0.85) * a * near, 0, toneOf(p.id + 31))) { path.moveTo(p.x + pr, p.y); path.arc(p.x, p.y, pr, 0, Math.PI * 2); }
       });
 
       if (traced) {
@@ -709,7 +719,8 @@ function plexus(host: HTMLElement, variant: Variant, PX: Plex, onFocus?: (p: [nu
                 const pieces = bright ? 4 : 1, ua = u0 + ((u1 - u0) * m) / pieces, ub = u0 + ((u1 - u0) * (m + 1)) / pieces;
                 const qp = clip(a.x + (b.x - a.x) * ua, a.y + (b.y - a.y) * ua, a.x + (b.x - a.x) * ub, a.y + (b.y - a.y) * ub);
                 if (!qp) continue;
-                for (const p of both(lines, (a.l + b.l) / 2, TRACE.a * Math.min(a.a, b.a) * ta * along(d0 + (l * (ua + ub)) / 2), TRACE.w)) seg(p, qp[0], qp[1], qp[2], qp[3]);
+                // each trace keeps one tone along its length (a ridge is one line), varying from ridge to ridge
+                for (const p of both(lines, (a.l + b.l) / 2, TRACE.a * Math.min(a.a, b.a) * ta * along(d0 + (l * (ua + ub)) / 2), TRACE.w, toneOf(8000 + k) % 4)) seg(p, qp[0], qp[1], qp[2], qp[3]);
               }
               const q = clip(a.x + (b.x - a.x) * u0, a.y + (b.y - a.y) * u0, a.x + (b.x - a.x) * u1, a.y + (b.y - a.y) * u1);
               if (!q) continue;
@@ -739,7 +750,8 @@ function plexus(host: HTMLElement, variant: Variant, PX: Plex, onFocus?: (p: [nu
 
       // in option 1 your node is the composition's focus itself, so only the headline fades it
       const y = bright ? (() => { const p = point(keys[you], c, PX); return p && { ...p, a: p.a * clearOfCopy(c, p.x, p.y), l: groundAt(keys[you], c.f, PX.step) }; })() : at(keys[you]);
-      if (y) {
+      // D64: option 1 no longer marks your node ("remove the circle with crosshair all together"); it stays the focus
+      if (y && !bright) {
         const mark = new Map() as Batch;
         const gp = add(mark, GREEN, y.a, 1.25)!;
         cross(gp, y.x, y.y, 8, 3);
@@ -844,7 +856,8 @@ export function HeroLayer({ look, settle = false, data = "plexus" }: { look: Lay
         // the land
         let focus: [number, number] | null = null, pockets: number[][] = [];
         // D58: the dust a third stronger, and shaped by the same pockets as the plexus over it
-        const under = dust(host, m.default as Plex, d.default, { strength: 1.35, weight: (c, x, y) => composition(c, x, y, focus, pockets) * cornerFade(c, x, y), ribbons: false, risers: 5 });
+        // D64: nine risers (was five), more of them lifting a triangle
+        const under = dust(host, m.default as Plex, d.default, { strength: 1.35, weight: (c, x, y) => composition(c, x, y, focus, pockets) * cornerFade(c, x, y), ribbons: false, risers: 9 });
         const over = plexus(host, "plexusBright", m.default as Plex, (p, k) => { focus = p; pockets = k; });
         ready({ resize: (c) => { under.resize?.(c); over.resize?.(c); }, draw: (c) => { under.draw(c); over.draw(c); } });
       });
@@ -867,6 +880,20 @@ export function HeroLayer({ look, settle = false, data = "plexus" }: { look: Lay
     };
 
     let W = 0, H = 0, key = "", raf = 0, inView = true, crop = "";
+    // The headline block's text as a box relative to the block (D64): the union of its text lines and its links
+    let tight: [number, number, number, number] | null = null, tightKey = "";
+    const textBox = (el: HTMLElement, a: DOMRect): [number, number, number, number] | null => {
+      let l = Infinity, t = Infinity, r = -Infinity, btm = -Infinity;
+      const grow = (q: DOMRect) => { l = Math.min(l, q.left); t = Math.min(t, q.top); r = Math.max(r, q.right); btm = Math.max(btm, q.bottom); };
+      const walk = document.createTreeWalker(el, NodeFilter.SHOW_TEXT), range = document.createRange();
+      for (let n = walk.nextNode(); n; n = walk.nextNode()) {
+        if (!n.textContent?.trim()) continue;
+        range.selectNodeContents(n);
+        for (const q of range.getClientRects()) grow(q);
+      }
+      el.querySelectorAll("a, button").forEach((q) => grow(q.getBoundingClientRect()));
+      return r > l ? [l - a.left, t - a.top, r - l, btm - t] : null;
+    };
     let pos = [0.5, 0.5];
     const ctx = (): Ctx => {
       // The same crop as the picture under it: object-fit cover at its object-position (read once per size and source)
@@ -875,10 +902,13 @@ export function HeroLayer({ look, settle = false, data = "plexus" }: { look: Lay
       const s = Math.max(W / VW, H / VH), dw = VW * s, dh = VH * s, ox = (W - dw) * pos[0], oy = (H - dh) * (pos[1] ?? 0.5);
       const t = ambientT();
       // The headline block, where it sits over the picture now (it scrolls up over the pinned stage)
+      // D64: the text itself (its lines and the button), not the block's full width, which runs well past the words
+      // and kept the layer from coming close to them; measured once per size, relative to the block, then moved with it
       let box: Ctx["copy"] = null;
       if (copyEl && copyEl.offsetParent) {
         const a = copyEl.getBoundingClientRect(), b = host.getBoundingClientRect();
-        if (a.bottom > b.top && a.top < b.bottom) box = [a.left - b.left, a.top - b.top, a.width, a.height];
+        if (tightKey !== `${W}|${H}`) { tightKey = `${W}|${H}`; tight = textBox(copyEl, a); }
+        if (a.bottom > b.top && a.top < b.bottom) box = tight ? [a.left + tight[0] - b.left, a.top + tight[1] - b.top, tight[2], tight[3]] : [a.left - b.left, a.top - b.top, a.width, a.height];
       }
       return { host, W, H, f: frameNow(), t, rest: restNow, map: (nx, ny) => [ox + nx * dw, oy + ny * dh], copy: box, thread: headDot()?.[0] ?? null };
     };

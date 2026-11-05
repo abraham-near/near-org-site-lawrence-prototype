@@ -20,6 +20,21 @@
   },
   "versions": [
     {
+      "commit": "e0fa107",
+      "date": "2026-11-05T11:31:16-05:00",
+      "direction": "b",
+      "title": "Homepage: Original + Orbit is the main version",
+      "summary": [
+        "The homepage is now the master: the take j pull-back with its tracked lines and dust, and the rail with Orbit's rendered drawings, micro-animations and hover.",
+        "The hero layer comes closer to the headline with a long soft feather, varies its greens in five tones, and its tracks are smoothed; the rail's markers are square tiles with the NEAR mark."
+      ],
+      "decisions": ["D64", "D65", "D66", "D67", "D68", "D69", "D70", "D71"],
+      "home": "home",
+      "options": [
+        { "label": "Illustration options (contact sheet)", "path": "lab/directions" }
+      ]
+    },
+    {
       "commit": "87b662b",
       "date": "2026-11-05T10:30:33-05:00",
       "direction": "b",

@@ -23,7 +23,7 @@ import s from "./orbit.module.css";
 // container and the type divides by the drawing's scale (--fit) as well as the station's zoom (--k).
 
 const W = 420, H = 315;
-const SRC = "/lab/own-hybrid/orbit"; // review location (D56); moves with the assets if Orbit ships
+const SRC = "/images/home/own/orbit"; // the homepage's own assets since Orbit shipped (D71)
 
 // Timing on the 120 ms step (--dur-1): `d` is the delay, `t` the duration, in steps
 const at = (d: number, t?: number) => ({ "--d": d, ...(t ? { "--t": t } : {}) }) as CSSProperties;

@@ -9,7 +9,8 @@ import { DIR_SWITCH } from "../directions/switch";
 export const metadata: Metadata = { title: "Lab: Original with Orbit", robots: { index: false, follow: false } };
 
 // D56: the Original direction (D53) with the Orbit illustrations (D54/D55) on the rail's four stations, live, with
-// their micro-animations and hover. Everything else as /lab/dir-o.
+// their micro-animations and hover. Everything else as /lab/dir-o. Since D71 this is the homepage (/home); kept here
+// for the lab switch.
 export default function OriginalOrbit() {
   return (
     <HomeSections story={<StoryRail look="horizon" art="orbit" />} hero={{ ...ZMOVE.j, layer: <HeroLayer look="plexusDust" data="zj2" /> }}>

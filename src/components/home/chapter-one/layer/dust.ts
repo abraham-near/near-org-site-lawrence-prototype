@@ -1,5 +1,5 @@
 import styles from "./HeroLayer.module.css";
-import { clamp, smooth, rand, groundAt, point, clearOfCopy, makeInk, type Batch, type Ctx, type Data, type Look, type Plex, type Track } from "./core";
+import { clamp, smooth, rand, groundAt, point, clearOfCopy, makeInk, toneOf, type Batch, type Ctx, type Data, type Look, type Plex, type Track } from "./core";
 
 // D49, option 2: the land drawn as light. After point-cloud renders (a wolf, a car, a globe made of glittering
 // particles, ribbons of light through a city), the ridges become rims of light built from thousands of tiny particles
@@ -47,8 +47,10 @@ export function dust(host: HTMLElement, PX: Plex, D: Dust, { strength = 1, weigh
       const seen = new Map<number, [number, number, number]>();
       // the bottom left, below the headline: the golden spiral's sweep (core.ts composition)
       const lowLeft = (x: number, y: number) => y / c.H > 0.55 && x / c.W < 0.7;
-      const dot = (x: number, y: number, r: number, l: number, a: number) => {
-        const p = ink.inked(dots, l, a * shaped(x, y), 0);
+      // D68: as a layer under option 1, each particle keeps its own tone (deeper, paler, muted or vivid as well as the
+      // plain shade), so the glitter is not one flat green
+      const dot = (x: number, y: number, r: number, l: number, a: number, id = 0) => {
+        const p = ink.inked(dots, l, a * shaped(x, y), 0, weight ? toneOf(id + 17) : 0);
         if (!p) return;
         // round, however small (D50: square specks read as sensor dust)
         p.moveTo(x + r, y); p.arc(x, y, r, 0, Math.PI * 2);
@@ -92,7 +94,7 @@ export function dust(host: HTMLElement, PX: Plex, D: Dust, { strength = 1, weigh
             const x = ax + (bx - ax) * u + nx * depth, y = ay + (by - ay) * u + ny * depth;
             const tw = c.t ? 0.55 + 0.45 * Math.sin(2 * Math.PI * (c.t * (0.2 + 0.5 * rand(id, 3)) + rand(id, 4))) : 0.8;
             const a = (aa + (ba - aa) * u) * tw * (1 - 0.5 * depth / (9 * s));
-            dot(x, y, s * (0.65 + 0.5 * rand(id, 5)), al + (bl - al) * u, a);
+            dot(x, y, s * (0.65 + 0.5 * rand(id, 5)), al + (bl - al) * u, a, id);
           }
         }
       }));
@@ -124,12 +126,12 @@ export function dust(host: HTMLElement, PX: Plex, D: Dust, { strength = 1, weigh
         const edge = t.edge ? 1 : 0, near = 1 - l;
         const r = s * (0.8 + 1.2 * near + 0.3 * edge) * (1 + 0.8 * glint);
         const a = p.a * pr * clear * keep * (bl && l > 0.7 ? 0.5 : 1) * Math.min(1, (edge ? 0.9 : 0.55) * tw + glint);
-        dot(p.x, p.y, r, l, a);
+        dot(p.x, p.y, r, l, a, i);
         if (a > 0.3) seen.set(i, [p.x, p.y, l]);
         for (let k = 0; k < SAT; k++) {
           const ang = 2 * Math.PI * rand(i, 10 + k), d = s * (4 + 9 * rand(i, 12 + k)) * (0.6 + 0.6 * near);
           const sh = c.t ? Math.sin(2 * Math.PI * c.t * (0.2 + 0.3 * rand(i, 14 + k))) * s : 0;
-          dot(p.x + Math.cos(ang) * (d + sh), p.y + Math.sin(ang) * (d + sh), r * 0.65, l, a * (0.55 + 0.35 * rand(i, 16 + k)));
+          dot(p.x + Math.cos(ang) * (d + sh), p.y + Math.sin(ang) * (d + sh), r * 0.65, l, a * (0.55 + 0.35 * rand(i, 16 + k)), i * 7 + k + 3);
         }
       });
 
@@ -138,7 +140,7 @@ export function dust(host: HTMLElement, PX: Plex, D: Dust, { strength = 1, weigh
       // at the land and fainter towards the particle, and it fades as it lengthens; the particle and its line are gone
       // by the top of the rise. `risers` slots each run their own 5-8 s cycle: rising over 80% of it, then a pause. Half
       // of the cycles lift two of the origin's nearest neighbours too, joined to each other as they rise (a polygon)
-      // as well as to their own origins. So about 4-8 are in the air at once.
+      // as well as to their own origins. So about 4-8 are in the air at once (D64: nine slots in the hero, about 7-14).
       if (c.t && risers) {
         const edgeFade = (x: number, y: number) => Math.min(clamp(y / 40), clamp((c.H - y) / 40), clamp(x / 40), clamp((c.W - x) / 40));
         for (let k = 0; k < risers; k++) {
@@ -155,11 +157,13 @@ export function dust(host: HTMLElement, PX: Plex, D: Dust, { strength = 1, weigh
               const cand = Array.from({ length: 16 }, (_, m) => Math.floor(rand(cyc * 31 + k, 62 + m) * D.points.length));
               const o = cand.find((j) => {
                 const q = seen.get(j), w = q && weight ? weight(c, q[0], q[1]) : 0.5;
-                return q && q[2] < (lowLeft(q[0], q[1]) ? 0.8 : 0.65) && w > 0.3 && w < 0.8 && clearOfCopy(c, q[0], q[1]) >= 1;
+                // D64: the busier middle too (no upper bound on the composition), where the ridges climb to the focus
+                // and every other slot only there (w > 0.6), so the rising lines gather over those ridges
+                return q && q[2] < (lowLeft(q[0], q[1]) ? 0.8 : 0.65) && w > (k % 2 ? 0.6 : 0.3) && clearOfCopy(c, q[0], q[1]) >= 1;
               });
               if (o !== undefined) {
                 set.push(o);
-                if (rand(cyc * 31 + k, 80) < 0.5) {
+                if (rand(cyc * 31 + k, 80) < 0.65) {
                   const [ox0, oy0] = seen.get(o)!;
                   const dist = (q: [number, number, number]) => Math.hypot(q[0] - ox0, q[1] - oy0);
                   const near = [...seen].filter(([j, q]) => j !== o && dist(q) < 80 * s && dist(q) > 14 * s).sort((a2, b2) => dist(a2[1]) - dist(b2[1])).slice(0, 2).map(([j]) => j);
@@ -197,8 +201,17 @@ export function dust(host: HTMLElement, PX: Plex, D: Dust, { strength = 1, weigh
             tops.push([x, y, l, a]);
           });
           if (tops.length === 3) {
-            const pg = ink.inked(lines, tops[0][2], 0.6 * Math.min(...tops.map((q) => q[3])), 0.6);
-            if (pg) { pg.moveTo(tops[0][0], tops[0][1]); pg.lineTo(tops[1][0], tops[1][1]); pg.lineTo(tops[2][0], tops[2][1]); pg.closePath(); }
+            // the triangle's edges join dots, so they follow the gradient rule (D59): strongest at the rising particles,
+            // about a sixth between, in six stretches each
+            const a3 = 0.6 * Math.min(...tops.map((q) => q[3]));
+            for (let e = 0; e < 3; e++) {
+              const [ax, ay] = tops[e], [bx, by] = tops[(e + 1) % 3];
+              for (let m = 0; m < 6; m++) {
+                const t0 = m / 6, t1 = (m + 1) / 6, along = 0.15 + 0.85 * Math.pow(Math.abs(t0 + t1 - 1), 1.2);
+                const pg = ink.inked(lines, tops[0][2], a3 * along, 0.6);
+                if (pg) { pg.moveTo(ax + (bx - ax) * t0, ay + (by - ay) * t0); pg.lineTo(ax + (bx - ax) * t1, ay + (by - ay) * t1); }
+              }
+            }
           }
         }
       }
@@ -217,7 +230,7 @@ export function dust(host: HTMLElement, PX: Plex, D: Dust, { strength = 1, weigh
           const [x, y] = c.map(q.x / 1e4 + sx + dx, q.y / 1e4 + sy + dy);
           const tw = c.t ? 0.55 + 0.45 * Math.sin(2 * Math.PI * (c.t * (0.1 + 0.3 * rand(id, 7)) + rand(id, 8))) : 0.8;
           const a = 0.7 * tw * clearOfCopy(c, x, y) * Math.min(clamp(y / 40), clamp((c.H - y) / 40), clamp((c.W - x) / 40));
-          if (a > 0) dot(x, y, s * (0.9 + 0.7 * rand(id, 9)), l, a);
+          if (a > 0) dot(x, y, s * (0.9 + 0.7 * rand(id, 9)), l, a, id);
         }
       });
 

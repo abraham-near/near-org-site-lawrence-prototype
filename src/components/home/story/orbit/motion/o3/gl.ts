@@ -89,7 +89,6 @@ const frosted = (tint: THREE.Color, pal: Pal, roughness: number) => new THREE.Me
 });
 const polished = (pal: Pal) => new THREE.MeshPhysicalMaterial({ color: pal.onDark, metalness: 1, roughness: 0.08 });
 const polishedDark = (pal: Pal) => new THREE.MeshPhysicalMaterial({ color: mix(pal.ink, pal.surface2, 0.35), metalness: 1, roughness: 0.2 });
-const chromeBall = (pal: Pal) => new THREE.MeshPhysicalMaterial({ color: pal.onDark, metalness: 1, roughness: 0.14, clearcoat: 1, clearcoatRoughness: 0.05 });
 const greenBall = (pal: Pal) => new THREE.MeshPhysicalMaterial({
   color: pal.green, metalness: 0.92, roughness: 0.2, clearcoat: 1, clearcoatRoughness: 0.06,
 });
@@ -225,13 +224,14 @@ export function assetsView(tokens: Tokens): View<AssetsPose> {
   ring.translate(0, 0, -(ASSETS.thick - 2 * bev) / 2);
   ring.rotateX(-Math.PI / 2);
   frame.add(new THREE.Mesh(ring, [frosted(mix(pal.surface2, pal.onDark, 0.2), pal, 0.42), polished(pal)]));
-  const geo = new THREE.SphereGeometry(ASSETS.ball, 64, 48);
-  const chrome = new THREE.Mesh(geo, chromeBall(pal));
-  const greenM = new THREE.Mesh(geo.clone(), greenBall(pal));
-  frame.add(chrome, greenM);
-  // where the balls sit on the glass, and the ring's own soft shadow on the page below
-  const contact = [softShadow(pal.ink, 0.5), softShadow(pal.ink, 0.5)];
-  for (const c of contact) { c.scale.setScalar(ASSETS.ball * 3.6); frame.add(c); }
+  // the ball is drawn on screen only: if the frosted washer saw it in its transmission pass, it would smear a green
+  // haze across the glass beside the ball (the refraction offset samples the ball's pixels)
+  const ball = onlyIn(new THREE.Mesh(new THREE.SphereGeometry(ASSETS.ball, 64, 48), greenBall(pal)), false);
+  frame.add(ball);
+  // where the ball sits on the glass, and the ring's own soft shadow on the page below
+  const contact = softShadow(pal.ink, 0.5);
+  contact.scale.setScalar(ASSETS.ball * 3.6);
+  frame.add(contact);
   const ground = softShadow(pal.ink, 0.07);
   ground.scale.set(ASSETS.rOut * 2.5, 1, ASSETS.rOut * 2.2);
   ground.position.y = -0.55;
@@ -239,9 +239,7 @@ export function assetsView(tokens: Tokens): View<AssetsPose> {
   const top = ASSETS.thick / 2 + 0.003;
 
   return view(scene, camera, (p) => {
-    chrome.position.set(...p.chrome);
-    greenM.position.set(...p.green);
-    contact[0].position.set(p.chrome[0], top, p.chrome[2]);
-    contact[1].position.set(p.green[0], top, p.green[2]);
+    ball.position.set(...p.green);
+    contact.position.set(p.green[0], top, p.green[2]);
   });
 }

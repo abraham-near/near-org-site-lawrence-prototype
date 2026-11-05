@@ -20,6 +20,21 @@
   },
   "versions": [
     {
+      "commit": "c1238ce",
+      "date": "2026-11-05T13:36:45-05:00",
+      "direction": "b",
+      "title": "Rail stations: one green ball on assets, animated vector layers, no tags",
+      "summary": [
+        "The assets station keeps only the green ball with a fading trail, and a second animated layer of dials, markers and drawing arcs around the glass washer.",
+        "The data station drops its tag and its vectors move: the rim arc sweeps, markers ride the orbits, the axis draws in and out. Hidden stations stop rendering, so the rail holds 60 fps."
+      ],
+      "decisions": ["D75", "D76", "D77"],
+      "home": "home",
+      "options": [
+        { "label": "Rail motion options", "path": "lab/rail-motion" }
+      ]
+    },
+    {
       "commit": "a096294",
       "date": "2026-11-05T12:58:20-05:00",
       "direction": "b",

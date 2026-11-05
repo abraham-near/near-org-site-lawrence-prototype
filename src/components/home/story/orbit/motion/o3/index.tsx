@@ -4,10 +4,10 @@ import Image from "next/image";
 import { useCallback, useEffect, useId, useRef, type HTMLAttributes, type ReactNode } from "react";
 import s from "../../orbit.module.css";
 import { REDUCED, useSlide } from "../slide";
-import { circlePath, HEAD, SQUARE, STAR, type Attrs } from "./geo";
+import { circlePath, SQUARE, STAR, type Attrs } from "./geo";
 import type { Tokens, View } from "./gl";
 import {
-  assetsHorizon, assetsPose, assetsVectors, dataPose, dataVectors, LABEL_DATA, SWAP_TAG,
+  assetsHorizon, assetsPose, assetsVectors, dataPose, dataVectors, LABEL_DATA,
   type AssetsPose, type DataPose,
 } from "./scenes";
 import m from "./o3.module.css";
@@ -18,7 +18,7 @@ import m from "./o3.module.css";
 // still rendered from this scene at t = 0 with its vectors drawn from the same pose on the server.
 export const name = "Real-time 3D";
 export const note =
-  "Rendered live in the browser with three.js: real frosted glass (transmission with roughness) that genuinely blurs the green ball behind it, polished metal and chrome in a neutral studio light. The disc turns flat to camera as it reaches the centre and the balls loop on their own time; Orbit’s lines are projected from the 3D scene every frame.";
+  "Rendered live in the browser with three.js: real frosted glass (transmission with roughness) that genuinely blurs the green ball behind it, polished metal in a neutral studio light. The disc turns flat to camera as it reaches the centre and the green balls loop on their own time; Orbit’s lines are projected from the 3D scene every frame.";
 
 const W = 420, H = 315;
 const SRC = "/images/home/own/motion/o3";
@@ -156,15 +156,29 @@ function ecliptic() {
 }
 const ECLIPTIC = ecliptic();
 
+// the three orbiting markers (ring, cross, square), each drawn in both layers and shown in the one it is in
+const MARKS = [circlePath(2.2), STAR, SQUARE];
+const markCls = [s.marker, s.hair, s.marker];
+const marksIn = (k: K, side: "b" | "f") => MARKS.map((d, i) => (
+  <g key={i}>
+    <path {...k(`mt${i}${side}`, s.fine)} />
+    <g {...k(`mk${i}${side}`, "")}><path className={markCls[i]} d={d} /></g>
+  </g>
+));
+
 export function AssetsArt(props: HTMLAttributes<HTMLDivElement>) {
-  const gid = `o3swap${useId().replace(/[^a-zA-Z0-9]/g, "")}`;
+  const id = useId().replace(/[^a-zA-Z0-9]/g, "");
+  const trail = `o3trail${id}`, reading = `o3read${id}`;
   return (
     <Stage<AssetsPose>
       which="assets" rest={ASSETS_REST} still="assets" props={props} pose={assetsPose} vectors={assetsVectors} load={loadAssets}
       under={(k) => (
         <>
           <path className={s.faint} d={ECLIPTIC} />
+          <path {...k("dialRingBack", s.faint)} />
+          <path {...k("dialBack", s.fine)} />
           <path {...k("constructBack", s.faint)} />
+          {marksIn(k, "b")}
           <path {...k("pathBack", s.orbit)} />
           <path {...k("ticks", s.fine)} />
         </>
@@ -172,26 +186,34 @@ export function AssetsArt(props: HTMLAttributes<HTMLDivElement>) {
       over={(k) => (
         <>
           <defs>
-            {/* the swap is strongest at its two balls */}
-            <linearGradient id={gid} gradientUnits="userSpaceOnUse" {...k("archGrad", "")}>
-              <stop offset="0" stopColor="var(--color-green-text)" />
-              <stop offset="0.5" stopColor="var(--color-green-text)" stopOpacity="0.3" />
+            {/* the trail: full strength where it meets the ball, gone at its tail */}
+            <linearGradient id={trail} gradientUnits="userSpaceOnUse" {...k("trailGrad", "")}>
+              <stop offset="0" stopColor="var(--color-green-text)" stopOpacity="0" />
               <stop offset="1" stopColor="var(--color-green-text)" />
             </linearGradient>
+            {/* the reading joins two points: strongest at both */}
+            <linearGradient id={reading} gradientUnits="userSpaceOnUse" {...k("readingGrad", "")}>
+              <stop offset="0" stopColor="var(--color-ink)" stopOpacity="0.85" />
+              <stop offset="0.5" stopColor="var(--color-ink)" stopOpacity="0.2" />
+              <stop offset="1" stopColor="var(--color-ink)" stopOpacity="0.85" />
+            </linearGradient>
           </defs>
+          <path {...k("dialRingFront", s.faint)} />
+          <path {...k("dialFront", s.fine)} />
           <path {...k("constructFront", s.faint)} />
+          {marksIn(k, "f")}
           <path {...k("pathFront", s.orbit)} />
-          <path {...k("arch", s.gLine)} style={{ stroke: `url(#${gid})` }} />
-          <g {...k("archFrom", "")}><path className={s.gFill} d={circlePath(1.8)} /></g>
-          <g {...k("archHead", "")}><path className={s.gFill} d={HEAD} /></g>
-          <g {...k("m206", "")}><path className={s.marker} d={circlePath(2.2)} /></g>
-          <g {...k("m328", "")}><path className={s.hair} d={STAR} /></g>
-          <g {...k("m140", "")}><path className={s.marker} d={SQUARE} /></g>
-          <path {...k("apexLeader", s.fine)} />
-          <g {...k("apexDot", "")}><path className={s.inkFill} d={circlePath(1.6)} /></g>
+          <path {...k("arc0", s.dash)} />
+          <path {...k("arc1", s.dash)} />
+          <path {...k("arc2", s.dash)} />
+          <path {...k("reading", s.hair)} style={{ stroke: `url(#${reading})` }} />
+          <path {...k("readingTicks", s.faint)} />
+          <g {...k("readingFrom", "")}><path className={s.inkFill} d={circlePath(1.4)} /></g>
+          <g {...k("readingTo", "")}><path className={s.inkFill} d={circlePath(1.4)} /></g>
+          <path {...k("trail", s.gLine)} style={{ stroke: `url(#${trail})`, strokeWidth: 1.2 }} />
         </>
       )}
-      labels={<text className={s.label} x={SWAP_TAG[0]} y={SWAP_TAG[1]} textAnchor="middle">Swap</text>}
+      labels={null}
     />
   );
 }

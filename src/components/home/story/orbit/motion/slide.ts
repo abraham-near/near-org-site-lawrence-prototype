@@ -24,10 +24,13 @@ export function useSlide(ref: RefObject<HTMLElement | null>, onFrame: (slide: nu
     if (!el || matchMedia(REDUCED).matches) return;
     let raf = 0, on = false;
     const t0 = performance.now();
+    // The rail hides every station but the one being read (autoAlpha on its [data-art]): a hidden drawing skips its
+    // frame (no layout read, no render), so only the station on show costs anything
+    const holder = el.closest<HTMLElement>("[data-art]") ?? el;
     const tick = () => {
       raf = 0;
       if (!on) return;
-      onFrame(slideOf(el), (performance.now() - t0) / 1000);
+      if (holder.style.visibility !== "hidden") onFrame(slideOf(el), (performance.now() - t0) / 1000);
       raf = requestAnimationFrame(tick);
     };
     const io = new IntersectionObserver(([e]) => {

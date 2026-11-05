@@ -16,8 +16,8 @@ import { camera, f, onDisc, onRing, seg, useLive, type Pt, type V3 } from "./pro
 //   - inside it a blurred copy of the ball stands in for the ball, which is masked out there, and the lines behind are
 //     clipped away. A backdrop filter has nothing to blur under a translucent parent (Chrome), and the rail fades each
 //     station in, so what passes behind from inside the drawing is frosted explicitly, the same at any opacity.
-// The vectors are projected through the same camera as the CSS (proj.ts), so the graduated arc on the glass, the tag's
-// leader and the ball's reading stay on the objects.
+// The vectors are projected through the same camera as the CSS (proj.ts), so the graduated arc on the glass, the
+// markers on the orbits and the ball's reading stay on the objects, and several of them move slowly on their own.
 
 const SRC = "/images/home/own/motion/o1";
 const C: Pt = [210, 150]; // the disc's centre and the camera's pivot
@@ -71,19 +71,45 @@ function chase(st: { y: number; v: number; t: number }, target: number, time: nu
 }
 
 const Y_HOR = C[1]; // the horizon through the disc's centre
-const LABEL: Pt = [404, 266];
-const LEAD_TO: Pt = [384, 254];
-const LEAD_AT = 38; // degrees round the rim (clockwise from 3 o'clock) where the leader touches the glass
 
-// Everything that moves, for a turn (yaw) and a ball angle (t)
-function pose(yaw: number, t: number) {
+// The vectors' own slow motions, all on the same clock as the ball, all seamless loops, each computed through the
+// projection every frame (so they stay on the disc and the orbit at any turn). Nothing travels along a line:
+// - the graduated arc on the glass sweeps round the rim, once every ARC_LAP seconds;
+const ARC_LAP = 40, ARC_FROM = 192, ARC_SPAN = 60;
+// - three markers ride the orbit ellipses at their own speeds and ways (degrees a second), passing behind the glass
+//   on the far side and in front of it on the near side;
+const MARKS = [
+  { kind: "ring", k: 1, t0: 30, rate: 360 / 64 },
+  { kind: "square", k: 0.72, t0: 120, rate: -360 / 48 },
+  { kind: "point", k: 1, t0: 150, rate: 360 / 90 },
+] as const;
+// - the pivot's dashed axis draws out from the disc and back in (its dashes fixed at the disc's end, so they never
+//   travel), with a pause at full length;
+const AXIS_LOOP = 7, AXIS_LEN = 17;
+function axisAt(time: number) {
+  const u = ((time % AXIS_LOOP) + AXIS_LOOP) % AXIS_LOOP; // 0-3.5 s full, 3.5-5 s in, 5-5.6 s gone, 5.6-7.1 s out
+  const ease = (x: number) => 0.5 - 0.5 * Math.cos(Math.PI * Math.min(1, Math.max(0, x)));
+  if (u < 3.5) return 1;
+  if (u < 5) return 1 - ease((u - 3.5) / 1.5);
+  if (u < 5.5) return 0;
+  return ease((u - 5.5) / 1.5);
+}
+// - the horizon's scale breathes: each tick only lengthens and shortens in place, in a slow wave
+const TICKS = 11, TICK_LOOP = 8;
+const tickScale = (time: number) =>
+  Array.from({ length: TICKS }, (_, i) => {
+    const h = (i % 5 === 0 ? 5 : 2.2) * (0.78 + 0.3 * Math.sin(2 * Math.PI * (time / TICK_LOOP - i / TICKS)));
+    return `M${22 + i * 6} ${Y_HOR}v${f(-h)}`;
+  }).join("");
+
+// Everything that moves, for a turn (yaw), a ball angle (t) and the clock (for the vectors' own motions)
+function pose(yaw: number, t: number, time: number) {
   const b = orb(t);
   const [bx, by, bk] = cam.proj(b);
   const a = (yaw * Math.PI) / 180;
   const behind = b[0] * Math.sin(a) + b[2] * Math.cos(a) < 0; // the ball's side of the turned disc's plane
   const disc = (t: number, k = 1): V3 => onDisc(R * k * Math.cos((t * Math.PI) / 180), R * k * Math.sin((t * Math.PI) / 180), yaw);
   const left = cam.proj(onDisc(-R, 0, yaw));
-  const lead = cam.proj(disc(LEAD_AT));
   // the hole the ball cuts in the lines in front: none while it is behind the glass (the frost hides it)
   const hidden = behind && Math.abs(bx - C[0]) < Math.abs(left[0] - C[0]);
   const q = hidden ? 0 : f((BALL / 2) * bk + 1.5);
@@ -109,12 +135,21 @@ function pose(yaw: number, t: number) {
     hole: `M-20 -20H440V335H-20Z${oval}`,
     glass: (z: number) => `perspective(${cam.P}px) rotateY(${f(yaw)}deg) translateZ(${z}px)`,
     frost: { left: `${f(xl)}px`, top: `${f(C[1] - hh)}px`, width: `${f(xr - xl)}px`, height: `${f(2 * hh)}px` },
-    // the graduated arc on the glass, upper left, and its scale
-    arc: cam.curve((u) => disc(u, 1.1), 192, 252),
-    scale: cam.ticks((u, k) => disc(u, k), 192, 252, 4, 1.1, 1.13, 5, 1.165),
+    // the graduated arc on the glass and its scale, sweeping round the rim
+    ...(() => {
+      const a0 = ARC_FROM + (360 * time) / ARC_LAP;
+      return { arc: cam.curve((u) => disc(u, 1.1), a0, a0 + ARC_SPAN), scale: cam.ticks((u, k) => disc(u, k), a0, a0 + ARC_SPAN, 4, 1.1, 1.13, 5, 1.165) };
+    })(),
+    // the markers on the orbits: each one's place, and whether it is on the near (front) side
+    marks: MARKS.map((m) => { const u = m.t0 + m.rate * time; const [x, y] = cam.pt(orb(u, m.k)); return { x, y, near: Math.sin((u * Math.PI) / 180) > 0 }; }),
+    // the pivot's axis, drawn out from the disc by g (0 to 1)
+    axis: (() => {
+      const g = axisAt(time), l = AXIS_LEN * g;
+      return { g: f(g), d: g > 0.01 ? seg([C[0], C[1] - R - 5], [C[0], C[1] - R - 5 - l]) + seg([C[0], C[1] + R + 5], [C[0], C[1] + R + 5 + l]) : "", top: f(C[1] - R - 5 - l), bottom: f(C[1] + R + 5 + l) };
+    })(),
+    ticks: tickScale(time),
     // the horizon up to the glass's left edge
     horizon: seg([22, Y_HOR], [left[0] - 1.5, Y_HOR]),
-    lead: { at: [f(lead[0]), f(lead[1])] as Pt, d: seg([lead[0], lead[1]], LEAD_TO) },
     // the ball's reading on the horizon: a drop to it, and a point where it lands
     drop: seg([bx, by], [bx, Y_HOR - 1.5]),
     foot: [f(bx), Y_HOR] as Pt,
@@ -123,7 +158,7 @@ function pose(yaw: number, t: number) {
     cut: `M-20 -20H440V335H-20ZM${f(bx - q)} ${f(by)}a${q} ${q} 0 1 0 ${f(2 * q)} 0a${q} ${q} 0 1 0 ${f(-2 * q)} 0Z`,
   };
 }
-const REST = pose(0, T_REST);
+const REST = pose(0, T_REST, 0);
 
 // The turned layers of the glass, back to front: the rim's copies stepped back in depth (the edge's thickness), then
 // (after the frost, which is not turned but clipped to the turned outline) the veil, the frosted face and the rim. All
@@ -135,15 +170,26 @@ const GLASS: { cls: "edge" | "veil" | "face" | "rim"; z: number; size: number; s
   { cls: "rim", z: 0, size: DISC_BOX, src: "data-disc-rim" },
 ];
 
+// A marker drawn about (0, 0), placed by transform: a hollow ring, a tiny square or a filled point
+const Mark = ({ kind }: { kind: (typeof MARKS)[number]["kind"] }) =>
+  kind === "ring" ? <circle className={s.marker} r="2.2" /> : kind === "square" ? <rect className={s.marker} x="-1.6" y="-1.6" width="3.2" height="3.2" /> : <circle className={s.inkFill} r="1.7" />;
+const marksIn = (front: boolean, ref: (i: number) => (el: SVGGElement | null) => void) =>
+  REST.marks.map((m, i) => (
+    <g key={i} ref={ref(i)} transform={`translate(${m.x} ${m.y})`} style={{ visibility: m.near === front ? "visible" : "hidden" }}>
+      <Mark kind={MARKS[i].kind} />
+    </g>
+  ));
+
 const Point = ({ p, r = 1.5, cls = s.inkFill }: { p: Pt; r?: number; cls?: string }) => <circle className={cls} cx={p[0]} cy={p[1]} r={r} />;
-const at2 = cam.pt;
 
 export function DataArt({ className = "", style, ...rest }: HTMLAttributes<HTMLDivElement>) {
   const root = useRef<HTMLDivElement>(null);
   const ball = useRef<HTMLDivElement>(null);
   const layers = useRef<(HTMLDivElement | null)[]>([]);
   const arc = useRef<SVGPathElement>(null), scale = useRef<SVGPathElement>(null), horizon = useRef<SVGPathElement>(null);
-  const lead = useRef<SVGPathElement>(null), leadAt = useRef<SVGCircleElement>(null);
+  const marks = useRef<(SVGGElement | null)[]>([]); // each marker twice: behind the glass [i], in front [i + 3]
+  const axis = useRef<SVGPathElement>(null), axisTop = useRef<SVGCircleElement>(null), axisBottom = useRef<SVGCircleElement>(null);
+  const tickPath = useRef<SVGPathElement>(null);
   const drop = useRef<SVGPathElement>(null), foot = useRef<SVGCircleElement>(null), grad = useRef<SVGLinearGradientElement>(null);
   const cut = useRef<SVGPathElement>(null);
   const frost = useRef<HTMLDivElement>(null), inside = useRef<HTMLDivElement>(null), frosted = useRef<HTMLDivElement>(null);
@@ -152,7 +198,7 @@ export function DataArt({ className = "", style, ...rest }: HTMLAttributes<HTMLD
 
   const turn = useRef({ y: 0, v: 0, t: -1 });
   useLive(root, (slide, time) => {
-    const p = pose(chase(turn.current, yawFor(slide), time), ballAt(time));
+    const p = pose(chase(turn.current, yawFor(slide), time), ballAt(time), time);
     const b = ball.current!;
     b.style.transform = p.ball;
     b.style.zIndex = p.behind ? "1" : "3";
@@ -167,9 +213,15 @@ export function DataArt({ className = "", style, ...rest }: HTMLAttributes<HTMLD
     arc.current!.setAttribute("d", p.arc);
     scale.current!.setAttribute("d", p.scale);
     horizon.current!.setAttribute("d", p.horizon);
-    lead.current!.setAttribute("d", p.lead.d);
-    leadAt.current!.setAttribute("cx", String(p.lead.at[0]));
-    leadAt.current!.setAttribute("cy", String(p.lead.at[1]));
+    p.marks.forEach((m, i) => {
+      const far = marks.current[i]!, near = marks.current[i + MARKS.length]!;
+      far.setAttribute("transform", `translate(${m.x} ${m.y})`); near.setAttribute("transform", `translate(${m.x} ${m.y})`);
+      far.style.visibility = m.near ? "hidden" : "visible"; near.style.visibility = m.near ? "visible" : "hidden";
+    });
+    axis.current!.setAttribute("d", p.axis.d);
+    axisTop.current!.setAttribute("cy", String(p.axis.top)); axisBottom.current!.setAttribute("cy", String(p.axis.bottom));
+    axisTop.current!.style.opacity = axisBottom.current!.style.opacity = String(p.axis.g);
+    tickPath.current!.setAttribute("d", p.ticks);
     drop.current!.setAttribute("d", p.drop);
     foot.current!.setAttribute("cx", String(p.foot[0]));
     grad.current!.setAttribute("y1", String(p.dropGrad.y1));
@@ -205,6 +257,7 @@ export function DataArt({ className = "", style, ...rest }: HTMLAttributes<HTMLD
           <path className={s.dots} d={seg([C[0] + R + 8, Y_HOR], [404, Y_HOR - 0.5])} />
           <path ref={drop} d={REST.drop} fill="none" stroke={`url(#${id}d)`} strokeWidth="0.6" />
           <circle ref={foot} className={s.inkFill} cx={REST.foot[0]} cy={Y_HOR} r="1.3" />
+          {marksIn(false, (i) => (el) => { marks.current[i] = el; })}
           </g>
         </svg>
 
@@ -235,23 +288,16 @@ export function DataArt({ className = "", style, ...rest }: HTMLAttributes<HTMLD
             <path className={s.faint} d={cam.curve((t) => orb(t, 0.72), 0, 180)} />
             <path className={s.fine} d={cam.ticks(orb, 100, 176, 2, 1, 1.035, 5, 1.07)} />
             <path ref={horizon} className={s.hair} d={REST.horizon} />
-            <path className={s.fine} d={Array.from({ length: 11 }, (_, i) => `M${22 + i * 6} ${Y_HOR}v${i % 5 === 0 ? -5 : -2.2}`).join("")} />
+            <path ref={tickPath} className={s.fine} d={REST.ticks} />
             <Point p={[22, Y_HOR]} />
-            <Point p={at2(orb(150))} r={1.8} />
+            {marksIn(true, (i) => (el) => { marks.current[i + MARKS.length] = el; })}
           </g>
           {/* the pivot: the disc turns about this axis */}
-          <path className={s.dash} d={seg([C[0], C[1] - R - 22], [C[0], C[1] - R - 5]) + seg([C[0], C[1] + R + 5], [C[0], C[1] + R + 22])} />
-          <Point p={[C[0], C[1] - R - 22]} r={1.2} />
-          <Point p={[C[0], C[1] + R + 22]} r={1.2} />
+          <path ref={axis} className={s.dash} d={REST.axis.d} />
+          <circle ref={axisTop} className={s.inkFill} cx={C[0]} cy={REST.axis.top} r="1.2" />
+          <circle ref={axisBottom} className={s.inkFill} cx={C[0]} cy={REST.axis.bottom} r="1.2" />
           <path ref={arc} className={s.orbit} d={REST.arc} />
           <path ref={scale} className={s.fine} d={REST.scale} />
-          <circle className={s.marker} cx={at2(orb(30))[0]} cy={at2(orb(30))[1]} r="2.2" />
-          <rect className={s.marker} x={at2(orb(120, 0.72))[0] - 1.6} y={at2(orb(120, 0.72))[1] - 1.6} width="3.2" height="3.2" />
-          <path ref={lead} className={s.fine} d={REST.lead.d} />
-          <circle ref={leadAt} className={s.inkFill} cx={REST.lead.at[0]} cy={REST.lead.at[1]} r="1.6" />
-        </svg>
-        <svg className={`${st.svg} ${st.free}`} viewBox="0 0 420 315">
-          <text className={st.label} x={LABEL[0]} y={LABEL[1]} textAnchor="end">Private</text>
         </svg>
       </div>
     </div>

@@ -22,6 +22,9 @@ else
 fi
 
 mkdir -p "$WORK" "$OUT"
+# The real path: macOS's temp folder sits behind a symlink (/var -> /private/var), and Turbopack refuses a root whose
+# build folder resolves outside it
+WORK="$(cd "$WORK" && pwd -P)"
 xattr -w 'com.apple.fileprovider.ignore#P' 1 "$OUT" 2>/dev/null || true
 
 for c in "${COMMITS[@]}"; do
@@ -62,9 +65,10 @@ for c in "${COMMITS[@]}"; do
   cd build
   git -C "$SITE" archive "$c" | tar -x -C .
   # Prefix the copy's base path onto paths basePath doesn't reach: public files (in quotes, backticks or CSS url()),
-  # and plain <a href> attributes to its own pages (next/link hrefs, written as object fields, get it already)
+  # and plain <a href> attributes to its own pages (next/link hrefs, written as object fields, get it already). A plain
+# link built from data is written href={`/${...}`} so it is caught too
   find src -type f \( -name '*.ts' -o -name '*.tsx' -o -name '*.css' \) -print0 |
-    xargs -0 perl -pi -e "s{([\"'\`(])/(images|videos|brand|lab/voices-refs)/}{\$1/versions/$c/\$2/}g; s{href=(\{\`|\")/(lab|system)\b}{href=\$1/versions/$c/\$2}g"
+    xargs -0 perl -pi -e "s{([\"'\`(])/(images|videos|brand|lab/voices-refs|lab/hero)/}{\$1/versions/$c/\$2/}g; s{href=(\{\`|\")/(lab|system|\\\$\\{)}{href=\$1/versions/$c/\$2}g"
   mv next.config.ts next.config.base.ts
   cat > next.config.ts <<EOF
 import type { NextConfig } from "next";
@@ -87,7 +91,8 @@ EOF
 
   # Every page's own paths must stay inside the copy: no public file or own page left at the site's root (links to
   # the wider site map, like /brand or /blog, may point there), nothing prefixed twice
-  escaped="$(grep -rhoE '(href|src|srcset|poster)="[^"]*"' out --include='*.html' |
+  # (The copy's own versions index is skipped: its working-copy links point at the live site on purpose)
+  escaped="$(grep -rhoE '(href|src|srcset|poster)="[^"]*"' out --include='*.html' --exclude=index.html |
     grep -E '(^|[" ,])(/(images|videos|brand|_next)/|/(lab|system)([/"]|$))|/versions/[0-9a-f]+/versions/' | sort -u || true)"
   [ -z "$escaped" ] || { printf '%s: paths outside the copy:\n%s\n' "$c" "$escaped"; exit 1; }
 

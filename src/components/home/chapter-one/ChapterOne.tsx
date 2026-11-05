@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import Image from "next/image";
 import { SplitText } from "./SplitText";
 import { ChapterOneMotion } from "./ChapterOneMotion";
@@ -10,7 +11,12 @@ import styles from "./ChapterOne.module.css";
 // and "Own your") is its own section since D29 (components/home/story).
 // Desktop with motion: a pinned stage under scrolling beats (GSAP, D8); the hero is a scroll-scrubbed camera move down
 // the ridges (D29). Otherwise: plain stacked beats with a static green rule. All copy is server-rendered.
-export function ChapterOne() {
+// `hero` lets lab routes try another grade of the camera move (its poster must be that video's first frame) and a
+// graphic layer over it; the homepage uses the defaults.
+export type HeroOptions = { poster?: string; video?: string; layer?: ReactNode };
+
+export function ChapterOne({ hero = {} }: { hero?: HeroOptions }) {
+  const { poster = "/images/home/home-hero-ridges-v2.webp", video, layer } = hero;
   return (
     <section className={styles.chapter} data-ch="root" aria-label="Own your world">
       {/* The stage: decorative (every word lives in the beats). Pinned on desktop; a photo band on phones. */}
@@ -18,10 +24,11 @@ export function ChapterOne() {
         <div className={styles.photo} data-ch="photo">
           <div className={styles.media} data-ch="media">
             {/* The video's first frame, so the swap to the video is invisible; first paint and LCP */}
-            <Image src="/images/home/home-hero-ridges-v2.webp" alt="" fill sizes="100vw" quality={75} preload fetchPriority="high" className={styles.photoImg} />
+            <Image src={poster} alt="" fill sizes="100vw" quality={75} preload fetchPriority="high" className={styles.photoImg} />
             {/* Desktop with motion only: HeroVideo gives it a source and scrubs it with the scroll (never plays on its own) */}
             <video className={styles.video} data-ch="video" muted playsInline preload="none" tabIndex={-1} />
-            <HeroVideo />
+            <HeroVideo src={video} />
+            {layer}
           </div>
           {/* The close-in: two surface curtains scale in from the edges until only the line is left (transform only). */}
           <span className={`${styles.curtain} ${styles.curtainL}`} data-ch="curtain-l" />
@@ -32,7 +39,7 @@ export function ChapterOne() {
 
       <div className={styles.beats} data-ch="beats">
         <div className={`${styles.beat} ${styles.beatClaim}`} data-beat="claim">
-          <div className={styles.copy}>
+          <div className={styles.copy} data-ch="copy">
             <h1 className="t-display">
               Own your <span className="accent">world.</span>
             </h1>

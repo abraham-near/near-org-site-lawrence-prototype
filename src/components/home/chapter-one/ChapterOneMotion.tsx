@@ -65,7 +65,7 @@ export function ChapterOneMotion() {
         curtainL.style.width = `${X}px`;
         curtainR.style.width = `${W - X}px`;
         svg.replaceChildren();
-        const thread = el("path", { class: "thread" }), head = el("circle", { class: "dot", r: 5 });
+        const thread = el("path", { class: "thread" }), head = el("circle", { class: "dot", r: 5, "data-ch": "head" });
         G = { X, y: { headStart: 0, headHero: H * 0.5 }, thread, head }; // nothing on load: the line drops in with the scroll
         render();
       }

@@ -12,10 +12,13 @@ const OPTIONS = [
   { href: "/lab/opening-c3", key: "c3", name: "C3 Drafting" },
 ];
 
-export function LabSwitch({ current }: { current: string }) {
+type Option = { href: string; key: string; name: string };
+
+// Also used by the hero options (D40), with their own list
+export function LabSwitch({ current, options = OPTIONS, label = "Story options" }: { current: string; options?: Option[]; label?: string }) {
   return (
-    <nav className={styles.switch} aria-label="Story options">
-      {OPTIONS.map((o) => (
+    <nav className={styles.switch} aria-label={label}>
+      {options.map((o) => (
         <Link key={o.key} href={o.href} className={styles.link} aria-current={o.key === current ? "page" : undefined}>{o.name}</Link>
       ))}
     </nav>

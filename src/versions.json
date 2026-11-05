@@ -10,11 +10,32 @@
     "summary": "What is on screen now, including anything not yet committed. It changes as we work.",
     "home": "/home",
     "options": [
+      { "label": "Hero options", "path": "/lab/hero" },
       { "label": "Testimonial options", "path": "/lab/voices" },
       { "label": "System", "path": "/system" }
     ]
   },
   "versions": [
+    {
+      "commit": "c8fecb5",
+      "date": "2026-11-04T19:33:20-05:00",
+      "direction": "b",
+      "title": "Hero: a tracked graphics layer on the pull-back render",
+      "summary": [
+        "The hero gains a layer of fine graphics tracked to the footage (A4 Plexus + Traces): lines draw on and off, dots come and go, nothing runs a light along a line.",
+        "A new render (take j, the gentle pull-back) with a subtle green; three graphics options on it, then option 1 composed by the golden ratio over a dust layer, with particles rising off the land.",
+        "All in the lab (/lab/hero, /lab/hero-j4); the homepage is unchanged."
+      ],
+      "decisions": ["D40", "D41", "D42", "D43", "D44", "D45", "D46", "D47", "D48", "D49", "D50", "D51"],
+      "home": "home",
+      "options": [
+        { "label": "All hero options", "path": "lab/hero" },
+        { "label": "Take j: A4 + Dust (the pick)", "path": "lab/hero-j4" },
+        { "label": "1 Brighter A4", "path": "lab/hero-j1" },
+        { "label": "2 Dust", "path": "lab/hero-j2" },
+        { "label": "3 Signal", "path": "lab/hero-j3" }
+      ]
+    },
     {
       "commit": "bfcc365",
       "date": "2026-11-04T12:49:31-05:00",

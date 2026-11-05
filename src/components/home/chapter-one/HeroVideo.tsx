@@ -12,10 +12,10 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
 // never download it; it fades in over the photograph (its own first frame) once it can seek. Encoded with a keyframe
 // every 4 frames and no B-frames so seeking is cheap; the playhead eases towards the scroll target, one seek at a time.
 // Phones/tablets keep the still with a gentle parallax.
-const SRC = "/videos/home/home-hero-ridges-crane-v1.mp4";
+export const HERO_VIDEO = "/videos/home/home-hero-ridges-crane-v1.mp4";
 const FPS = 24;
 
-export function HeroVideo() {
+export function HeroVideo({ src = HERO_VIDEO }: { src?: string }) {
   const anchor = useRef<HTMLSpanElement>(null);
 
   useGSAP(() => {
@@ -66,7 +66,7 @@ export function HeroVideo() {
       video.addEventListener("seeked", ready, { once: true });
       video.addEventListener("loadeddata", loaded, { once: true });
       video.preload = "auto";
-      video.src = SRC;
+      video.src = src;
       video.load();
 
       return () => {
@@ -80,7 +80,7 @@ export function HeroVideo() {
       };
     });
     return () => mm.revert();
-  }, { scope: anchor });
+  }, { scope: anchor, dependencies: [src] });
 
   return <span ref={anchor} hidden />;
 }

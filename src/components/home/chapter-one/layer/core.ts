@@ -4,7 +4,8 @@ import TRACKS from "./tracks.json";
 // at a frame, and the batched, token-coloured ink they draw with.
 
 export const FPS = 24, VW = 1920, VH = 1080;
-export type Track = { from: number; pts: number[]; lum?: number[] };
+// fg: a point from the reverse track of the near trees (D63)
+export type Track = { from: number; pts: number[]; lum?: number[]; fg?: number };
 export type Data = { frames: number; step: number };
 export type Pt = { x: number; y: number; a: number };
 // f: the video frame on screen (the scroll's); t: seconds of ambient time for the plexus looks (D43), 0 when ambient
@@ -12,12 +13,9 @@ export type Pt = { x: number; y: number; a: number };
 // rest: 0-1, how far A4s has eased to its settled state (every line whole, every dot full size); 0 otherwise
 // copy: the headline block's box in the layer's coordinates (x, y, w, h), for the looks that keep clear of it
 // themselves (D49) rather than fading out across the left of the picture; thread: the green thread's x, where it shows
-// view: the stretch of the layer's width still showing between the curtains as the picture closes into the column
-// (D62), [left, right]; the whole width when they are open
 export type Ctx = {
   host: HTMLElement; W: number; H: number; f: number; t: number; rest: number;
   map: (nx: number, ny: number) => [number, number]; copy: [number, number, number, number] | null; thread: number | null;
-  view?: [number, number];
 };
 export type Look = { draw: (c: Ctx) => void; resize?: (c: Ctx) => void };
 // sky: the upper scene's displacement through the move (every `step` frames, x 10000); air: untracked points in the

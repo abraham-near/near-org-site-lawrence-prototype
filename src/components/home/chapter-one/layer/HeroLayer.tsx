@@ -363,26 +363,22 @@ function plexus(host: HTMLElement, variant: Variant, PX: Plex, onFocus?: (p: [nu
   // D59: six satellites each (was seven), with the composition trimmed, about a fifth fewer new elements
   const SATS = 6;
   // The foreground trees (D61: "add more dust and connecting lines to the foreground trees that enter as we scroll
-  // down"): they rise into the picture late in the pull-back, dark and barely tracked. Up to five anchors among the
-  // tracked points that sit on them (low in the picture and dark, at 85% of the move), at least 14% of the picture
-  // apart. Each becomes a pocket that fades in as the trees enter (frames from 150), with eight satellites of its own
-  // (joined by the plexus) and fourteen motes of dust around it.
+  // down"): they rise into the picture late in the pull-back. Since D63 they are tracked properly: a second pass ran
+  // the clip in reverse from the final frame (assets/generated/2026-11-05_hero-reverse-track), and its tree tracks are
+  // part of the data (plexus-z-j2.json, dust-z-j2.json), so every dot and line there sits on a real tracked point.
+  // Up to seven anchors among the points low in the picture on dark ground at 85% of the move, at least 12% apart,
+  // become pockets that fade in as the trees enter (frames from 150), so the composition carries the detail there.
+  // (D61's satellites and motes at fixed offsets, and D62's end anchors placed by the closing column, are gone: they
+  // drifted against the trees.)
   const FG_AT = Math.round(PX.frames * 0.85);
   const fgTrack: number[] = [];
   points
     .map((t, i) => ({ i, q: sample(t, FG_AT, PX.step), l: groundAt(t, FG_AT, PX.step), n: t.pts.length }))
-    .filter((o) => o.q && o.q[1] > 0.55 && o.l < 0.3)
+    .filter((o) => o.q && o.q[1] > 0.5 && o.l < 0.3)
     .sort((a, b) => b.n - a.n)
     .forEach((o) => {
-      if (fgTrack.length < 5 && fgTrack.every((j) => { const q = sample(points[j], FG_AT, PX.step)!; return Math.hypot(q[0] - o.q![0], q[1] - o.q![1]) > 0.14; })) fgTrack.push(o.i);
+      if (fgTrack.length < 7 && fgTrack.every((j) => { const q = sample(points[j], FG_AT, PX.step)!; return Math.hypot(q[0] - o.q![0], q[1] - o.q![1]) > 0.12; })) fgTrack.push(o.i);
     });
-  const FG_SATS = 8, FG_MOTES = 14;
-  // The very end (D62: "add more to the very end"): the lower trees in the last frames, where nothing is tracked. Six
-  // more anchors, weighted to the lower half, placed where they sit in the final picture (as shares of the layer's width and height), fading in over
-  // the last 70 frames (from frame 170, full by 210). Each rides the trees by the mean motion of the tracked points near it (their displacement from
-  // the final frame), and carries the foreground's satellites and dust.
-  const END_AT: [number, number][] = [[0.25, 0.58], [0.7, 0.62], [0.45, 0.74], [0.15, 0.86], [0.62, 0.88], [0.88, 0.78]];
-  const END = PX.frames - 1;
   const you = keys.reduce((b, t, i) => (Math.abs((sample(t, 0, PX.step)?.[0] ?? 9) - 0.66) < Math.abs((sample(keys[b], 0, PX.step)?.[0] ?? 9) - 0.66) ? i : b), 0);
   // Plexus rules: lines only within reach (in the picture's own scale, growing a little with the scroll), each point to
   // its K nearest, every line fading with its length
@@ -465,23 +461,7 @@ function plexus(host: HTMLElement, variant: Variant, PX: Plex, onFocus?: (p: [nu
       }) : [];
       // the foreground anchors this frame, with how far the trees have entered (D61)
       const enter = smooth((c.f - (FG_AT - 55)) / 45);
-      const fg = bright && enter > 0 ? fgTrack.map((i): GPt | null => { const p = point(points[i], c, PX); return p && { ...p, a: p.a * enter, l: Math.max(groundAt(points[i], c.f, PX.step), 0.12) }; }).filter((p): p is GPt => !!p) : ([] as GPt[]);
-      const endIn = bright ? smooth((c.f - (END - 70)) / 40) : 0;
-      // placed across the part of the picture still showing between the curtains (the column)
-      const [v0, v1] = c.view ?? [0, c.W];
-      if (endIn > 0) END_AT.forEach(([u, v]) => {
-        // the anchor's place in the video, then the mean motion of the tracked points within 15% of it since the end
-        const vx = (v0 + u * (v1 - v0) - inv.ox) / inv.dw, vy = (v * c.H - inv.oy) / inv.dh;
-        let dx = 0, dy = 0, n = 0;
-        for (const t of points) {
-          const e = sample(t, END, PX.step), q = e && sample(t, c.f, PX.step);
-          if (!e || !q || Math.hypot(e[0] - vx, e[1] - vy) > 0.15) continue;
-          dx += q[0] - e[0]; dy += q[1] - e[1]; n++;
-        }
-        const [x, y] = c.map(vx + (n ? dx / n : 0), vy + (n ? dy / n : 0));
-        const a = endIn * clearOfCopy(c, x, y) * Math.min(clamp((c.H - y) / 30), clamp((v1 - x) / 30), clamp((x - v0) / 30));
-        if (a > 0) fg.push({ x, y, a, l: 0.12 });
-      });
+      const fg = bright && enter > 0 ? fgTrack.map((i): GPt | null => { const p = point(points[i], c, PX); return p && { ...p, a: p.a * enter, l: groundAt(points[i], c.f, PX.step) }; }).filter((p): p is GPt => !!p) : [];
       const pockets: number[][] = [...anchors.map((p) => [p.x, p.y]), ...fg.map((p) => [p.x, p.y, p.a])];
       onFocus?.(focus, pockets);
       const comp = (x: number, y: number) => composition(c, x, y, focus, pockets);
@@ -491,9 +471,12 @@ function plexus(host: HTMLElement, variant: Variant, PX: Plex, onFocus?: (p: [nu
       // a point is kept where the composition wants it: nearly all of them at the focus, few where it is light
       const thin = (id: number, x: number, y: number) => (bright ? smooth((1.6 * comp(x, y) - 0.25 - rand(id, 40)) / 0.15) : 1);
       const at = (t: Track): GPt | null => { const p = point(t, c, PX); return p && { ...p, a: p.a * clear(p.x, p.y), l: groundAt(t, c.f, PX.step) }; };
+      // the near trees' points (D63, the reverse track) are their own field: never thinned, and at least 60% strong
+      // wherever the headline allows, so the trees carry lines as well as dust as they rise into the picture
       const tracked = points.map((t, i): Dot | null => {
         const p = at(t), pr = presence(i, c.t, 0.45);
-        return p && { ...p, a: p.a * pr * thin(i, p.x, p.y), r: (i % 5 === 0 ? 1.6 : 1.1) * (bright ? 1.1 : 1) * (0.35 + 0.65 * pr), id: i };
+        if (p && t.fg && bright) { const q = point(t, c, PX)!; p.a = Math.max(p.a, 0.6 * q.a * clearOfCopy(c, p.x, p.y)); }
+        return p && { ...p, a: p.a * pr * (t.fg ? 1 : thin(i, p.x, p.y)), r: (i % 5 === 0 ? 1.6 : 1.1) * (bright ? 1.1 : 1) * (0.35 + 0.65 * pr), id: i };
       });
       // Air (D44): points in the sky and mist, not tracked to the land. They travel with the upper scene through the
       // camera move and drift a little on their own (a few pixels over 7-15 s), so the lines drawn to them are never
@@ -525,17 +508,7 @@ function plexus(host: HTMLElement, variant: Variant, PX: Plex, onFocus?: (p: [nu
         const a = q.a * Math.min(clamp(y / 40), clamp((c.H - y) / 40), clamp((c.W - x) / 40), clamp(x / 40)) * pr * clear(x, y) * thin(id, x, y);
         return a > 0 ? { x, y, a, l: q.l, r: (n % 3 === 0 ? 1.6 : 1.1) * 1.1 * (0.35 + 0.65 * pr), id } : null;
       }));
-      // Foreground satellites (D61): wider (about 8% of the picture), on the trees' own ground (kept above crushed
-      // black, a pale green-white over the dark), ids from 7100
-      const fgSats = fg.flatMap((q, k) => Array.from({ length: FG_SATS }, (_, n): Dot | null => {
-        const id = 7100 + k * 10 + n, tau = 2 * Math.PI * c.t * pace(id);
-        const r = inv.dw * 0.08 * (0.25 + 0.75 * Math.sqrt(rand(id, 30))), ang = 2 * Math.PI * rand(id, 31);
-        const x = q.x + r * Math.cos(ang) + 2.5 * Math.sin(tau / (8 + 5 * rand(id, 32))), y = q.y + 0.8 * r * Math.sin(ang) + 2 * Math.sin(tau / (7 + 4 * rand(id, 33)));
-        const pr = presence(id, c.t, 0.35);
-        const a = q.a * Math.min(clamp(y / 40), clamp((c.H - y) / 40), clamp((c.W - x) / 40), clamp(x / 40)) * pr * clear(x, y);
-        return a > 0 ? { x, y, a, l: q.l, r: (n % 3 === 0 ? 1.6 : 1.1) * 1.1 * (0.35 + 0.65 * pr), id } : null;
-      }));
-      const pts = [...tracked, ...air, ...sats, ...fgSats].filter((p): p is Dot => !!p);
+      const pts = [...tracked, ...air, ...sats].filter((p): p is Dot => !!p);
       const lines: Batch = new Map(), dots: Batch = new Map();
 
       // Ridge traces (TRON's line-work that follows the land), worked out first so the plexus can give way to them:
@@ -761,18 +734,6 @@ function plexus(host: HTMLElement, variant: Variant, PX: Plex, onFocus?: (p: [nu
           if (variant === "rings") bracket(path, p.x, p.y, 11, 4);
         }
       });
-      // Foreground dust (D61): motes scattered over the trees around each anchor, unlinked, each glimmering slowly on
-      // its own clock (its size and strength breathe; nothing travels)
-      fg.forEach((q, k) => {
-        for (let n = 0; n < FG_MOTES; n++) {
-          const id = 7300 + k * 20 + n, r = inv.dw * 0.11 * Math.sqrt(rand(id, 34)), ang = 2 * Math.PI * rand(id, 35);
-          const x = q.x + r * Math.cos(ang), y = q.y + 0.85 * r * Math.sin(ang);
-          const tw = c.t ? 0.6 + 0.4 * Math.sin((2 * Math.PI * c.t * pace(id)) / (3 + 4 * rand(id, 36)) + 6.3 * rand(id, 37)) : 1;
-          const a = q.a * (0.35 + 0.45 * rand(id, 38)) * tw * clearOfCopy(c, x, y) * Math.min(clamp((c.H - y) / 40), clamp((c.W - x) / 40), clamp(x / 40));
-          const rr = (0.6 + 0.7 * rand(id, 39)) * (0.8 + 0.2 * tw);
-          for (const path of both(dots, q.l, a, 0)) { path.moveTo(x + rr, y); path.arc(x, y, rr, 0, Math.PI * 2); }
-        }
-      });
       flush(lines);
       flush(dots, true);
 
@@ -829,6 +790,8 @@ const DATA = {
   zj: () => import("./plexus-z-j.json"),
   // D49 option 1: take j with a denser field low in the picture and a sparser one in the sky beside the headline
   zj1: () => import("./plexus-z-j1.json"),
+  // D63: zj1 with the reverse track of the near trees merged in (and the main pass's points that slid there cut)
+  zj2: () => import("./plexus-z-j2.json"),
 };
 export type LayerData = keyof typeof DATA;
 
@@ -843,8 +806,6 @@ export function HeroLayer({ look, settle = false, data = "plexus" }: { look: Lay
     const video = media.querySelector<HTMLVideoElement>("[data-ch='video']");
     const img = media.querySelector<HTMLImageElement>("img");
     const copyEl = host.closest("[data-ch='root']")?.querySelector<HTMLElement>("[data-ch='copy']") ?? null;
-    // the curtains that close the picture into the column (ChapterOneMotion), for Ctx.view
-    const curtains = [stage.querySelector<HTMLElement>("[data-ch='curtain-l']"), stage.querySelector<HTMLElement>("[data-ch='curtain-r']")] as const;
     const playing = () => !!video?.hasAttribute("data-ready");
     const shown = () => (playing() ? video : img) as HTMLElement | null;
     // The thread's head (ChapterOneMotion), in this layer's coordinates; the two boxes only shift on resize
@@ -878,7 +839,7 @@ export function HeroLayer({ look, settle = false, data = "plexus" }: { look: Lay
         update();
       };
       if (variant === "dust") Promise.all([DATA[data](), import("./dust-z-j.json")]).then(([m, d]) => ready(dust(host, m.default as Plex, d.default)));
-      else if (variant === "plexusDust") Promise.all([DATA[data](), import("./dust-z-j.json")]).then(([m, d]) => {
+      else if (variant === "plexusDust") Promise.all([DATA[data](), data === "zj2" ? import("./dust-z-j2.json") : import("./dust-z-j.json")]).then(([m, d]) => {
         // the dust underneath (its canvas first), A4 over it; D51: the dust at full strength, with particles rising off
         // the land
         let focus: [number, number] | null = null, pockets: number[][] = [];
@@ -919,15 +880,7 @@ export function HeroLayer({ look, settle = false, data = "plexus" }: { look: Lay
         const a = copyEl.getBoundingClientRect(), b = host.getBoundingClientRect();
         if (a.bottom > b.top && a.top < b.bottom) box = [a.left - b.left, a.top - b.top, a.width, a.height];
       }
-      // the stretch still showing between the curtains, in this layer's coordinates
-      let view: [number, number] = [0, W];
-      const [cl, cr] = curtains;
-      if (cl && cr && cl.offsetParent) {
-        const b = host.getBoundingClientRect(), l = cl.getBoundingClientRect(), r = cr.getBoundingClientRect();
-        view = [clamp(l.right - b.left, 0, W), clamp(r.left - b.left, 0, W)];
-        if (view[1] - view[0] < 40) view = [0, W];
-      }
-      return { host, W, H, f: frameNow(), t, rest: restNow, map: (nx, ny) => [ox + nx * dw, oy + ny * dh], copy: box, thread: headDot()?.[0] ?? null, view };
+      return { host, W, H, f: frameNow(), t, rest: restNow, map: (nx, ny) => [ox + nx * dw, oy + ny * dh], copy: box, thread: headDot()?.[0] ?? null };
     };
     const update = () => {
       const w = host.clientWidth, h = host.clientHeight;

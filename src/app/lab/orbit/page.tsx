@@ -12,7 +12,7 @@ export const metadata: Metadata = { title: "Lab: Original with Orbit", robots: {
 // their micro-animations and hover. Everything else as /lab/dir-o.
 export default function OriginalOrbit() {
   return (
-    <HomeSections story={<StoryRail look="horizon" art="orbit" />} hero={{ ...ZMOVE.j, layer: <HeroLayer look="plexusDust" data="zj1" /> }}>
+    <HomeSections story={<StoryRail look="horizon" art="orbit" />} hero={{ ...ZMOVE.j, layer: <HeroLayer look="plexusDust" data="zj2" /> }}>
       <LabSwitch current="orbit" options={DIR_SWITCH} label="Directions" />
     </HomeSections>
   );

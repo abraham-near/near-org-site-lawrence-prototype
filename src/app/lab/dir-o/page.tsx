@@ -11,7 +11,7 @@ export const metadata: Metadata = { title: "Directions: Original", robots: { ind
 // D52: the original direction for comparison with A, B and C: today's homepage with the take j hero (A4 + dust, D51).
 export default function DirectionOriginal() {
   return (
-    <HomeSections story={<StoryRail look="horizon" />} hero={{ ...ZMOVE.j, layer: <HeroLayer look="plexusDust" data="zj1" /> }}>
+    <HomeSections story={<StoryRail look="horizon" />} hero={{ ...ZMOVE.j, layer: <HeroLayer look="plexusDust" data="zj2" /> }}>
       <LabSwitch current="o" options={DIR_SWITCH} label="Directions" />
     </HomeSections>
   );

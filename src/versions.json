@@ -20,6 +20,23 @@
   },
   "versions": [
     {
+      "commit": "87b662b",
+      "date": "2026-11-05T10:30:33-05:00",
+      "direction": "b",
+      "title": "Hero: the near trees tracked by a second pass run in reverse",
+      "summary": [
+        "Take j's near trees are tracked again, backward from the final frame on brightened frames, so the dots and lines that rise with them stay on the trees.",
+        "80 linked points and 450 dust points on the trees; points that slid there are cut, and the earlier stand-ins that flew in from the left are gone."
+      ],
+      "decisions": ["D63"],
+      "home": "home",
+      "options": [
+        { "label": "Original", "path": "lab/dir-o" },
+        { "label": "Original + Orbit", "path": "lab/orbit" },
+        { "label": "Hero, option 1 + Dust", "path": "lab/hero-j4" }
+      ]
+    },
+    {
       "commit": "cdcf8f5",
       "date": "2026-11-05T10:20:05-05:00",
       "direction": "b",

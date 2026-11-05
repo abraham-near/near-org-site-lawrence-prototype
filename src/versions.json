@@ -20,6 +20,18 @@
   },
   "versions": [
     {
+      "commit": "a096294",
+      "date": "2026-11-05T12:58:20-05:00",
+      "direction": "b",
+      "title": "Confidential: no crawling or indexing anywhere the site is hosted",
+      "summary": [
+        "The site asks every search engine not to crawl or index it (robots.txt and a no-index header on every response). The pages look the same as 212980b."
+      ],
+      "decisions": ["D74"],
+      "home": "home",
+      "options": []
+    },
+    {
       "commit": "212980b",
       "date": "2026-11-05T12:55:06-05:00",
       "direction": "b",

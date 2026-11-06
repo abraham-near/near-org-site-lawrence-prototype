@@ -20,6 +20,123 @@
   },
   "versions": [
     {
+      "commit": "71df0cd",
+      "date": "2026-11-06T06:58:52-05:00",
+      "direction": "b",
+      "title": "Hero original: even motion",
+      "summary": [
+        "The original ridges hero no longer hitches every fourth frame: its move is re-timed into even steps, with the vector layer moved to match. The first frame is unchanged; add ?hero=original to see it."
+      ],
+      "decisions": ["D93"],
+      "home": "home",
+      "options": [
+        { "label": "Hero versions", "path": "lab/hero-live" }
+      ]
+    },
+    {
+      "commit": "e77d749",
+      "date": "2026-11-05T23:07:33-05:00",
+      "direction": "b",
+      "title": "Hero gate and unfurl: smooth starts and even motion",
+      "summary": [
+        "The bump at the start of the gate's move is edited out, and the gate and unfurl moves no longer hitch every fourth frame: both now run in even steps at 30 fps, with their vector layers re-tracked. Add ?hero=gate or ?hero=unfurl to see them."
+      ],
+      "decisions": ["D92"],
+      "home": "home",
+      "options": [
+        { "label": "Hero versions", "path": "lab/hero-live" }
+      ]
+    },
+    {
+      "commit": "6b50895",
+      "date": "2026-11-05T22:19:54-05:00",
+      "direction": "b",
+      "title": "Hero gate: re-shot with a real crane and clean chrome, re-tracked",
+      "summary": [
+        "The gate hero's camera move is a new take: the camera cranes down the slope while the chrome ring's reflections slide cleanly across it, and every vector mark is re-tracked to it. The other four versions are unchanged; add ?hero=gate to see it."
+      ],
+      "decisions": ["D91"],
+      "home": "home",
+      "options": [
+        { "label": "Hero versions", "path": "lab/hero-live" }
+      ]
+    },
+    {
+      "commit": "6d5601a",
+      "date": "2026-11-05T21:42:51-05:00",
+      "direction": "b",
+      "title": "Hero: five versions, one at random on each load",
+      "summary": [
+        "The four hero concepts are now full heroes like the original: a camera move down through the scene, scrubbed by the scroll, with the vector layer tracked to it. Clouds roll round the summit, the fern unfurls with its dew sliding, the dune's light moves like a time lapse with sand blowing, and the gate's chrome reflections shift as the grass blows.",
+        "Each load shows one of the five at random, the original included; add ?hero=original, clouds, unfurl, dune or gate to choose one."
+      ],
+      "decisions": ["D90"],
+      "home": "home",
+      "options": [
+        { "label": "Hero versions", "path": "lab/hero-live" }
+      ]
+    },
+    {
+      "commit": "4249698",
+      "date": "2026-11-05T19:29:22-05:00",
+      "direction": "b",
+      "title": "Hero: four cinematic static options in situ (with the lab links fixed for the frozen copy)",
+      "summary": [
+        "Four options for the opening image, each a generated photograph with a vector layer traced from it, shown as the homepage's real first screen: above the clouds, a fern unfurling, a dune, and a chrome gate in mist.",
+        "The homepage is the same as 462e91a."
+      ],
+      "decisions": ["D89"],
+      "home": "home",
+      "options": [
+        { "label": "Hero options", "path": "lab/hero-cinematic" }
+      ]
+    },
+    {
+      "commit": "462e91a",
+      "date": "2026-11-05T19:27:21-05:00",
+      "direction": "b",
+      "title": "Layer moments in real-time 3D (glass tokens); Go deeper matches the r16/v3 prototype",
+      "summary": [
+        "The rail opens with your data as glass tokens round a frosted core; as the layer becomes user-owned the core grows over them, turns NEAR green and hides them, the N etched into it.",
+        "Go deeper now follows the r16/v3 prototype: one lead item and a scroll-held list of rows with thumbnails, mono filters, a halftone entrance."
+      ],
+      "decisions": ["D83", "D84", "D85", "D86", "D87", "D88"],
+      "home": "home",
+      "options": [
+        { "label": "Layer concepts", "path": "lab/layer-concepts" }
+      ]
+    },
+    {
+      "commit": "66cc6c7",
+      "date": "2026-11-05T17:48:42-05:00",
+      "direction": "b",
+      "title": "Rail: the identity station, a gimbal in real-time 3D; every station is now live",
+      "summary": [
+        "The identity station is a precision gimbal rendered live: a frosted glass frame, two chrome rings and the green ball at the centre, which never moves. On arrival the inner ring makes its one turn from a ghost of its old angle while a dial on the rim reads it.",
+        "At rest the middle ring sways and the vectors keep moving like the other stations'. The static options it was chosen from are on the identity lab page."
+      ],
+      "decisions": ["D80", "D81", "D82"],
+      "home": "home",
+      "options": [
+        { "label": "Identity options", "path": "lab/identity" }
+      ]
+    },
+    {
+      "commit": "1b3aaf6",
+      "date": "2026-11-05T15:38:28-05:00",
+      "direction": "b",
+      "title": "Rail: the intelligence station in real-time 3D, a green core turning inside the frost",
+      "summary": [
+        "The intelligence station is rendered live like the assets station: a frosted sphere with a clear glass band, a green machined core turning inside it, and a chrome ball outside.",
+        "The sphere enters tilted and its band eases level at the centre. The Signed proof tag is gone, and the vectors move: the meridian sways, markers ride the orbits, the request ray grows in and retracts."
+      ],
+      "decisions": ["D78", "D79"],
+      "home": "home",
+      "options": [
+        { "label": "Rail motion options", "path": "lab/rail-motion" }
+      ]
+    },
+    {
       "commit": "c1238ce",
       "date": "2026-11-05T13:36:45-05:00",
       "direction": "b",

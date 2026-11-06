@@ -10,8 +10,8 @@ import { Close } from "@/components/home/close/Close";
 
 // The homepage, built one section at a time from spec/pages/home.md. `story` is the beat after the anthem (D29): the
 // homepage uses the chosen option; /lab/opening-* render each option in place for comparison. `hero` is for the lab's
-// hero options (/lab/hero-*).
-export function HomeSections({ story, hero, children }: { story: ReactNode; hero?: HeroOptions; children?: ReactNode }) {
+// hero options (/lab/hero-*); "random" is the homepage's pick of the hero versions (D90).
+export function HomeSections({ story, hero, children }: { story: ReactNode; hero?: HeroOptions | "random"; children?: ReactNode }) {
   return (
     <main id="main">
       <ChapterOne hero={hero} />

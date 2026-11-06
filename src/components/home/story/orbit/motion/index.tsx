@@ -4,6 +4,7 @@ import { OrbitArt } from "../OrbitArt";
 import * as o1 from "./o1";
 import * as o2 from "./o2";
 import * as o3 from "./o3";
+import { GimbalArt } from "./o3/identity/gimbal";
 
 // The motion options for Orbit's data and assets stations (D72): the frosted disc that turns flat to camera as it
 // reaches the centre with the green ball looping behind it, and the two equal balls orbiting their angled ring in a
@@ -12,11 +13,14 @@ import * as o3 from "./o3";
 export const MOTION = { 1: o1, 2: o2, 3: o3 } as const;
 export type MotionKey = keyof typeof MOTION;
 
-// Lawrence's picks (D73): the data station from option 1 (live glass), the assets station from option 3 (real-time 3D)
+// Lawrence's picks (D73, D78, D81): the data station from option 1 (live glass), the assets and intelligence stations
+// from option 3 (real-time 3D), and identity the gimbal (real-time 3D, D81)
 export function liveArt() {
   return function LiveArt({ which, ...rest }: { which: OwnKey } & HTMLAttributes<HTMLDivElement>) {
     if (which === "data") return <o1.DataArt {...rest} />;
     if (which === "assets") return <o3.AssetsArt {...rest} />;
+    if (which === "intelligence") return <o3.IntelligenceArt {...rest} />;
+    if (which === "identity") return <GimbalArt {...rest} />;
     return <OrbitArt which={which} {...rest} />;
   };
 }

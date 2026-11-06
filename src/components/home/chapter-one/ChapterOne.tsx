@@ -3,7 +3,10 @@ import Image from "next/image";
 import { SplitText } from "./SplitText";
 import { ChapterOneMotion } from "./ChapterOneMotion";
 import { HeroInView } from "./HeroInView";
-import { HeroVideo } from "./HeroVideo";
+import { HeroVideo, HERO_VIDEO } from "./HeroVideo";
+import { RandomPoster, HERO_POSTERS, HERO_FOCAL_CSS, HERO_THREADS } from "./heroes/RandomPoster";
+import { focalStyle, threadAttr, type HeroFocal, type HeroThread } from "./heroes/framing";
+import { RandomHero } from "./heroes/RandomHero";
 import { GoArrow } from "@/components/GoArrow";
 import styles from "./ChapterOne.module.css";
 
@@ -11,30 +14,36 @@ import styles from "./ChapterOne.module.css";
 // and "Own your") is its own section since D29 (components/home/story).
 // Desktop with motion: a pinned stage under scrolling beats (GSAP, D8); the hero is a scroll-scrubbed camera move down
 // the ridges (D29). Otherwise: plain stacked beats with a static green rule. All copy is server-rendered.
-// `hero` lets lab routes try another grade of the camera move (its poster must be that video's first frame) and a
-// graphic layer over it; the homepage uses the defaults.
-export type HeroOptions = { poster?: string; video?: string; layer?: ReactNode };
+// `hero` is one hero version (D90: heroes/), or a lab route's camera move (its poster must be that video's first frame)
+// and a graphic layer over it. "random" (the homepage) shows one of the versions at random on each load (RandomPoster,
+// RandomHero). A poster with no video is a still (a version still in the making); no poster at all is the crane default.
+// `fps` is the clip's frame rate (24 by default); any length works. `focal` and `thread` frame the photo band and place
+// the green line for a version (heroes/framing.ts).
+export type HeroOptions = { poster?: string; video?: string; fps?: number; layer?: ReactNode; focal?: HeroFocal; thread?: HeroThread };
 
-export function ChapterOne({ hero = {} }: { hero?: HeroOptions }) {
-  const { poster = "/images/home/home-hero-ridges-v2.webp", video, layer } = hero;
+export function ChapterOne({ hero = {} }: { hero?: HeroOptions | "random" }) {
+  const random = hero === "random", fixed = random ? {} : hero;
+  const { poster = "/images/home/home-hero-ridges-v2.webp", video = fixed.poster ? undefined : HERO_VIDEO, fps, layer, focal, thread } = fixed;
   return (
     <section className={styles.chapter} data-ch="root" aria-label="Own your world">
+      {/* Each version's crop of the photo band, applied once the poster's script has picked one (before first paint) */}
+      {random && HERO_FOCAL_CSS && <style dangerouslySetInnerHTML={{ __html: HERO_FOCAL_CSS }} />}
       {/* The stage: decorative (every word lives in the beats). Pinned on desktop; a photo band on phones. */}
-      <div className={styles.stage} data-ch="stage" aria-hidden="true">
+      <div className={styles.stage} data-ch="stage" aria-hidden="true" style={random ? undefined : focalStyle(focal)}>
         <div className={styles.photo} data-ch="photo">
           <div className={styles.media} data-ch="media">
             {/* The video's first frame, so the swap to the video is invisible; first paint and LCP */}
-            <Image src={poster} alt="" fill sizes="100vw" quality={75} preload fetchPriority="high" className={styles.photoImg} />
+            {random ? <RandomPoster className={styles.photoImg} />
+              : <Image src={poster} alt="" fill sizes="100vw" quality={75} preload fetchPriority="high" className={styles.photoImg} />}
             {/* Desktop with motion only: HeroVideo gives it a source and scrubs it with the scroll (never plays on its own) */}
             <video className={styles.video} data-ch="video" muted playsInline preload="none" tabIndex={-1} />
-            <HeroVideo src={video} />
-            {layer}
+            {random ? <RandomHero posters={HERO_POSTERS} /> : <><HeroVideo src={video} fps={fps} />{layer}</>}
           </div>
           {/* The close-in: two surface curtains scale in from the edges until only the line is left (transform only). */}
           <span className={`${styles.curtain} ${styles.curtainL}`} data-ch="curtain-l" />
           <span className={`${styles.curtain} ${styles.curtainR}`} data-ch="curtain-r" />
         </div>
-        <svg className={styles.lines} data-ch="lines" />
+        <svg className={styles.lines} data-ch="lines" data-thread={random ? HERO_THREADS : threadAttr({ "*": thread })} />
       </div>
 
       <div className={styles.beats} data-ch="beats">

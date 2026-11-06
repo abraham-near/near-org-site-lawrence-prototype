@@ -7,15 +7,16 @@ import { useGSAP } from "@gsap/react";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
-// The hero's camera move (D29): a 10 s Seedance crane shot down the ridges, scrubbed by the reader's scroll and never
-// played on its own (so WCAG 2.2.2 stays met, D26). Desktop with motion only: the video gets its source there, so phones
+// The hero's camera move (D29): a Seedance shot (the original's 10 s, D90's versions 8 s), scrubbed by the reader's
+// scroll and never played on its own (so WCAG 2.2.2 stays met, D26). Any length and frame rate: the scroll maps onto
+// the clip's own duration, stepped in its frames (`fps`, 24 by default). No `src` (a version that is still a still):
+// the photo stays, with the same parallax on phones. Desktop with motion only: the video gets its source there, so phones
 // never download it; it fades in over the photograph (its own first frame) once it can seek. Encoded with a keyframe
 // every 4 frames and no B-frames so seeking is cheap; the playhead eases towards the scroll target, one seek at a time.
 // Phones/tablets keep the still with a gentle parallax.
 export const HERO_VIDEO = "/videos/home/home-hero-ridges-crane-v1.mp4";
-const FPS = 24;
 
-export function HeroVideo({ src = HERO_VIDEO }: { src?: string }) {
+export function HeroVideo({ src, fps: FPS = 24 }: { src?: string; fps?: number }) {
   const anchor = useRef<HTMLSpanElement>(null);
 
   useGSAP(() => {
@@ -39,6 +40,7 @@ export function HeroVideo({ src = HERO_VIDEO }: { src?: string }) {
         return;
       }
 
+      if (!src) return;
       let target = 0, raf = 0;
       // The move runs from the top of the page until the photo has closed on the line (ChapterOneMotion: the curtains
       // run from -75% to -120%), so it keeps moving through the close-in and never freezes on screen (D35)
@@ -80,7 +82,7 @@ export function HeroVideo({ src = HERO_VIDEO }: { src?: string }) {
       };
     });
     return () => mm.revert();
-  }, { scope: anchor, dependencies: [src] });
+  }, { scope: anchor, dependencies: [src, FPS] });
 
   return <span ref={anchor} hidden />;
 }

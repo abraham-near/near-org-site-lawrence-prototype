@@ -804,6 +804,8 @@ const DATA = {
   zj1: () => import("./plexus-z-j1.json"),
   // D63: zj1 with the reverse track of the near trees merged in (and the main pass's points that slid there cut)
   zj2: () => import("./plexus-z-j2.json"),
+  // D93: zj2 re-sampled onto the re-timed take j (home-hero-ridges-take-j-v2.mp4: the move's 4-frame rhythm evened out)
+  zj3: () => import("./plexus-z-j3.json"),
 };
 export type LayerData = keyof typeof DATA;
 
@@ -851,7 +853,7 @@ export function HeroLayer({ look, settle = false, data = "plexus" }: { look: Lay
         update();
       };
       if (variant === "dust") Promise.all([DATA[data](), import("./dust-z-j.json")]).then(([m, d]) => ready(dust(host, m.default as Plex, d.default)));
-      else if (variant === "plexusDust") Promise.all([DATA[data](), data === "zj2" ? import("./dust-z-j2.json") : import("./dust-z-j.json")]).then(([m, d]) => {
+      else if (variant === "plexusDust") Promise.all([DATA[data](), data === "zj3" ? import("./dust-z-j3.json") : data === "zj2" ? import("./dust-z-j2.json") : import("./dust-z-j.json")]).then(([m, d]) => {
         // the dust underneath (its canvas first), A4 over it; D51: the dust at full strength, with particles rising off
         // the land
         let focus: [number, number] | null = null, pockets: number[][] = [];

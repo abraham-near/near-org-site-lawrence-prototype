@@ -1,195 +1,190 @@
-/* Section 4: Go deeper (layout 4C, D9). Light section; hairlines, no boxed cards. Tokens only. */
+/* Section 4: Go deeper, after the r16/v3 prototype. Light section; hairlines and one ink rule, no boxed cards. Tokens only.
+   Layout: heading and filters over an ink rule; the lead item (photo, meta, title) on the left, the rest as rows
+   (meta, title, thumbnail) on the right; "View everything" under the rows. Phones stack it all in one column. */
 
-/* D30: the whole section (heading to "View everything") fits one 1440 × 900 screen, so desktop uses tighter padding
-   than the page's other sections, and wide, shallow featured images. Above, the Proof strip's own padding keeps the gap
-   generous; below, Origin opens straight on its hairline, so the bottom keeps more room. */
 .deeper { padding-block: var(--section-pad-y); }
-@media (min-width: 1280px) { .deeper { padding-block: var(--space-6) var(--space-7); } }
+/* The section's own lines, and its window size on desktop: rows shown at once (--n), the photo's height (--imgh, set on
+   .panels, which measures the content width) */
+.deeper { --n: 4; --line: var(--color-line-strong); --hair: var(--color-line); }
+@media (max-height: 799px) { .deeper { --n: 3; } }
 .inner { max-width: var(--content-max); margin-inline: auto; padding-inline: var(--page-margin); }
 
-.head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--space-4) var(--space-6); }
+/* Heading left, filters right, over one ink rule */
+.head {
+  display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: var(--space-4) var(--space-7);
+  padding-bottom: var(--space-2); border-bottom: 1px solid var(--color-ink);
+}
 .head h2 { margin: 0; }
-/* Footer row: "View everything" and the active strip's arrows. Phones: link left, arrows right. From tablet up the link
-   sits on the centre axis (D19) and the arrows on the right edge. The row keeps the arrows' height when they hide. */
-.foot { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); min-height: 44px; margin-top: var(--space-5); }
-@media (min-width: 1280px) { .foot { margin-top: var(--space-4); } }
-.all { font-size: var(--text-small); font-weight: 500; color: var(--color-ink); text-decoration-line: underline; text-decoration-thickness: 1px; text-underline-offset: 5px; }
-.all:hover { text-decoration-color: var(--color-green); text-decoration-thickness: 2px; }
+@media (min-width: 768px) { .head { flex-wrap: nowrap; padding-bottom: var(--space-4); } }
 
-/* Filter tablist (arrows, Home/End), mirrored in ?type= */
-/* Phones: one row that scrolls sideways, bleeding to the screen edges, instead of a stranded second row */
-.filters {
-  /* the vertical padding keeps the focus ring clear of the scroll clip */
-  display: flex; gap: var(--space-2); margin: calc(var(--space-6) - var(--space-2)) calc(var(--page-margin) * -1); padding: var(--space-2) var(--page-margin);
-  overflow-x: auto; scrollbar-width: none; scroll-padding-inline: var(--page-margin);
-}
-.filters::-webkit-scrollbar { display: none; }
-.filter { flex: none; }
-@media (min-width: 768px) {
-  .filters { flex-wrap: wrap; justify-content: center; margin: var(--space-5) 0; padding: 0; overflow: visible; }
-  .head { justify-content: center; text-align: center; }
-  .foot { display: grid; grid-template-columns: 1fr auto 1fr; }
-  .all { grid-column: 2; }
-  .foot .stripNav { grid-column: 3; justify-self: end; }
-}
+/* Filters: quiet uppercase words; the chosen one turns ink with a small green square before it */
+.filters { display: flex; justify-content: space-between; width: 100%; }
+@media (min-width: 768px) { .filters { width: auto; gap: 0 var(--space-6); margin-bottom: calc(var(--space-3) * -1); } }
 .filter {
-  min-height: 44px; padding: 0 var(--space-4);
-  border: 1px solid var(--color-line-strong); border-radius: var(--radius-sm);
-  background: none; color: var(--color-ink); font: inherit; font-size: var(--text-small); cursor: pointer;
-  transition: background-color var(--dur-2) var(--ease-out), color var(--dur-2) var(--ease-out), border-color var(--dur-2) var(--ease-out), transform var(--dur-1) var(--ease-out);
+  display: inline-flex; align-items: center; gap: var(--space-2); min-height: 44px; padding: 0 2px;
+  border: 0; background: none; cursor: pointer;
+  font-family: var(--font-mono); font-size: var(--text-label); line-height: 1.2; letter-spacing: 0.02em; text-transform: uppercase;
+  color: var(--color-muted); transition: color var(--dur-2) var(--ease-out);
 }
-.filter:hover { border-color: var(--color-ink); }
-.filter:active, .navBtn:active:not(:disabled) { transform: scale(0.97); }
-.filter[aria-selected="true"] { background: var(--color-ink); border-color: var(--color-ink); color: var(--color-on-dark); }
+.filter::before {
+  content: ""; flex: none; width: 7px; height: 7px; background: var(--color-green);
+  transform: scale(0); transition: transform var(--dur-3) var(--ease-settle);
+}
+.filter:hover, .filter[aria-selected="true"] { color: var(--color-ink); }
+.filter[aria-selected="true"]::before { transform: none; }
+.filter:focus-visible { outline-offset: 0; border-radius: var(--radius-sm); }
 
-/* Panels share one grid cell, so the block always holds the tallest filter's height (no jump when switching).
-   Phones show only the active panel: a locked height would leave a screen of space under a one-item filter. */
+/* Panels share one grid cell. Below desktop only the active one shows (it settles in); on desktop every panel keeps
+   the shared cell, so switching never moves the page (D9) */
 .panels { display: grid; }
-.panel { grid-area: 1 / 1; min-width: 0; }
-/* From tablet up every panel is the shared cell's height; a short one (Read) sets its empty note at the bottom (see
-   .empty), where the strip would be, so the leftover space sits above it rather than under it */
-@media (min-width: 768px) { .panel { display: flex; flex-direction: column; } }
-/* Switching (D28, after Tempo): out fast, in slow. The old panel fades out in 120 ms; then the new one fades up 8 px on a
-   long settle, so the two never show at once. Phones show only the active panel (it settles in the same way). */
-@media (max-width: 767px) { .panel[data-active] { animation: panel-in var(--dur-4) var(--ease-settle); } }
-@keyframes panel-in { from { opacity: 0; transform: translateY(var(--space-2)); } }
+.panel {
+  grid-area: 1 / 1; min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr); align-items: start; align-content: start;
+  row-gap: var(--space-7); padding-top: var(--space-5);
+}
 .panel:not([data-active]) { display: none; }
-@media (min-width: 768px) {
-  .panel { transition: opacity var(--dur-3) var(--ease-out) var(--dur-1), transform var(--dur-4) var(--ease-settle) var(--dur-1); }
+@media (max-width: 1279px) { .panel[data-active] { animation: panel-in var(--dur-4) var(--ease-settle); } }
+@keyframes panel-in { from { opacity: 0; } }
+
+/* From 900 wide: two equal columns; the lead item stays in view beside the longer list (sticky is layout, not motion,
+   so it holds with reduced motion too). Below 900 the section is one column, as in the reference */
+@media (min-width: 900px) {
+  .panel { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--space-7); row-gap: var(--space-6); padding-top: var(--space-6); }
+  .panel .feat { grid-column: 1; grid-row: 1 / span 2; position: sticky; top: calc(var(--space-8) + var(--space-6)); }
+  .win, .foot { grid-column: 2; }
+}
+
+/* Desktop: the photo takes 46% and both columns share its height; the lead's text and "View everything" share the
+   next line. Switching: out fast, in slow (D28) */
+/* --imgh: the photo's height, 16:10 at the 46% column (the content box is the viewport, capped at --content-max, less
+   the page margins); from 1600 wide it grows a quarter (about 4:3), so large screens aren't left half empty. Never
+   taller than the screen allows (100vh − 380px keeps the heading and the lead's title in view). */
+@media (min-width: 1280px) {
+  .deeper { --cw: calc(min(100vw, var(--content-max)) - var(--page-margin) * 2); --imgh: min(calc(var(--cw) * 0.46 * 0.625), calc(100vh - 380px)); }
+}
+@media (min-width: 1600px) {
+  .deeper { --imgh: min(calc(var(--cw) * 0.46 * 0.625 * 1.25), calc(100vh - 380px)); }
+}
+@media (min-width: 1280px) {
+  .panel { grid-template-columns: 46% minmax(0, 1fr); grid-template-rows: auto auto; row-gap: 0; padding-top: var(--space-5); }
+  .win { grid-row: 1; }
+  .foot { grid-row: 2; }
+  .feat .media { aspect-ratio: auto; height: var(--imgh); }
+  .panel { transition: opacity var(--dur-3) var(--ease-out) var(--dur-1); }
   .panel:not([data-active]) {
-    display: block; visibility: hidden; opacity: 0; transform: translateY(var(--space-2));
-    transition: opacity var(--dur-1) var(--ease-out), visibility 0s linear var(--dur-1), transform 0s linear var(--dur-1);
+    display: grid; visibility: hidden; opacity: 0;
+    transition: opacity var(--dur-1) var(--ease-out), visibility 0s linear var(--dur-1);
   }
 }
 
 /* Whole-item links: the title's link stretches over its item */
-.feat, .tile { position: relative; }
+.feat, .row { position: relative; }
 .stretch { color: inherit; text-decoration: none; }
-.stretch::after { content: ""; position: absolute; inset: 0; }
+.stretch::after { content: ""; position: absolute; inset: 0; z-index: 1; }
 .stretch:focus-visible { outline: none; }
 .stretch:focus-visible::after { outline: 2px solid var(--color-ink); outline-offset: 4px; border-radius: var(--radius-sm); }
-.feat:hover a.stretch {
-  text-decoration: underline; text-decoration-color: var(--color-green); text-decoration-thickness: 2px; text-underline-offset: 5px;
-}
-
-.meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1) var(--space-3); margin: 0; font-size: var(--text-small); color: var(--color-muted); }
-.type { color: var(--color-ink); font-weight: 500; }
-/* A customer story's logo sits on the meta line in place of the name (D37): small, in its own colours, no effects */
-.source { display: inline-flex; align-items: center; min-height: 1.5em; }
-.logo { display: block; width: auto; }
-
-/* Featured: the three newest in the filter, always with an image (D33; was two at 3:1, which Lawrence found squished) */
-.featGrid { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-7) var(--space-6); }
-/* Phones: the newest item runs large; the next two are compact rows, a smaller image beside the text */
-@media (max-width: 767px) {
-  .featGrid { row-gap: var(--space-5); }
-  .featGrid .feat:nth-child(n + 2) { display: grid; grid-template-columns: 40% minmax(0, 1fr); column-gap: var(--space-4); align-items: start; }
-  .featGrid .feat:nth-child(n + 2) .media { aspect-ratio: 4 / 3; margin-bottom: 0; }
-  .featGrid .feat:nth-child(n + 2) .featTitle { font-size: var(--text-h4); line-height: 1.25; letter-spacing: normal; }
-  .featGrid .feat:nth-child(2) { padding-top: var(--space-2); }
-}
-/* Tablet: two up, and a third item runs across both columns with its image on the left and its text beside it.
-   A filter with one item lays out the same way (D30). */
-@media (min-width: 768px) and (max-width: 1279px) {
-  .featGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-7) var(--space-6); }
-  .featGrid[data-count="1"] .feat, .featGrid[data-count="3"] .feat:nth-child(3) {
-    grid-column: 1 / -1; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: var(--space-6);
+.row .stretch:focus-visible::after { inset: 2px calc(var(--space-2) * -1); outline-offset: 0; } /* the window clips top and bottom only */
+@media (hover: hover) and (pointer: fine) {
+  .feat:hover .stretch, .row:hover .stretch {
+    text-decoration-line: underline; text-decoration-color: var(--color-green); text-decoration-thickness: 2px; text-underline-offset: 0.18em;
   }
-  .featGrid[data-count="1"] .media, .featGrid[data-count="3"] .feat:nth-child(3) .media { margin-bottom: 0; }
-}
-/* Desktop: three up at 16:9. Two items take two of the three columns; one item sets its image in the first column
-   and its text across the other two, so every featured image is the same size */
-@media (min-width: 1280px) {
-  .featGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-6); }
-  .featGrid[data-count="1"] .feat { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: var(--space-6); }
-  .featGrid[data-count="1"] .media { margin-bottom: 0; }
-  .featGrid[data-count="1"] .featText { grid-column: 2 / span 2; }
 }
 
-.media { position: relative; aspect-ratio: 16 / 10; overflow: hidden; margin-bottom: var(--space-4); background: var(--color-surface-2); } /* images are square-cornered unless framed (DESIGN §3) */
-/* Desktop: 16:9 at a third of the width, so three items and the strip still fit one 1440 × 900 screen (D30, D33) */
-@media (min-width: 1280px) { .media { aspect-ratio: 16 / 9; margin-bottom: var(--space-4); } }
+/* Meta: position, type, source on one line. The position and type are set small in the mono face */
+.meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1) var(--space-3); margin: 0; font-size: var(--text-caption); line-height: 1.3; color: var(--color-muted); }
+.idx, .type { font-family: var(--font-mono); font-size: var(--text-label); letter-spacing: 0.02em; text-transform: uppercase; }
+.idx { min-width: 2ch; font-variant-numeric: tabular-nums; }
+.type { color: var(--color-ink); }
+/* A customer story's logo sits in place of its name (D37): small, in its own colours, no effects */
+.source { display: inline-flex; align-items: center; min-height: 1.3em; }
+.logo { display: block; width: auto; }
+.note { margin: var(--space-2) 0 0; font-size: var(--text-caption); line-height: 1.4; color: var(--color-muted); }
+
+/* The lead item */
+.media { position: relative; aspect-ratio: 16 / 10; overflow: hidden; background: var(--color-surface-2); } /* square-cornered (DESIGN §3) */
 .img { object-fit: cover; transition: transform var(--dur-4) var(--ease-settle), opacity var(--dur-3) var(--ease-out); }
-/* Images fade in once loaded (no pop after a filter switch); without JS they simply show */
 :global(html[data-js]) .img:not([data-loaded]) { opacity: 0; }
-/* Hover (mouse only) on items that link somewhere: the image eases in slowly on a long settle, a gentle 3% (D28,
-   after Stripe's two-speed cards: the title answers at once, the picture follows) */
-@media (hover: hover) and (pointer: fine) { .feat:has(.stretch):hover .img { transform: scale(1.03); } }
-.featText { min-width: 0; }
-.featTitle { margin: var(--space-2) 0 0; max-width: 30ch; font-size: var(--text-h3); font-weight: 500; line-height: 1.15; letter-spacing: var(--tracking-h3); text-wrap: balance; }
-/* Desktop: a third of the width takes the h4 size, so a long title stays on two lines (D33) */
-@media (min-width: 1280px) { .featTitle { font-size: var(--text-h4); line-height: 1.25; letter-spacing: normal; } }
-.note { margin: var(--space-2) 0 0; font-size: var(--text-label); color: var(--color-muted); }
-
-/* Older items: a sideways strip of hairline tiles with a type glyph, never images */
-.stripWrap { margin-top: var(--space-7); }
-@media (min-width: 1280px) { .stripWrap { margin-top: var(--space-5); } }
-.strip {
-  --gap: var(--space-6);
-  display: grid; grid-auto-flow: column; grid-auto-columns: 78%; gap: var(--gap);
-  margin: 0; padding: 0 0 var(--space-3); list-style: none;
-  overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scrollbar-width: thin;
+/* The halftone (motion only): the photo waits under its dots until they merge, then the canvas clears */
+.track[data-ht] .media:not([data-done]) .img { opacity: 0; transition: none; }
+.media canvas { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; pointer-events: none; }
+@media (hover: hover) and (pointer: fine) { .feat:hover .img { transform: scale(1.03); } }
+.featText { min-width: 0; padding-top: var(--space-4); }
+.featTitle {
+  margin: var(--space-3) 0 0; max-width: 22ch;
+  font-size: var(--text-h3); font-weight: 500; line-height: 1.08; letter-spacing: var(--tracking-h3); text-wrap: balance;
 }
-@media (min-width: 768px) { .strip { grid-auto-columns: calc((100% - var(--gap) * 2) / 3); } }
-@media (min-width: 1280px) { .strip { grid-auto-columns: calc((100% - var(--gap) * 4) / 5); } }
-.strip:focus-visible { outline-offset: 6px; border-radius: var(--radius-sm); }
-.tile {
-  display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-4) var(--space-3) var(--space-3);
-  border-top: 1px solid var(--color-line-strong); scroll-snap-align: start;
-  /* At rest each tile carries a very faint lift, so the tiles read as separate boxes (Lawrence, 2026-11-03) */
-  background: color-mix(in srgb, var(--color-white) 45%, var(--color-surface));
-  transition: background-color var(--dur-2) var(--ease-out);
-}
-/* Hover (D20; lightened in D24): the whole tile answers. A light lift to white, the top rule turns green, the glyph
-   turns green; no underline (colour and a 200 ms rule draw only: DESIGN §4). Mouse only, so a tap never leaves a
-   tile lit. */
-.tile::before { content: ""; position: absolute; top: -1px; left: 0; right: 0; height: 2px; background: var(--color-green); transform: scaleX(0); transform-origin: left center; transition: transform var(--dur-2) var(--ease-out); }
-@media (hover: hover) and (pointer: fine) {
-  .tile:hover { background: var(--color-white); }
-  .tile:hover::before { transform: none; }
-  .tile:hover .glyph { stroke: var(--color-green-text); }
-  .tile:hover .tileSrc { color: var(--color-ink); }
-}
-/* Keyboard focus gets the same state as hover, and its ring sits inside the tile (the strip's scroll box clips
-   anything outside it) */
-.tile:has(.stretch:focus-visible) { background: var(--color-white); }
-.tile:has(.stretch:focus-visible)::before { transform: none; }
-.tile:has(.stretch:focus-visible) .glyph { stroke: var(--color-green-text); }
-.tile:has(.stretch:focus-visible) .tileSrc { color: var(--color-ink); }
-.tile .stretch:focus-visible::after { outline-offset: -2px; border-radius: 0; }
-.tileTitle { flex: 1; margin: 0; font-size: var(--text-body); font-weight: 500; line-height: 1.35; text-wrap: balance; }
-.tileSrc { display: flex; align-items: center; min-height: 1.5em; margin: 0; font-size: var(--text-small); color: var(--color-muted); }
-/* At rest the tiles step back (Lawrence, 2026-11-03): titles a little fainter (about 5.6:1), the label and byline to the
-   AA floor (4.5:1, the faintest text may go), the logos much fainter (logotypes are exempt from contrast). Hover or
-   keyboard focus brings the whole tile up to full strength at once: colour 200 ms, the logo's opacity alongside. */
-.tile .tileTitle { color: color-mix(in srgb, var(--color-ink) 70%, var(--color-surface)); transition: color var(--dur-2) var(--ease-out); }
-.tile .meta, .tile .tileSrc { color: color-mix(in srgb, var(--color-muted) 92%, var(--color-surface)); transition: color var(--dur-2) var(--ease-out); }
-.tile .logo { opacity: 0.35; transition: opacity var(--dur-2) var(--ease-out); }
-@media (hover: hover) and (pointer: fine) {
-  .tile:hover .tileTitle { color: var(--color-ink); }
-  .tile:hover .meta { color: var(--color-muted); }
-  .tile:hover .logo { opacity: 1; }
-}
-.tile:has(.stretch:focus-visible) .tileTitle { color: var(--color-ink); }
-.tile:has(.stretch:focus-visible) .meta { color: var(--color-muted); }
-.tile:has(.stretch:focus-visible) .logo { opacity: 1; }
-.glyph { width: 18px; height: 18px; flex: none; fill: none; stroke: var(--color-ink); stroke-width: 1.4; stroke-linejoin: round; stroke-linecap: round; }
+@media (min-width: 1280px) { .featTitle { margin-top: var(--space-2); max-width: 26ch; } }
 
-.stripNav { display: flex; gap: var(--space-2); }
-.stripNav[hidden] { display: none; }
-.navBtn {
-  display: grid; place-items: center; width: 44px; height: 44px; padding: 0; cursor: pointer;
-  border: 1px solid var(--color-line-strong); border-radius: var(--radius-md); background: none;
-  transition: border-color var(--dur-2) var(--ease-out), transform var(--dur-1) var(--ease-out);
+/* The list: rows of meta, title and a thumbnail, hairlines between. Each row's rule draws in from the left and its
+   content rises a little as it arrives (--k, --kt: set from the scroll; 1 without motion) */
+.list { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--hair); }
+.row {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--space-4); align-items: start;
+  padding: var(--space-4) 0 var(--space-5);
 }
-.navBtn:hover:not(:disabled) { border-color: var(--color-ink); }
-.navBtn:disabled { cursor: default; opacity: 0.35; }
-.navBtn svg { width: 20px; height: 20px; fill: none; stroke: var(--color-ink); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.row::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: var(--hair);
+  transform: scaleX(var(--k, 1)); transform-origin: left center;
+}
+/* The text only fades: a transform on it would trap the stretched link's area inside the text, off the thumbnail */
+.rowText, .thumb { opacity: var(--kt, 1); }
+.thumb { transform: translateY(calc((1 - var(--kt, 1)) * var(--space-3))); }
+.rowText { min-width: 0; }
+/* Hover (mouse) and keyboard focus: a green rule draws across the row's top */
+.row::before {
+  content: ""; position: absolute; top: -1px; left: 0; right: 0; z-index: 1; height: 2px; background: var(--color-green);
+  transform: scaleX(0); transform-origin: left center; transition: transform var(--dur-2) var(--ease-out);
+}
+@media (hover: hover) and (pointer: fine) { .row:hover::before { transform: none; } }
+.row:has(.stretch:focus-visible)::before { transform: none; }
+.rowTitle { margin: var(--space-2) 0 0; font-size: var(--text-h4); font-weight: 400; line-height: 1.2; text-wrap: balance; }
+.thumb { position: relative; width: 96px; aspect-ratio: 16 / 10; overflow: hidden; background: var(--color-surface-2); }
+/* Below desktop only the first two rows carry a picture */
+@media (max-width: 1279px) { .row:nth-child(n + 3) .thumb { display: none; } }
+@media (min-width: 1280px) { .row { column-gap: var(--space-5); align-items: center; } .thumb { width: 150px; } }
 
-.empty { margin: var(--space-7) 0 0; padding-top: var(--space-5); border-top: 1px solid var(--color-line); color: var(--color-muted); }
-@media (min-width: 768px) { .empty { margin-top: auto; } }
+.empty { margin: 0; padding: var(--space-4) 0; border-block: 1px solid var(--hair); font-size: var(--text-h4); color: var(--color-muted); }
 
-/* Tablet up: titles reserve three lines so the source lines align across tiles */
-@media (min-width: 768px) { .tileTitle { min-height: 4lh; } }
-@media (min-width: 1440px) { .tileTitle { min-height: 3lh; } }
+/* "View everything" */
+.foot { display: flex; }
+@media (min-width: 1280px) { .foot { justify-content: flex-end; align-self: start; padding-top: calc(var(--space-4) - var(--space-3)); } }
+.all {
+  display: inline-flex; align-items: center; min-height: 44px;
+  font-family: var(--font-mono); font-size: var(--text-label); letter-spacing: 0.02em; text-transform: uppercase; color: var(--color-ink);
+  text-decoration-line: underline; text-decoration-thickness: 1px; text-underline-offset: 6px;
+  transition: text-decoration-color var(--dur-2) var(--ease-out);
+}
+.all:hover { text-decoration-color: var(--color-green); text-decoration-thickness: 2px; }
 
+/* Desktop with motion: the section holds (sticky, D8) for as long as the active filter's rows need to pass through the
+   window, one step of max(150px, 26vh) per row beyond the first --n. Its stage is one screen tall, clear of the header. */
+@media (min-width: 1280px) and (prefers-reduced-motion: no-preference) {
+  :global(html[data-js]) .deeper { padding-block: 0; }
+  :global(html[data-js]) .track { height: calc(100vh + max(0, var(--rows) - var(--n)) * max(150px, 26vh)); }
+  :global(html[data-js]) .stage {
+    position: sticky; top: 0; height: 100vh; box-sizing: border-box; overflow: clip;
+    /* Clear of the header (80 px) by a little; on tall screens the content (about --imgh + 213 px: heading, gaps and
+       the lead's two-line title) sits a little above the middle instead, so the slack isn't all at the bottom */
+    padding-top: max(calc(var(--space-8) + var(--space-4) + clamp(8px, 2vh, 24px)), calc((100vh - var(--imgh) - 213px) / 2 - var(--space-8)));
+  }
+  :global(html[data-js]) .panel .feat { position: relative; top: auto; }
+  /* the lead's photo and text sit on the two rows, so its text and "View everything" share a line */
+  :global(html[data-js]) .feat { display: grid; grid-template-rows: subgrid; }
+  /* Clipped top and bottom only, so a row's focus ring may sit just outside the column */
+  :global(html[data-js]) .win { position: relative; height: var(--imgh); clip-path: inset(0 calc(var(--space-2) * -1)); }
+  :global(html[data-js]) .win::before, :global(html[data-js]) .win::after {
+    content: ""; position: absolute; left: 0; right: 0; z-index: 2; height: 1px; background: var(--hair); pointer-events: none;
+  }
+  :global(html[data-js]) .win::before { top: 0; }
+  :global(html[data-js]) .win::after { bottom: 0; }
+  :global(html[data-js]) .list { --rowh: calc(var(--imgh) / var(--n)); border-top: 0; will-change: transform; }
+  :global(html[data-js]) .row { box-sizing: border-box; height: var(--rowh); padding: var(--space-2) 0; }
+  :global(html[data-js]) .rowTitle { margin-top: var(--space-1); font-size: clamp(var(--text-body), calc(var(--rowh) * 0.18), var(--text-h4)); }
+  :global(html[data-js]) .row .note { margin-top: 2px; }
+  :global(html[data-js]) .thumb { width: auto; height: calc(var(--rowh) - var(--space-2) * 2); }
+  :global(html[data-js]) .empty { border-top: 0; }
+  :global(html[data-js]) .win:has(.empty)::after { content: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel, .panel:not([data-active]), .filter, .filter::before, .img, .row::before { transition: none; animation: none; }
+}

@@ -5,10 +5,13 @@
 .chapter { position: relative; }
 
 /* ── Static mode ─────────────────────────────────────────────── */
-.stage { position: relative; height: 42vh; height: 42svh; overflow: hidden; }
-.photo { position: absolute; inset: 0; }
+/* The crop (D90): --hero-fx/--hero-fy, fractions of the picture, from the version's focal point (--focal-x/-y, set on the
+   stage by ChapterOne; heroes/framing.ts) or 78% 50%. Every picture uses it, and the versions' layers read it too, so
+   their stills stay registered with the photo. --focal-clear starts the photo below the floating nav bar. */
+.stage { --hero-fx: var(--focal-x, 0.78); --hero-fy: var(--focal-y, 0.5); position: relative; height: 42vh; height: 42svh; overflow: hidden; }
+.photo { position: absolute; inset: var(--focal-clear, 0px) 0 0; overflow: hidden; }
 .media { position: absolute; inset: 0; will-change: transform; }
-.photoImg { object-fit: cover; object-position: 78% 50%; }
+.photoImg { object-fit: cover; object-position: calc(var(--hero-fx) * 100%) calc(var(--hero-fy) * 100%); }
 .video { display: none; }
 .curtain { display: none; }
 .lines { display: none; }
@@ -40,13 +43,14 @@
 
 /* ── Motion mode ─────────────────────────────────────────────── */
 @media (min-width: 1280px) and (prefers-reduced-motion: no-preference) {
-  :global(html[data-js]) .stage { position: sticky; top: 0; height: 100vh; height: 100svh; }
+  /* The camera move's crop: 30% 50%, or the version's own (--focal-dx/-dy); the layers read it from the picture */
+  :global(html[data-js]) .stage { --hero-fx: var(--focal-dx, 0.3); --hero-fy: var(--focal-dy, 0.5); position: sticky; top: 0; height: 100vh; height: 100svh; }
+  :global(html[data-js]) .photo { inset: 0; overflow: visible; }
   :global(html[data-js]) .curtain { display: block; position: absolute; top: 0; bottom: 0; background: var(--color-surface); transform: scaleX(0); will-change: transform; }
   :global(html[data-js]) .curtainL { left: 0; transform-origin: left center; }
   :global(html[data-js]) .curtainR { right: 0; transform-origin: right center; }
-  :global(html[data-js]) .photoImg { object-position: 30% 50%; }
   /* The scrubbed camera move (D29) fades in over its own first frame once it can seek */
-  :global(html[data-js]) .video { display: block; position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 30% 50%; opacity: 0; transition: opacity var(--dur-4) var(--ease-out); }
+  :global(html[data-js]) .video { display: block; position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: calc(var(--hero-fx) * 100%) calc(var(--hero-fy) * 100%); opacity: 0; transition: opacity var(--dur-4) var(--ease-out); }
   :global(html[data-js]) .video[data-ready] { opacity: 1; }
   :global(html[data-js]) .lines { display: block; position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
 

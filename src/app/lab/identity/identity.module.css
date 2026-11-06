@@ -1,0 +1,20 @@
+/* The identity options (D80). Lab only; tokens only. */
+.page { padding-block: calc(var(--space-10) + var(--space-6)) calc(var(--section-pad-y) + var(--space-9)); }
+.intro { max-width: 60rem; }
+.intro p { margin-top: var(--space-5); max-width: var(--measure); }
+.options { margin-top: var(--space-9); display: grid; gap: var(--space-10); list-style: none; padding: 0; }
+.option { border-top: 1px solid var(--color-line-strong); padding-top: var(--space-6); }
+.head { display: grid; gap: var(--space-3) var(--space-8); }
+@media (min-width: 1024px) { .head { grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); } }
+.note { max-width: var(--measure); line-height: 1.6; }
+.views { margin-top: var(--space-6); display: grid; gap: var(--space-5); align-items: end; }
+@media (min-width: 1024px) { .views { grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr); } }
+
+/* A crop of the rail at 1440: its ridges plate at low strength, the line at 72%, the drawing's 420 slot above it */
+.frame { position: relative; height: 470px; overflow: hidden; border-radius: var(--radius-md); background: var(--color-surface); outline: 1px solid var(--color-line); outline-offset: -1px; }
+.plate { position: absolute; inset: 0 0 28% 0; background: url("/images/home/rail/home-rail-ridges-wide-v1.webp") no-repeat 40% bottom / 260% auto; opacity: 0.38; mask-image: linear-gradient(to bottom, transparent, var(--color-ink) 60%); }
+.rail { position: absolute; left: 0; right: 0; top: 72%; height: 1px; background: var(--color-line-strong); }
+.slot { position: absolute; left: 50%; bottom: calc(28% + var(--space-6)); width: min(420px, calc(100% - var(--space-6))); transform: translateX(-50%); }
+/* twice the size, for the detail */
+.big { height: 760px; }
+.big .slot { width: min(840px, calc(100% - var(--space-6))); bottom: calc(28% + var(--space-6)); }

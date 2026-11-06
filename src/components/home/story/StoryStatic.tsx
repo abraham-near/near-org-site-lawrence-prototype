@@ -1,6 +1,6 @@
 import { artOf, type RailArt } from "./StoryRail";
 import { ANSWER, CONNECT, MEET, OWN, PROBLEM } from "./copy";
-import { NearArt } from "./NearArt";
+import { LayerArt } from "./orbit/motion/o3/layer/layer";
 import styles from "./Story.module.css";
 
 // The story as plain reading (D29): every option's words, in order, as real headings and paragraphs. It is what phones,
@@ -14,7 +14,7 @@ export function StoryStatic({ titleId, art = "line" }: { titleId: string; art?: 
         <span className={styles.sentence}>{MEET.near}{MEET.rest}</span>
       </h2>
       <p className={`t-lede ${styles.problem}`}>{PROBLEM}</p>
-      <NearArt className={styles.nearArt} />
+      <LayerArt className={`${styles.nearArt} ${styles.ownArtLarge}`} />
       <p className={`t-h3 ${styles.answer}`}>
         {ANSWER.pre}{ANSWER.near}{ANSWER.mid}<span className={styles.owned}>{ANSWER.owned}</span>
       </p>

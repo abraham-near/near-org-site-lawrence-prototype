@@ -1,0 +1,42 @@
+/* Lab: the cinematic hero options (/lab/hero-cinematic). Laid out like /home's first screen (ChapterOne is the
+   reference): below 1280 px a photo band (42 svh) with the copy under it, as /home shows it on a phone (no thread);
+   from 1280 px the photo fills the first screen and the copy sits on the page container's edge, vertically centred.
+   The band starts below the floating nav; on it the photo can be zoomed (--mz) and placed (--mfx / --mfy).
+   Static: no pinning, no video. Tokens only. */
+
+.hero { position: relative; }
+
+/* The photo and its vector layer share one box with the photo's aspect ratio, covering the stage from a focal point */
+.stage { position: relative; height: 42vh; height: 42svh; overflow: hidden; container-type: size; background: var(--color-surface); }
+/* Below 1280 px the band starts under the floating nav (its height plus a step), so no subject is hidden behind it */
+@media (max-width: 1279px) { .hero { padding-top: calc(var(--space-8) + var(--space-5)); } }
+.box {
+  --f: var(--mfx);
+  --g: var(--mfy);
+  --z: var(--mz);
+  --bw: calc(max(100cqw, calc(100cqh * var(--arn))) * var(--z, 1));
+  --bh: calc(var(--bw) / var(--arn));
+  position: absolute;
+  width: var(--bw);
+  height: var(--bh);
+  left: calc((100cqw - var(--bw)) * var(--f));
+  top: calc((100cqh - var(--bh)) * var(--g));
+}
+.img { object-fit: fill; }
+.svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+
+/* Copy: as /home shows it below 1280 px, on the page margin */
+.beats { --inset: max(var(--page-margin), calc((100% - var(--content-max)) / 2 + var(--page-margin))); position: relative; }
+.beat { position: relative; padding: var(--space-8) var(--inset) var(--space-7); }
+.copy { max-width: 640px; }
+.lede { margin-top: var(--space-5); }
+.cta { margin-top: var(--space-6); }
+
+@media (min-width: 1280px) {
+  .hero { height: 100vh; height: 100svh; min-height: 640px; }
+  .stage { position: absolute; inset: 0; height: auto; }
+  .box { --f: var(--fx); --g: var(--fy); --z: 1; }
+  .beats { position: absolute; inset: 0; }
+  .beat { display: flex; align-items: center; height: 100%; padding: 0 var(--inset); }
+  .lede { max-width: 34ch; } /* keeps the lede on the pale side of the photo, as on /home */
+}

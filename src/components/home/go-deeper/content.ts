@@ -69,7 +69,15 @@ export const ITEMS: DeeperItem[] = [
 export const FEATURED = 3; // three featured items (D33; was two)
 export const MORE = 10;
 
+// Three featured and a strip of ten (D33). The /lab directions still lay out from this; the homepage now uses `lead`.
 export function select(filter: DeeperFilter) {
   const list = ITEMS.filter((it) => filter === "all" || it.type === filter);
   return { featured: list.slice(0, FEATURED), more: list.slice(FEATURED, FEATURED + MORE) };
+}
+
+// The homepage section (after the r16/v3 prototype): the newest item in the filter leads with its photo, and every
+// other item follows as a row in the list beside it.
+export function lead(filter: DeeperFilter) {
+  const list = ITEMS.filter((it) => filter === "all" || it.type === filter);
+  return { first: list[0], rest: list.slice(1) };
 }

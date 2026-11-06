@@ -39,8 +39,24 @@ export function ChapterOneMotion() {
       // One thread (D19, D35): it hangs in the photo right of the claim, the photo closes in on it, and it stays at that
       // same x, just right of the anthem's longest line: its head drops to the statement's first line as the anthem
       // arrives, it draws down beside the statement while it wipes on, and rises away with it. It never moves sideways.
-      type Geo = { X: number; y: Record<string, number>; thread: SVGPathElement; head: SVGCircleElement };
+      // D90: a hero version may move the line right (thread.x) or keep it off its photo (thread: false), so it never
+      // crosses the version's subject (heroes/framing.ts). The settings ride on the svg as data-thread, one per version
+      // ("*" for a fixed hero); the random hero's choice is html[data-hero].
+      type Geo = { X: number; y: Record<string, number>; thread: SVGPathElement; head: SVGCircleElement; hide: boolean; key: string };
       let G: Geo | null = null;
+      let settings: Record<string, { x?: number | string } | false> = {};
+      try { settings = JSON.parse(svg.dataset.thread ?? "{}"); } catch { settings = {}; }
+      const heroKey = () => document.documentElement.getAttribute("data-hero") ?? "*";
+      const threadFor = (k: string) => settings[k] ?? settings["*"];
+      // A CSS length (or a fraction of the width) in px, measured on a probe inside the stage
+      const lengthPx = (v: number | string, W: number) => {
+        if (typeof v === "number") return v * W;
+        const probe = document.createElement("div");
+        probe.style.cssText = `position:absolute;visibility:hidden;width:${v}`;
+        svg.parentElement!.appendChild(probe);
+        const w = probe.offsetWidth; probe.remove();
+        return w;
+      };
 
       const el = <K extends keyof SVGElementTagNameMap>(name: K, attrs: Record<string, string | number>) => {
         const n = document.createElementNS(NS, name);
@@ -59,19 +75,23 @@ export function ChapterOneMotion() {
         // is far narrower, so the same x hangs in the photo right of it
         const words = [...anthem.querySelectorAll<HTMLElement>("[aria-hidden] > span")];
         const textRight = Math.max(...words.map((w) => w.getBoundingClientRect().right)) - svgLeft;
-        const X = Math.min(R - 24, Math.max(pad + 700, textRight + 48));
+        const key = heroKey(), t = threadFor(key), least = textRight + 48;
+        let X = Math.min(R - 24, Math.max(pad + 700, least));
+        if (t && t.x !== undefined) X = Math.min(W - 24, Math.max(least, lengthPx(t.x, W)));
         svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
         // Curtains meet exactly at the line (no 1 px seam of photo either side); widths only change on rebuild
         curtainL.style.width = `${X}px`;
         curtainR.style.width = `${W - X}px`;
         svg.replaceChildren();
         const thread = el("path", { class: "thread" }), head = el("circle", { class: "dot", r: 5, "data-ch": "head" });
-        G = { X, y: { headStart: 0, headHero: H * 0.5 }, thread, head }; // nothing on load: the line drops in with the scroll
+        G = { X, y: { headStart: 0, headHero: H * 0.5 }, thread, head, hide: t === false, key }; // nothing on load: the line drops in with the scroll
         render();
       }
 
       function render() {
         if (!G) return;
+        // After a client-side navigation the random hero is picked after this ran: rebuild for the version on screen
+        if (G.key !== heroKey()) { G = null; build(); return; }
         const { y } = G, top = svg.getBoundingClientRect().top;
         const c = easeIO(prog.clip);
         curtainL.style.transform = curtainR.style.transform = `scaleX(${c})`;
@@ -84,7 +104,11 @@ export function ChapterOneMotion() {
         const x = G.X, v = Math.max(0, h);
         G.thread.setAttribute("d", v > 0 ? `M${x} 0 V${v}` : "");
         G.head.setAttribute("cx", String(x)); G.head.setAttribute("cy", String(v));
-        G.head.setAttribute("opacity", String(v > 6 ? 1 : 0));
+        // Kept off the photo (thread: false): it fades in only over the last 8% of the close-in, when the curtains have
+        // all but met on it and the subject is gone, so the anthem keeps its line and it never crosses the picture
+        const shown = G.hide ? gsap.utils.clamp(0, 1, (c - 0.92) / 0.08) : 1;
+        G.thread.setAttribute("opacity", String(shown));
+        G.head.setAttribute("opacity", String(v > 6 ? shown : 0));
       }
 
       build();

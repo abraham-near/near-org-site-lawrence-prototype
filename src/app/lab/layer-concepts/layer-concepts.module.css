@@ -1,0 +1,16 @@
+/* The layer concept drafts (D83). Lab only; tokens only. */
+.page { padding-block: calc(var(--space-10) + var(--space-6)) calc(var(--section-pad-y) + var(--space-9)); }
+.intro { max-width: 60rem; }
+.intro p { margin-top: var(--space-5); max-width: var(--measure); }
+.list { margin-top: var(--space-9); display: grid; gap: var(--space-10); list-style: none; padding: 0; }
+.item { border-top: 1px solid var(--color-line-strong); padding-top: var(--space-6); }
+.head { display: grid; gap: var(--space-3) var(--space-8); }
+@media (min-width: 1024px) { .head { grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); } }
+.note { max-width: var(--measure); line-height: 1.6; }
+.pair { margin-top: var(--space-6); display: grid; gap: var(--space-5); }
+@media (min-width: 768px) { .pair { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.fig { margin: 0; }
+.fig img { display: block; width: 100%; height: auto; border-radius: var(--radius-md); outline: 1px solid var(--color-line); outline-offset: -1px; }
+.fig figcaption { margin-top: var(--space-3); font-size: var(--text-small); color: var(--color-muted); max-width: 44ch; }
+.round { margin-top: var(--space-10); }
+.round > .note { margin-top: var(--space-3); color: var(--color-muted); }

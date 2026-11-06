@@ -27,7 +27,6 @@ export function StoryRailMotion({ gate, stations, end, look }: { gate: number; s
     mm.add(MOTION, () => {
       const world = q("world"), problem = q("problem"), near = q("near");
       const pWords = [...problem.children], aWords = [...q("answer").children];
-      const part = (k: string) => [...near.querySelectorAll(`[data-n="${k}"]`)];
       const dots = qa("dot"), stops = qa("station"), arts = [...root.querySelectorAll<HTMLElement>("[data-s='station'] [data-art]")];
       // Bring a point on the track (in vw) to the middle of the screen
       const centre = (at: number) => () => -(window.innerWidth * (at - 50)) / 100;
@@ -41,10 +40,6 @@ export function StoryRailMotion({ gate, stations, end, look }: { gate: number; s
       gsap.set(qa("end"), { autoAlpha: 0 });
       gsap.set(problem, { autoAlpha: 0 });
       gsap.set(aWords, { autoAlpha: 0, y: "0.3em" });
-      // The layer starts as someone else's: dashed wires, an empty tile, no tag
-      gsap.set(part("before"), { opacity: 1 });
-      gsap.set(part("after"), { opacity: 0 });
-      gsap.set(part("tag"), { autoAlpha: 0, y: 6 });
       // Only the station being read shows; its neighbours are just their dots on the line (half-drawings cut by the
       // screen's edges read as bugs, and dimmed text would fail contrast)
       const words = stops.map((st) => [...st.querySelectorAll<HTMLElement>("[data-s='words']")]);
@@ -63,13 +58,14 @@ export function StoryRailMotion({ gate, stations, end, look }: { gate: number; s
         .to(world, { x: centre(gate), duration: 12, ease: "power2.inOut" }, 17)
         .to(problem, { autoAlpha: 1, duration: 3 }, 22)
         .to(pWords, { opacity: 1, ease: "none", duration: 2, stagger: 0.7 }, 25)
-        // 3. The answer takes the problem's place as it leaves (no empty beat) and stays; the layer turns into NEAR's
-        //    and the line runs on green
-        .to(problem, { autoAlpha: 0, y: -30, duration: 3, ease: "power1.in" }, 41)
+        // 3. The answer takes the problem's place the moment it has left (no empty beat, and never the two at once) and
+        //    stays; the layer becomes the user's and the line runs on green
+        .to(problem, { autoAlpha: 0, y: -30, duration: 2.4, ease: "power1.in" }, 40)
         .to(aWords, { autoAlpha: 1, y: 0, duration: 3, stagger: 0.5, ease: "power2.out" }, 42.5)
-        .to(part("before"), { opacity: 0, duration: 4 }, 43)
-        .to(part("after"), { opacity: 1, duration: 4 }, 43)
-        .to(part("tag"), { autoAlpha: 1, y: 0, duration: 3, ease: "power2.out" }, 47)
+        //    (D86: the drawing reads --own each frame, 0 the problem, 1 the answer, and eases its own change on a
+        //    spring, so the scrub itself runs straight; from-to, so the problem holds before it. It starts as the
+        //    problem starts leaving and lands, with the N, as "user-owned." finishes)
+        .fromTo(near, { "--own": 0 }, { "--own": 1, duration: 8, ease: "none" }, 40)
         .to(q("greenOn"), { scaleX: reach(gate + 20), duration: 6, ease: "power2.out" }, 46);
       // 4. Station by station: the world moves on, the green runs ahead to the station, its dot lands and its drawing plays
       const STEPS = [62, 72, 82, 92];

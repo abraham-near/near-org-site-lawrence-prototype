@@ -1,24 +1,42 @@
 "use client";
 
-import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
 import Image from "next/image";
 import { useSearchParams } from "next/navigation";
-import { FILTERS, LOGOS, TILE_LABEL, TYPE_LABEL, select, type DeeperFilter, type DeeperItem, type DeeperType } from "./content";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { useGSAP } from "@gsap/react";
+import { FILTERS, LOGOS, TYPE_LABEL, lead, type DeeperFilter, type DeeperItem } from "./content";
+import { halftone, type Halftone } from "./halftone";
 import styles from "./GoDeeper.module.css";
 
-// The filter tablist and its panels (layout 4C, D9). All panels share one grid cell, so the section always
-// holds the tallest filter's height and switching never moves the page (on phones only the active one is shown;
-// see the CSS). The filter is mirrored in ?type= so a filter can be linked to. One footer row under the panels holds
-// "View everything" and the arrows for the active panel's strip, so the section fits one screen (D30).
+gsap.registerPlugin(ScrollTrigger, useGSAP);
+
+// Go deeper, after the r16/v3 prototype: the heading with the filters on its right over an ink rule; then, per filter,
+// the newest item large with its photo on the left and every other item as a row (meta, title, thumbnail) on the right.
+// The filter tablist (arrows, Home/End) is mirrored in ?type= so a filter can be linked to. All panels share one grid
+// cell on desktop, so switching never moves the page there (D9).
+//
+// Desktop with motion: the list is a window the photo's height showing --n rows (4, or 3 on screens under 800 px tall).
+// The section holds still (CSS sticky, D8) while the page scroll moves the list up through the window, a row at a time
+// with a short hold at each (scrubbed and reversible; native scrolling throughout). The hold lasts as long as the
+// active filter needs to bring its last row in (CSS: --rows), so a filter whose rows fit has none.
+// Elsewhere (phones, tablets, reduced motion, no JS) the whole list simply shows.
 
 const isFilter = (v: string | null): v is DeeperFilter => FILTERS.some((f) => f.key === v);
+const WIN = "(min-width: 1280px) and (prefers-reduced-motion: no-preference)";
+const FLOW = "(max-width: 1279px) and (prefers-reduced-motion: no-preference)";
+const MOTION = "(prefers-reduced-motion: no-preference)";
+const SCRUB = 0.6; // DESIGN §4: about 0.6 s of scrub smoothing
+const clamp = (v: number, a: number, b: number) => (v < a ? a : v > b ? b : v);
+const smooth = (t: number) => { t = clamp(t, 0, 1); return t * t * (3 - 2 * t); };
+const pad = (n: number) => String(n).padStart(2, "0");
 
 // Reads ?type= (client-rendered under Suspense; the prerendered fallback is the "All" view).
 export function DeeperFromUrl() {
   const params = useSearchParams();
   const type = params.get("type");
-  // A choice shows at once; the URL (replaceState, so no history entries) catches up a moment later. Without this
-  // the old panel stayed active for ~300 ms, so a quick Tab landed in it and lost focus when it hid (D28).
+  // A choice shows at once; the URL (replaceState, so no history entries) catches up a moment later (D28).
   const [picked, setPicked] = useState<DeeperFilter | null>(null);
   const active: DeeperFilter = picked ?? (isFilter(type) ? type : "all");
   const choose = (next: DeeperFilter) => {
@@ -32,102 +50,179 @@ export function DeeperFromUrl() {
 
 export function DeeperView({ active, onSelect }: { active: DeeperFilter; onSelect?: (f: DeeperFilter) => void }) {
   const tabs = useRef<(HTMLButtonElement | null)[]>([]);
-  const strips = useRef<Partial<Record<DeeperFilter, HTMLOListElement | null>>>({});
-  const nav = useRef<HTMLDivElement>(null);
-  const prev = useRef<HTMLButtonElement>(null);
-  const next = useRef<HTMLButtonElement>(null);
-  const hasStrip = select(active).more.length > 0;
+  const track = useRef<HTMLDivElement>(null);
+  const held = useRef(false); // the section was holding (sticky) when the filter changed
+  const seen = useRef<number | null>(null); // where the stage sat on screen just before a switch
+  const first = useRef(true);
+  const [near, setNear] = useState(false); // thumbnails load once the section is within two screens
+  const rows = lead(active).rest.length || 1; // the empty note takes one row
 
-  // The arrows follow the active strip: hidden when it doesn't overflow (or there is none), disabled at each end.
   useEffect(() => {
-    const s = strips.current[active], n = nav.current;
-    if (!n) return;
-    if (!s) { n.hidden = true; return; }
-    const sync = () => {
-      const max = s.scrollWidth - s.clientWidth;
-      n.hidden = max <= 1;
-      const p = prev.current, x = next.current;
-      if (!p || !x) return;
-      p.disabled = s.scrollLeft <= 1;
-      x.disabled = s.scrollLeft >= max - 1;
-      // A button that disables under the keyboard would drop focus to the page; hand it to the other arrow
-      if (p.disabled && document.activeElement === p && !x.disabled) x.focus();
-      if (x.disabled && document.activeElement === x && !p.disabled) p.focus();
-    };
-    const ro = new ResizeObserver(sync);
-    ro.observe(s);
-    s.addEventListener("scroll", sync, { passive: true });
-    sync();
-    return () => { ro.disconnect(); s.removeEventListener("scroll", sync); };
-  }, [active]);
+    const el = track.current;
+    if (!el) return;
+    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setNear(true); io.disconnect(); } }, { rootMargin: "200% 0px" });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
 
-  const go = (dir: number) => {
-    const s = strips.current[active];
-    if (!s) return;
-    const smooth = !matchMedia("(prefers-reduced-motion: reduce)").matches;
-    s.scrollBy({ left: dir * s.clientWidth * 0.8, behavior: smooth ? "smooth" : "auto" });
+  const select = (next: DeeperFilter) => {
+    const el = track.current;
+    if (el) {
+      const r = el.getBoundingClientRect();
+      held.current = r.top <= 1 && r.bottom >= innerHeight - 1;
+      seen.current = (el.firstElementChild ?? el).getBoundingClientRect().top;
+    }
+    onSelect?.(next);
   };
+
+  useGSAP(() => {
+    const el = track.current;
+    const panel = el?.querySelector<HTMLElement>(`#deeper-panel-${active}`);
+    if (!el || !panel) return;
+    const switched = !first.current;
+    first.current = false;
+    // The track's length (desktop) or the list's (elsewhere) just changed, so the page may have moved under the reader
+    // (a shorter track ends the hold early). Keep the stage exactly where the reader saw it: if it was holding, the new
+    // list starts at its top; otherwise the page shifts by however far the stage moved. Then re-measure the triggers.
+    if (switched) {
+      const stage = (el.firstElementChild ?? el) as HTMLElement;
+      const win = matchMedia(WIN).matches, old = seen.current;
+      if (held.current && win) window.scrollTo({ top: el.getBoundingClientRect().top + scrollY, behavior: "instant" });
+      // Past the hold, the stage rests at the track's end, so its place depends on the new track's length: put the
+      // page where the stage ends exactly where it was (a longer list then shows its last rows)
+      else if (win && old !== null && old < -0.5) window.scrollTo({ top: el.getBoundingClientRect().top + scrollY - old + el.offsetHeight - innerHeight, behavior: "instant" });
+      else if (old !== null) {
+        const moved = stage.getBoundingClientRect().top - old;
+        if (Math.abs(moved) > 0.5) window.scrollBy({ top: moved, behavior: "instant" });
+      }
+      held.current = false;
+      seen.current = null;
+    }
+    const list = panel.querySelector<HTMLElement>("[data-list]");
+    const items = [...panel.querySelectorAll<HTMLElement>("[data-row]")];
+    const setK = (row: HTMLElement, v: number) => {
+      row.style.setProperty("--k", smooth(v * 1.6).toFixed(3));
+      row.style.setProperty("--kt", smooth((v - 0.25) / 0.75).toFixed(3));
+    };
+    const mm = gsap.matchMedia();
+
+    // The lead photo's halftone: scrubbed as it comes into view; replayed when a filter switches it in
+    mm.add(MOTION, () => {
+      const media = panel.querySelector<HTMLElement>("[data-media]"), img = media?.querySelector("img");
+      if (!media || !img) return;
+      el.setAttribute("data-ht", "");
+      const ht: Halftone = halftone(media, img);
+      const st = ScrollTrigger.create({ trigger: media, start: "clamp(top 92%)", end: "clamp(top 38%)", onUpdate: (s) => ht.set(s.progress), onRefresh: (s) => { ht.resize(); ht.set(s.progress); } });
+      ht.set(st.progress);
+      if (switched) ht.replay();
+      return () => { st.kill(); ht.destroy(); el.removeAttribute("data-ht"); };
+    });
+
+    // Desktop: the windowed list, moved by the page scroll while the section holds
+    mm.add(WIN, () => {
+      if (!list) return;
+      const N = () => parseInt(getComputedStyle(el).getPropertyValue("--n"), 10) || 4;
+      const steps = () => Math.max(0, items.length - N());
+      const hold = (t: number) => smooth((t - 0.2) / 0.6); // a hold at each row, then a smooth step to the next
+      let cur = 0;
+      const render = (x: number) => {
+        const n = steps(), sx = x * n, i = Math.min(n, Math.floor(sx)), e = n ? i + (i < n ? hold(sx - i) : 0) : 0;
+        cur = e;
+        const rowh = (list.parentElement?.clientHeight ?? 0) / N();
+        list.style.transform = `translate3d(0, ${(-e * rowh).toFixed(2)}px, 0)`;
+      };
+      const state = { x: 0 };
+      const tl = gsap.timeline({ paused: true }).fromTo(state, { x: 0 }, { x: 1, duration: 1, ease: "none", immediateRender: false, onUpdate: () => render(state.x) });
+      const st = ScrollTrigger.create({ trigger: el, start: "top top", end: "bottom bottom", scrub: SCRUB, animation: tl, onRefresh: () => render(state.x) });
+      render(0);
+      // The rows draw in as the section comes up: one clock for the window, staggered by row
+      const drawIn = (v: number) => items.forEach((row, j) => setK(row, clamp((v * 1.5 - 0.09 * Math.min(j, N())) / 0.7, 0, 1)));
+      const tIn = ScrollTrigger.create({ trigger: el, start: "top bottom", end: "top 20%", onUpdate: (s) => drawIn(s.progress), onRefresh: (s) => drawIn(s.progress) });
+      // Keyboard: a row reached by Tab outside the window brings the page to the step that shows it
+      const onFocus = (e: FocusEvent) => {
+        const row = (e.target as HTMLElement).closest<HTMLElement>("[data-row]");
+        const i = row ? items.indexOf(row) : -1, n = N(), k = steps();
+        if (i < 0 || !k || (i >= cur - 0.01 && i <= cur + n - 1 + 0.01 && st.isActive)) return;
+        const s = clamp(i < cur ? i : i - n + 1, 0, k);
+        const y = st.start + (s / k) * (st.end - st.start);
+        requestAnimationFrame(() => { window.scrollTo({ top: y, behavior: "instant" }); tl.progress(s / k); render(s / k); });
+      };
+      panel.addEventListener("focusin", onFocus);
+      return () => {
+        panel.removeEventListener("focusin", onFocus);
+        st.kill(); tIn.kill(); tl.kill();
+        list.style.transform = "";
+        items.forEach((row) => { row.style.removeProperty("--k"); row.style.removeProperty("--kt"); });
+      };
+    });
+
+    // Phones and tablets: each row draws in over the first 64 px after it enters
+    mm.add(FLOW, () => {
+      const sts = items.map((row) => {
+        setK(row, 0);
+        return ScrollTrigger.create({ trigger: row, start: "clamp(top bottom)", end: "clamp(top bottom-=64)", onUpdate: (s) => setK(row, s.progress), onRefresh: (s) => setK(row, s.progress) });
+      });
+      return () => { sts.forEach((s) => s.kill()); items.forEach((row) => { row.style.removeProperty("--k"); row.style.removeProperty("--kt"); }); };
+    });
+
+    const raf = switched ? requestAnimationFrame(() => ScrollTrigger.refresh()) : 0;
+    return () => { cancelAnimationFrame(raf); mm.revert(); };
+  }, { scope: track, dependencies: [active], revertOnUpdate: true });
 
   const onKey = (e: KeyboardEvent, i: number) => {
     const n = FILTERS.length;
     const to = { ArrowRight: (i + 1) % n, ArrowLeft: (i - 1 + n) % n, Home: 0, End: n - 1 }[e.key];
     if (to === undefined) return;
     e.preventDefault();
-    onSelect?.(FILTERS[to].key);
+    select(FILTERS[to].key);
     tabs.current[to]?.focus();
   };
 
   return (
-    <>
-      <div className={styles.filters} role="tablist" aria-label="Filter by type">
-        {FILTERS.map((f, i) => (
-          <button
-            key={f.key} ref={(el) => { tabs.current[i] = el; }}
-            type="button" role="tab" id={`deeper-tab-${f.key}`} aria-controls={`deeper-panel-${f.key}`}
-            aria-selected={f.key === active} tabIndex={f.key === active ? 0 : -1}
-            className={styles.filter} onClick={() => onSelect?.(f.key)} onKeyDown={(e) => onKey(e, i)}
-          >
-            {f.label}
-          </button>
-        ))}
-      </div>
-      <div className={styles.panels}>
-        {FILTERS.map((f) => (
-          <Panel key={f.key} filter={f.key} label={f.label} active={f.key === active} stripRef={(el) => { strips.current[f.key] = el; }} />
-        ))}
-      </div>
-      <div className={styles.foot}>
-        <a href="/blog" className={styles.all}>View everything</a>
-        {/* Hidden until the effect finds the active strip overflowing (and so always hidden without JavaScript); the
-            effect owns it from then on */}
-        <div ref={nav} className={styles.stripNav} hidden>
-          <button ref={prev} type="button" className={styles.navBtn} onClick={() => go(-1)} aria-controls={hasStrip ? stripId(active) : undefined} aria-label="Previous items">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 6 8.5 12l6 6" /></svg>
-          </button>
-          <button ref={next} type="button" className={styles.navBtn} onClick={() => go(1)} aria-controls={hasStrip ? stripId(active) : undefined} aria-label="Next items">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 6l6 6-6 6" /></svg>
-          </button>
+    <div ref={track} className={styles.track} style={{ "--rows": rows } as CSSProperties}>
+      <div className={styles.stage}>
+        <div className={styles.inner}>
+          <header className={styles.head}>
+            <h2 id="deeper-title" className="t-h2">Go <span className="accent">deeper</span></h2>
+            <div className={styles.filters} role="tablist" aria-label="Filter by type">
+              {FILTERS.map((f, i) => (
+                <button
+                  key={f.key} ref={(el) => { tabs.current[i] = el; }}
+                  type="button" role="tab" id={`deeper-tab-${f.key}`} aria-controls={`deeper-panel-${f.key}`}
+                  aria-selected={f.key === active} tabIndex={f.key === active ? 0 : -1}
+                  className={styles.filter} onClick={() => select(f.key)} onKeyDown={(e) => onKey(e, i)}
+                >
+                  {f.label}
+                </button>
+              ))}
+            </div>
+          </header>
+          <div className={styles.panels}>
+            {FILTERS.map((f) => <Panel key={f.key} filter={f.key} label={f.label} active={f.key === active} near={near} />)}
+          </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 
-const stripId = (filter: DeeperFilter) => `deeper-strip-${filter}`;
-
-function Panel({ filter, label, active, stripRef }: { filter: DeeperFilter; label: string; active: boolean; stripRef: (el: HTMLOListElement | null) => void }) {
-  const { featured, more } = select(filter);
+function Panel({ filter, label, active, near }: { filter: DeeperFilter; label: string; active: boolean; near: boolean }) {
+  const { first, rest } = lead(filter);
   return (
-    <div
-      role="tabpanel" id={`deeper-panel-${filter}`} aria-labelledby={`deeper-tab-${filter}`}
-      className={styles.panel} data-active={active || undefined} inert={!active}
-    >
-      <div className={styles.featGrid} data-count={featured.length}>
-        {featured.map((it, i) => <Featured key={it.id} item={it} show={active} eager={filter === "all" && i < 2} />)}
+    <div role="tabpanel" id={`deeper-panel-${filter}`} aria-labelledby={`deeper-tab-${filter}`} className={styles.panel} data-active={active || undefined} inert={!active}>
+      {first && <Featured item={first} show={active} eager={filter === "all"} />}
+      <div className={styles.win}>
+        {rest.length > 0 ? (
+          <ol className={styles.list} data-list aria-label={`More in ${label}`}>
+            {rest.map((it, i) => <Row key={it.id} item={it} n={i + 2} show={active && near} />)}
+          </ol>
+        ) : (
+          <p className={styles.empty}>That&rsquo;s everything in {label} for now.</p>
+        )}
       </div>
-      {more.length > 0 ? <Strip id={stripId(filter)} items={more} label={label} stripRef={stripRef} /> : (
-        <p className={styles.empty}>That&rsquo;s everything in {label} for now.</p>
-      )}
+      <div className={styles.foot}>
+        <a href="/blog" className={styles.all}>View everything</a>
+      </div>
     </div>
   );
 }
@@ -142,27 +237,35 @@ const Title = ({ item }: { item: DeeperItem }) => {
     </a>
   );
 };
-const Source = ({ item }: { item: DeeperItem }) => <>{item.source}</>;
 // A customer story's company, as its own logo (D37), small and in its published colours; the name is its alt text
-const SourceMark = ({ item }: { item: DeeperItem }) => {
+const Source = ({ item }: { item: DeeperItem }) => {
   const logo = item.type === "story" ? LOGOS[item.id] : undefined;
-  if (!logo) return <Source item={item} />;
-  return <Image src={logo.src} alt={item.source ?? ""} width={Math.round((logo.w / logo.h) * logo.height)} height={logo.height} className={styles.logo} style={{ height: logo.height }} unoptimized />;
+  if (!logo) return <span className={styles.source}>{item.source}</span>;
+  return (
+    <span className={styles.source}>
+      <Image src={logo.src} alt={item.source ?? ""} width={Math.round((logo.w / logo.h) * logo.height)} height={logo.height} className={styles.logo} style={{ height: logo.height }} unoptimized />
+    </span>
+  );
 };
-// Dates show only once they are real; until then the section note covers them (one marker, not one per item)
-const DateTbd = ({ item }: { item: DeeperItem }) => (item.date ? <time dateTime={item.date}>{item.date}</time> : null);
+// The position in the filter (01, 02 …) is for the eye only; dates show only once they are real (D16)
+const Meta = ({ item, n }: { item: DeeperItem; n: number }) => (
+  <p className={styles.meta}>
+    <span className={styles.idx} aria-hidden="true">{pad(n)}</span>
+    <span className={styles.type}>{TYPE_LABEL[item.type]}</span>
+    <Source item={item} />
+    {item.date && <time dateTime={item.date}>{item.date}</time>}
+  </p>
+);
 
-// Images load only for the visible panel; hidden panels keep the media box, so the shared height still holds.
-// A filter with one featured item sets it beside its text at the same image size, so it never sets the height (D30).
+// The lead item. Its image loads only for the visible panel; hidden panels keep the media box, so the shared height holds
 function Featured({ item, show, eager }: { item: DeeperItem; show: boolean; eager: boolean }) {
   return (
     <article className={styles.feat}>
-      <div className={styles.media}>
-        {item.image && show && <Image src={item.image} alt="" fill sizes="(min-width: 1440px) 420px, (min-width: 1280px) 33vw, (min-width: 768px) 50vw, 100vw" loading={eager ? undefined : "lazy"} className={styles.img} onLoad={(e) => e.currentTarget.setAttribute("data-loaded", "")} />}
+      <div className={styles.media} data-media>
+        {item.image && show && <Image src={item.image} alt="" fill sizes="(min-width: 1440px) 604px, (min-width: 1280px) 46vw, (min-width: 768px) 50vw, 100vw" loading={eager ? undefined : "lazy"} className={styles.img} onLoad={(e) => e.currentTarget.setAttribute("data-loaded", "")} />}
       </div>
       <div className={styles.featText}>
-        {/* One line for the type and the source, above the title (D30: was two lines) */}
-        <p className={styles.meta}><span className={styles.type}>{TYPE_LABEL[item.type]}</span><span className={styles.source}><SourceMark item={item} /></span><DateTbd item={item} /></p>
+        <Meta item={item} n={1} />
         <h3 className={styles.featTitle}><Title item={item} /></h3>
         {item.note && <p className={styles.note}>{item.note}</p>}
       </div>
@@ -170,33 +273,17 @@ function Featured({ item, show, eager }: { item: DeeperItem; show: boolean; eage
   );
 }
 
-// The older items: a horizontally scrolling strip of hairline tiles with a type glyph (never images). Its arrows sit in
-// the footer row (DeeperView).
-function Strip({ id, items, label, stripRef }: { id: string; items: DeeperItem[]; label: string; stripRef: (el: HTMLOListElement | null) => void }) {
+function Row({ item, n, show }: { item: DeeperItem; n: number; show: boolean }) {
   return (
-    <div className={styles.stripWrap}>
-      {/* Focusable so keyboard users can scroll it with the arrow keys */}
-      <ol ref={stripRef} id={id} className={styles.strip} tabIndex={0} aria-label={`More in ${label}, scrolls sideways`}>
-        {items.map((it) => (
-          <li key={it.id} className={styles.tile}>
-            <p className={styles.meta}><Glyph type={it.type} /><span>{TILE_LABEL[it.type]}</span><DateTbd item={it} /></p>
-            <h3 className={styles.tileTitle}><Title item={it} /></h3>
-            <p className={styles.tileSrc}><SourceMark item={it} /></p>
-          </li>
-        ))}
-      </ol>
-    </div>
-  );
-}
-
-// Type glyphs: simple line icons (not logos).
-function Glyph({ type }: { type: DeeperType }) {
-  return (
-    <svg className={styles.glyph} viewBox="0 0 24 24" aria-hidden="true">
-      {type === "story" && <><rect x="3.5" y="3.5" width="17" height="17" rx="2" /><path d="M8 13.5c0-2 .8-3.3 2.6-4M13 13.5c0-2 .8-3.3 2.6-4" /></>}
-      {type === "read" && <><path d="M6 3.5h8.5l4 4v13H6z" /><path d="M14.5 3.5v4h4M9 12h6.5M9 15.5h6.5" /></>}
-      {type === "watch" && <><circle cx="12" cy="12" r="8.5" /><path d="M10.2 8.8v6.4l5.2-3.2z" /></>}
-      {type === "press" && <><path d="M4 5.5h13v13H6a2 2 0 0 1-2-2z" /><path d="M17 9h3v8a1.5 1.5 0 0 1-3 0M7.5 9h6M7.5 12h6M7.5 15h4" /></>}
-    </svg>
+    <li className={styles.row} data-row>
+      <div className={styles.rowText}>
+        <Meta item={item} n={n} />
+        <h3 className={styles.rowTitle}><Title item={item} /></h3>
+        {item.note && <p className={styles.note}>{item.note}</p>}
+      </div>
+      <div className={styles.thumb}>
+        {item.image && show && <Image src={item.image} alt="" fill sizes="(min-width: 1280px) 150px, 96px" className={styles.img} onLoad={(e) => e.currentTarget.setAttribute("data-loaded", "")} />}
+      </div>
+    </li>
   );
 }

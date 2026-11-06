@@ -4,7 +4,7 @@ import { OrbitArt } from "./orbit/OrbitArt";
 import { liveArt, motionArt } from "./orbit/motion";
 import { OwnReplay } from "../chapter-one/OwnReplay";
 import { ANSWER, CONNECT, MEET, OWN, PROBLEM } from "./copy";
-import { NearArt } from "./NearArt";
+import { LayerArt } from "./orbit/motion/o3/layer/layer";
 import { StoryStatic } from "./StoryStatic";
 import { StoryRailMotion } from "./StoryRailMotion";
 import { RailBack, RailDetail, RailOver, type RailLook } from "./RailLooks";
@@ -14,8 +14,8 @@ import styles from "./StoryRail.module.css";
 // Story option C, "The rail" (D29, reworked in D38): one horizontal line carries the story sideways while the reader
 // scrolls down. It draws from AI on one side and blockchain on the other into a green NEAR tile under the three lines
 // ("where they connect"). The three lines leave and the world slides to the layer beneath your agents, drawn on the line
-// (NearArt) while the problem is read; the problem gives way to the answer in the same place, the drawing turns into
-// NEAR's, and the line runs on green to four stations, one for each thing you own: the drawing above the line, the words
+// (LayerArt, real-time 3D, D86) while the problem is read; the problem gives way to the answer in the same place, the
+// layer becomes the user's, and the line runs on green to four stations, one for each thing you own: the drawing above the line, the words
 // below; only the station being read shows (its neighbours are dots on the line). The answer stays at the top
 // throughout. Positions on the track are in vw (StoryRail.module.css: --x on each element). `look` adds a cinematic
 // layer (D32, RailLooks.tsx).
@@ -55,9 +55,10 @@ export function StoryRail({ look = "plain", art = "line" }: { look?: RailLook; a
               <Image src="/brand/icon.svg" alt="" width={639} height={639} className={styles.hubMark} unoptimized />
             </span>
 
-            {/* The layer beneath your agents, on the line: someone else's while the problem is read, NEAR's with the answer */}
-            <div className={`${styles.artSlot} ${styles.gateSlot}`} style={{ "--x": `${RAIL.gate}vw` } as React.CSSProperties}>
-              <NearArt className={styles.art} data-s="near" />
+            {/* The layer beneath your agents, on the line: someone else's while the problem is read, the user's with the
+                answer (D86: real-time 3D, the rail's timeline drives its change through --own) */}
+            <div className={`${styles.artSlot} ${styles.gateSlot}`} style={{ "--x": `${RAIL.gate}vw` } as React.CSSProperties} data-own-stage data-large>
+              <LayerArt from="problem" className={styles.art} data-s="near" />
             </div>
 
             {OWN.map((o, i) => (

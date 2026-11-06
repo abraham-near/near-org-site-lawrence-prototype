@@ -4,11 +4,11 @@ import Image from "next/image";
 import { useCallback, useEffect, useId, useRef, type HTMLAttributes, type ReactNode } from "react";
 import s from "../../orbit.module.css";
 import { REDUCED, useSlide } from "../slide";
-import { circlePath, SQUARE, STAR, type Attrs } from "./geo";
+import { circlePath, HEAD, SQUARE, STAR, type Attrs } from "./geo";
 import type { Tokens, View } from "./gl";
 import {
-  assetsHorizon, assetsPose, assetsVectors, dataPose, dataVectors, LABEL_DATA,
-  type AssetsPose, type DataPose,
+  assetsHorizon, assetsPose, assetsVectors, dataPose, dataVectors, INTEL_GAP, INTEL_HORIZON, INTEL_RAY_FROM, intelligencePose,
+  intelligenceVectors, LABEL_DATA, type AssetsPose, type DataPose, type IntelPose, type Spring,
 } from "./scenes";
 import m from "./o3.module.css";
 
@@ -25,10 +25,10 @@ const SRC = "/images/home/own/motion/o3";
 
 // Lines, markers and tags, keyed so each frame can rewrite them in place (no React render per frame). Their numbers are
 // computed on the server and again in the browser, where the last decimal can differ, so hydration doesn't check them.
-type K = (k: string, cls: string) => { "data-k": string; className: string; suppressHydrationWarning: true; [attr: string]: string | boolean };
+export type K = (k: string, cls: string) => { "data-k": string; className: string; suppressHydrationWarning: true; [attr: string]: string | boolean };
 
-function Stage<P>({ which, rest, under, over, labels, pose, vectors, load, still, props }: {
-  which: "data" | "assets";
+export function Stage<P>({ which, rest, under, over, labels, pose, vectors, load, still, props }: {
+  which: "data" | "assets" | "intelligence" | "identity" | "layer";
   rest: Record<string, Attrs>;
   under: (k: K) => ReactNode;
   over: (k: K) => ReactNode;
@@ -63,7 +63,7 @@ function Stage<P>({ which, rest, under, over, labels, pose, vectors, load, still
       if (gone || !ctx) return;
       const css = getComputedStyle(el);
       const tok = (n: string) => css.getPropertyValue(`--color-${n}`).trim();
-      const tokens = { green: tok("green"), surface: tok("surface"), surface2: tok("surface-2"), onDark: tok("on-dark"), ink: tok("ink") };
+      const tokens = { green: tok("green"), surface: tok("surface"), surface2: tok("surface-2"), onDark: tok("on-dark"), ink: tok("ink"), muted: tok("muted") };
       try { view = make(tokens); } catch { return; } // no WebGL: the still stays
       const els = new Map<string, Element>();
       el.querySelectorAll("[data-k]").forEach((n) => els.set(n.getAttribute("data-k")!, n));
@@ -148,10 +148,11 @@ export function DataArt(props: HTMLAttributes<HTMLDivElement>) {
 // ── Assets
 const ASSETS_REST = assetsVectors(assetsPose(0, 0));
 const loadAssets = () => import("./gl").then((g) => g.assetsView);
-function ecliptic() {
-  const y = assetsHorizon();
-  let d = `M8 ${y.toFixed(2)}H412`;
-  for (let x = 8, i = 0; x <= 412; x += 6, i++) d += `M${x} ${y.toFixed(2)}v${i % 5 === 0 ? -4.5 : -2}`;
+// the ticked horizon, left out where it passes behind a sphere (`gap`, intelligence only)
+function ecliptic(y = assetsHorizon(), gap?: readonly [number, number]) {
+  const yy = y.toFixed(2);
+  let d = gap ? `M8 ${yy}H${gap[0].toFixed(2)}M${gap[1].toFixed(2)} ${yy}H412` : `M8 ${yy}H412`;
+  for (let x = 8, i = 0; x <= 412; x += 6, i++) if (!gap || x < gap[0] || x > gap[1]) d += `M${x} ${yy}v${i % 5 === 0 ? -4.5 : -2}`;
   return d;
 }
 const ECLIPTIC = ecliptic();
@@ -211,6 +212,63 @@ export function AssetsArt(props: HTMLAttributes<HTMLDivElement>) {
           <g {...k("readingFrom", "")}><path className={s.inkFill} d={circlePath(1.4)} /></g>
           <g {...k("readingTo", "")}><path className={s.inkFill} d={circlePath(1.4)} /></g>
           <path {...k("trail", s.gLine)} style={{ stroke: `url(#${trail})`, strokeWidth: 1.2 }} />
+        </>
+      )}
+      labels={null}
+    />
+  );
+}
+
+// ── Intelligence (Lawrence: "core only"): the sphere and the chrome ball stay put; the green core turns inside the
+// frost and the vectors move. The sphere arrives pitched and rolled (its band an open ellipse) and eases level at the
+// centre with the data disc's spring (D73), so each drawing keeps its own spring state. No tag (the "Signed proof" tag,
+// its leader and its dot are gone, as "Private" and "Swap" were).
+const INTEL_REST = intelligenceVectors(intelligencePose(0, 0));
+const loadIntelligence = () => import("./gl").then((g) => g.intelligenceView);
+const INTEL_ECLIPTIC = ecliptic(INTEL_HORIZON, INTEL_GAP);
+const INTEL_MARKS = [circlePath(2.2), STAR, SQUARE];
+const intelMarks = (k: K, side: "b" | "f") => INTEL_MARKS.map((d, i) => (
+  <g key={i} {...k(`mk${i}${side}`, "")}><path className={markCls[i]} d={d} /></g>
+));
+
+export function IntelligenceArt(props: HTMLAttributes<HTMLDivElement>) {
+  const id = useId().replace(/[^a-zA-Z0-9]/g, "");
+  const trace = `o3trace${id}`;
+  const spring = useRef<Spring>({ y: 0, v: 0, t: -1 });
+  const pose = useCallback((slide: number, t: number) => intelligencePose(slide, t, spring.current), []);
+  return (
+    <Stage<IntelPose>
+      which="intelligence" rest={INTEL_REST} still="intelligence" props={props} pose={pose} vectors={intelligenceVectors}
+      load={loadIntelligence}
+      under={(k) => (
+        <>
+          <path className={s.faint} d={INTEL_ECLIPTIC} />
+          <path {...k("sealBack", s.orbit)} />
+          <path {...k("tiltBack", s.dash)} />
+          <path {...k("scale", s.fine)} />
+          <path {...k("meridBack", s.faint)} />
+          <path {...k("meridTicksBack", s.fine)} />
+          {intelMarks(k, "b")}
+        </>
+      )}
+      over={(k) => (
+        <>
+          <defs>
+            {/* the signed trace, in ink now the ball is chrome (D79): full strength at the ball, gone at its tail */}
+            <linearGradient id={trace} gradientUnits="userSpaceOnUse" {...k("traceGrad", "")}>
+              <stop offset="0" stopColor="var(--color-ink)" stopOpacity="0" />
+              <stop offset="1" stopColor="var(--color-ink)" stopOpacity="0.86" />
+            </linearGradient>
+          </defs>
+          <path {...k("sealFront", s.orbit)} />
+          <path {...k("tiltFront", s.dash)} />
+          <path {...k("meridFront", s.faint)} />
+          <path {...k("meridTicksFront", s.fine)} />
+          {intelMarks(k, "f")}
+          <path {...k("ray", s.hair)} />
+          <g {...k("head", "")}><path className={s.inkFill} d={HEAD} /></g>
+          <g transform={`translate(${INTEL_RAY_FROM[0]} ${INTEL_RAY_FROM[1]})`}><path className={s.inkFill} d={circlePath(1.5)} /></g>
+          <path {...k("trace", s.hair)} style={{ stroke: `url(#${trace})`, strokeWidth: 1 }} />
         </>
       )}
       labels={null}

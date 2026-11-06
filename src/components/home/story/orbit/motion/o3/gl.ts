@@ -1,7 +1,10 @@
 import * as THREE from "three";
 import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 import { CAM, CAM_POS } from "./geo";
-import { ASSETS, DATA, DATA_TILT, type AssetsPose, type DataPose } from "./scenes";
+import {
+  ASSETS, DATA, DATA_TILT, INTEL, INTEL_BALL, intelFrame, intelSpin,
+  type AssetsPose, type DataPose, type IntelPose,
+} from "./scenes";
 
 // Option 3's WebGL (D72), loaded with a dynamic import on the client only. One renderer for the whole page: each
 // drawing renders its scene into the corner of the shared canvas and copies it into its own 2D canvas straight away
@@ -13,11 +16,11 @@ import { ASSETS, DATA, DATA_TILT, type AssetsPose, type DataPose } from "./scene
 // at partial alpha, so the frost reads as milky glass over the light page and lets the lines under it show, muted.
 
 // Every material colour comes from the page's tokens, read at runtime
-export type Tokens = { green: string; surface: string; surface2: string; onDark: string; ink: string };
-type Pal = { green: THREE.Color; surface: THREE.Color; surface2: THREE.Color; onDark: THREE.Color; ink: THREE.Color };
+export type Tokens = { green: string; surface: string; surface2: string; onDark: string; ink: string; muted: string };
+type Pal = { green: THREE.Color; surface: THREE.Color; surface2: THREE.Color; onDark: THREE.Color; ink: THREE.Color; muted: THREE.Color };
 const palette = (t: Tokens): Pal => ({
   green: new THREE.Color(t.green), surface: new THREE.Color(t.surface), surface2: new THREE.Color(t.surface2),
-  onDark: new THREE.Color(t.onDark), ink: new THREE.Color(t.ink),
+  onDark: new THREE.Color(t.onDark), ink: new THREE.Color(t.ink), muted: new THREE.Color(t.muted),
 });
 const mix = (a: THREE.Color, b: THREE.Color, k: number) => a.clone().lerp(b, k);
 type Engine = { renderer: THREE.WebGLRenderer; env: THREE.Texture; users: number };
@@ -243,3 +246,161 @@ export function assetsView(tokens: Tokens): View<AssetsPose> {
     contact.position.set(p.green[0], top, p.green[2]);
   });
 }
+
+// Machined chrome: clean polished metal (its studio reflections stay broad and smooth) with fine concentric lathe
+// hairlines cut into it about `axis`, in the mesh's own frame, so they turn with it. Procedural, no texture: each
+// hairline darkens the metal's reflectance along a thin ring (by the angle from the groove axis), antialiased to the
+// pixel and faded out where the rings crowd tighter than about 4 px, near the core's outline and toward the grooves'
+// poles, so they never shimmer and no bullseye draws the eye. Every few rings a slightly deeper cut and a slow
+// variation between passes give the rings something to carry as the core turns.
+function machined(pal: Pal, axis: THREE.Vector3) {
+  // green anodised metal under a clear coat (D79: the core is the green ball, the ball outside is chrome)
+  const m = new THREE.MeshPhysicalMaterial({ color: pal.green, metalness: 0.92, roughness: 0.16, clearcoat: 1, clearcoatRoughness: 0.06 });
+  m.onBeforeCompile = (sh) => {
+    sh.uniforms.uGroove = { value: axis };
+    sh.vertexShader = sh.vertexShader
+      .replace("#include <common>", "#include <common>\nvarying vec3 vObjN;")
+      .replace("#include <begin_vertex>", "#include <begin_vertex>\nvObjN = normal;");
+    sh.fragmentShader = sh.fragmentShader
+      .replace("#include <common>", "#include <common>\nuniform vec3 uGroove;\nvarying vec3 vObjN;")
+      .replace("#include <color_fragment>", `#include <color_fragment>
+      {
+        vec3 on = normalize(vObjN);
+        float th = atan(length(cross(on, uGroove)), dot(on, uGroove)); // the angle from the pole, stable near it
+        float u = th * 14.0;                         // 14 rings a radian: about 44 pole to pole, 5 px apart at 2×
+        float fu = fwidth(u);
+        float d = abs(fract(u) - 0.5) / max(fu, 1e-4);   // distance to the ring's centre, in pixels
+        float line = 1.0 - smoothstep(0.35, 1.1, d);
+        float deep = step(0.8, fract(floor(u) / 5.0));  // every fifth ring a deeper cut
+        float pass = 0.75 + 0.25 * sin(th * 7.0);       // the machining passes
+        float fade = 1.0 - smoothstep(0.2, 0.34, fu);
+        // and toward the grooves' poles: no bullseye, and no comb where the rings close round a pole near the outline;
+        // the rings show as a broad belt of hairlines that sways and drifts across the core as it turns
+        fade *= smoothstep(0.5, 0.88, sin(th));
+        fade *= smoothstep(0.15, 0.4, dot(normalize(vNormal), normalize(vViewPosition)));
+        diffuseColor.rgb *= 1.0 - line * fade * pass * mix(0.45, 0.62, deep);
+      }`);
+  };
+  m.customProgramCacheKey = () => "o3-machined-5";
+  return m;
+}
+
+// A milky veil on glass, by the angle between the surface and the view (`e`, 0 facing the camera, 1 at the outline):
+// a glow from `inner` to `outer` toward the edge (brighter on the upper left, toward the key light), a soft shading
+// (`shade`) in a ring just inside the edge, so a frosted ball has its volume, and in the last pixel or two the glow
+// gives way, so the glass keeps a fine contour on the light page
+function veiled(m: THREE.MeshPhysicalMaterial, color: THREE.Color, inner: number, outer: number, power = 2.2, shade = 0) {
+  m.onBeforeCompile = (sh) => {
+    sh.uniforms.uVeil = { value: color };
+    sh.fragmentShader = sh.fragmentShader
+      .replace("#include <common>", "#include <common>\nuniform vec3 uVeil;")
+      .replace("#include <opaque_fragment>", `{
+        float e = 1.0 - clamp(dot(normal, normalize(vViewPosition)), 0.0, 1.0);
+        float rim = 1.0 - smoothstep(0.8, 1.0, e);
+        float ring = smoothstep(0.2, 0.62, e) * (1.0 - smoothstep(0.72, 0.9, e));
+        float key = 0.82 + 0.14 * normal.y - 0.08 * normal.x;
+        outgoingLight = outgoingLight * (1.0 - ${shade.toFixed(3)} * ring)
+          + uVeil * mix(${inner.toFixed(3)}, ${outer.toFixed(3)}, pow(e, ${power.toFixed(2)})) * rim * key;
+      }
+      #include <opaque_fragment>`);
+  };
+  m.customProgramCacheKey = () => `o3-veil-${inner}-${outer}-${power}-${shade}`;
+  return m;
+}
+
+// The green ball's silhouette: on a small ball the polished coat's grazing reflections flick between the studio's light
+// and dark from pixel to pixel, which reads as a speckled grey fringe on the light page. Here the last sliver toward the
+// outline settles to a deep shade of the ball's own green instead (this station's ball only)
+function cleanEdge(m: THREE.MeshPhysicalMaterial, edge: THREE.Color) {
+  m.onBeforeCompile = (sh) => {
+    sh.uniforms.uEdge = { value: edge };
+    sh.fragmentShader = sh.fragmentShader
+      .replace("#include <common>", "#include <common>\nuniform vec3 uEdge;")
+      .replace("#include <tonemapping_fragment>", `{
+        float facing = clamp(dot(normal, normalize(vViewPosition)), 0.0, 1.0);
+        gl_FragColor.rgb = mix(gl_FragColor.rgb, uEdge, smoothstep(0.62, 0.9, 1.0 - facing));
+      }
+      #include <tonemapping_fragment>`);
+  };
+  m.customProgramCacheKey = () => "o3-clean-edge";
+  return m;
+}
+
+export function intelligenceView(tokens: Tokens): View<IntelPose> {
+  const e = getEngine();
+  const pal = palette(tokens);
+  const scene = new THREE.Scene();
+  const camera = studio(scene, e.env, pal);
+  // the page as the glass sees it: a light grey, cooled a little with the muted ink (the only cool token), so the glass
+  // reads neutral like Orbit's still, and the veil and the rim give it its volume
+  scene.add(backdrop(mix(pal.surface2, pal.muted, 0.12), 0.93));
+
+  // the sphere's frame: rolled about the view at its centre, then pitched (the entry turn), then the core's spin
+  const outer = new THREE.Group();
+  outer.position.set(...INTEL.S);
+  scene.add(outer);
+  const frame = new THREE.Group();
+  outer.add(frame);
+  const spin = new THREE.Group();
+  frame.add(spin);
+
+  // the seal: one sphere in three zones, flush (no lip anywhere): frosted caps above and below, and a narrow clear
+  // zone at the equator, the band, where the core is seen sharply
+  const { R, band: h } = INTEL;
+  const b = Math.asin(h / 2 / R); // the band's half-height as an angle from the equator
+  const frost = veiled(new THREE.MeshPhysicalMaterial({
+    color: pal.onDark, metalness: 0, roughness: 0.06, transmission: 1, thickness: 0.15, ior: 1.25, specularIntensity: 1, envMapIntensity: 1.6,
+    premultipliedAlpha: true,
+  }), mix(pal.onDark, pal.muted, 0.04), 0.05, 0.9, 2.6, 0.2);
+  frame.add(
+    new THREE.Mesh(new THREE.SphereGeometry(R, 192, 64, 0, Math.PI * 2, 0, Math.PI / 2 - b), frost),
+    new THREE.Mesh(new THREE.SphereGeometry(R, 192, 64, 0, Math.PI * 2, Math.PI / 2 + b, Math.PI / 2 - b), frost),
+  );
+  // the band: clear polished glass, barely refracting (a thin shell), a little brighter at its very edge like the
+  // frost, between two fine polished seams
+  const clear = veiled(new THREE.MeshPhysicalMaterial({
+    color: pal.onDark, metalness: 0, roughness: 0, transmission: 1, thickness: 0.08, ior: 1.3, specularIntensity: 1.2, envMapIntensity: 2.6,
+    premultipliedAlpha: true,
+  }), mix(pal.onDark, pal.muted, 0.04), 0.05, 0.8, 2.4);
+  frame.add(new THREE.Mesh(new THREE.SphereGeometry(R, 256, 6, 0, Math.PI * 2, Math.PI / 2 - b, 2 * b), clear));
+  // (centred on the surface, on screen only: the near halves show, the far halves stay hidden by the glass in front)
+  const seam = 0.0036, rs = R * Math.cos(b), ys = R * Math.sin(b);
+  const edgeTop = onlyIn(new THREE.Mesh(new THREE.TorusGeometry(rs, seam, 10, 256), polished(pal)), false);
+  const edgeBottom = onlyIn(new THREE.Mesh(new THREE.TorusGeometry(rs, seam, 10, 256), polished(pal)), false);
+  edgeTop.rotation.x = edgeBottom.rotation.x = Math.PI / 2;
+  edgeTop.position.y = ys;
+  edgeBottom.position.y = -ys;
+  frame.add(edgeTop, edgeBottom);
+  // the seams' far halves, seen only through the glass (quieter, so the band reads as a whole ellipse when it tilts)
+  const far = new THREE.MeshStandardMaterial({ color: mix(pal.onDark, pal.muted, 0.12), metalness: 0, roughness: 0.6 });
+  for (const y of [ys, -ys]) {
+    const t = onlyIn(new THREE.Mesh(new THREE.TorusGeometry(rs * 0.99, seam * 1.5, 8, 256, Math.PI), far.clone()), true);
+    t.rotation.x = Math.PI / 2;
+    t.rotation.z = Math.PI; // the half toward -z, away from the camera at rest
+    t.position.y = y;
+    frame.add(t);
+  }
+  // the core: machined chrome, turning; its grooves' pole sits high on the core, so the rings cross its face as near
+  // level arcs and sway and drift as it turns (the pole itself only passes the top edge, foreshortened)
+  const axis = new THREE.Vector3(0, Math.cos(INTEL.grooves), Math.sin(INTEL.grooves));
+  // (an icosphere: no poles in the mesh, whose thin triangle fans would put teeth in the hairlines)
+  spin.add(new THREE.Mesh(new THREE.IcosahedronGeometry(INTEL.core, 28), machined(pal, axis)));
+
+  // the chrome ball outside (D79), still, on screen only (if the glass saw it, its transmission would smear it beside
+  // it, D75)
+  const ball = onlyIn(new THREE.Mesh(new THREE.SphereGeometry(INTEL.ball, 64, 48), cleanEdge(polished(pal), mix(pal.ink, pal.surface2, 0.45))), false);
+  ball.position.set(...INTEL_BALL);
+  scene.add(ball);
+
+  return view(scene, camera, (p) => {
+    const f = intelFrame(p.lean);
+    outer.rotation.z = f.roll;
+    frame.rotation.x = f.pitch;
+    spin.rotation.y = intelSpin(p.t);
+  });
+}
+
+// The kit, for the identity options' scenes (D80, lab): the shared studio, materials and render loop, so every option
+// is lit and made like the three stations on the rail. Read-only for the options; the stations above don't use it.
+export type { Pal };
+export const kit = { palette, mix, getEngine, backdrop, studio, frosted, polished, polishedDark, greenBall, onlyIn, softShadow, machined, veiled, cleanEdge, view };

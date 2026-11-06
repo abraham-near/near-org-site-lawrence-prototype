@@ -186,8 +186,8 @@ function frost(pal: Pal, nTex: THREE.Texture, top: boolean): Core {
 // equal people in an even outline (a ring for the head, the shoulders' outline tucking in under it, a flat foot), one
 // in front and two behind it, higher and to either side, whose lines break with a clear gap where the front one passes
 // in front of them. Stroked into the mask, so it etches into the core exactly as the N did. Units: the front figure's
-// head centre is at (0, -0.285), the group spans about ±1.28 by ±1; set about the N's size and clear of the four
-// ticks round it.
+// head centre is at (0, -0.285), the group spans about ±1.28 by ±1; set a third larger than the N (Lawrence: "make the
+// people larger on the disc"), the four ticks round it moved out to clear them (layer.scene.ts).
 function person(g: CanvasRenderingContext2D, dx: number, dy: number) {
   const head = new Path2D(), body = new Path2D();
   head.arc(dx, dy - 0.285, 0.405, 0, Math.PI * 2);
@@ -210,7 +210,7 @@ function markTexture() {
   const g = c.getContext("2d")!;
   g.fillStyle = "black";
   g.fillRect(0, 0, 1024, 1024);
-  g.setTransform(272, 0, 0, 272, 512, 512 + 272 * 0.03);
+  g.setTransform(365, 0, 0, 365, 512, 512 + 365 * 0.03);
   g.lineJoin = g.lineCap = "round";
   const line = 0.1, gap = 0.09;
   // the two behind

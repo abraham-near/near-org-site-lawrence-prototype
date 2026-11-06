@@ -219,7 +219,7 @@ export function layerVectors({ own, yaw, t }: LayerPose): Record<string, Attrs> 
   // (as in B2), and on two of them a fine dot drifting slowly in and out
   const ki = S.inner, y = S.h + 0.004;
   [0, 90, 180, 270].forEach((deg, i) => {
-    const A = polar(0.42, deg, y), B = polar(0.53, deg, y);
+    const A = polar(0.6, deg, y), B = polar(0.7, deg, y); // D97: out from 0.42–0.53, clear of the larger people
     out[`il${i}`] = { d: ki > 0 ? seg2(at(A), at(B)) : "", opacity: (ki * 0.85).toFixed(3) };
     if (i > 1) return;
     const period = 7.5 + i * 1.7, s = (((t / period + i * 0.5) % 1) + 1) % 1;

@@ -2,13 +2,17 @@
    The world is a track several screens wide that slides left; everything on it is placed at --x (vw) on one line. */
 
 .stage { --rail-y: 64%; }
+/* D97: one size for the rail's three statements (the opening lines, the problem, the answer): 0.8 of h1 (64 px at
+   desktop widths), less on short screens so the problem's three lines still end above the drawing on the line */
+.stage { --say: min(calc(var(--text-h1) * 0.8), 7.2vh); }
 .world { position: absolute; top: 0; left: 0; height: 100%; width: var(--end); will-change: transform; }
 
 .rail { position: absolute; left: 0; right: 0; top: var(--rail-y); height: 1px; background: var(--color-line-strong); }
 .green { position: absolute; top: calc(var(--rail-y) - 1px); height: 2px; background: var(--color-green); }
+/* D100: the green is the reader's progress: from the left edge to the middle of the screen (the playhead's box), never
+   past it. greenL draws in from AI and then rides with the box (StoryRailMotion cancels the world's travel on it) */
 .greenL { left: 0; width: 50vw; }
 .greenR { left: 50vw; width: 50vw; }
-.greenOn { left: var(--x); width: calc(var(--end) - var(--x)); }
 /* The two sides, at h3 so they read as the story's two ends (D38) */
 .end { position: absolute; left: var(--x); top: calc(var(--rail-y) + var(--space-5)); font-size: var(--text-h3); font-weight: 500; line-height: 1.1; letter-spacing: var(--tracking-h3); white-space: nowrap; }
 .end em { font-style: normal; font-weight: 400; color: var(--color-muted); margin-left: var(--space-3); }
@@ -19,13 +23,13 @@
 .hubMark { display: block; width: 92%; height: auto; } /* D70: the N about half the tile (icon.svg has its own padding) */
 
 /* The problem, then the answer in the same place, centred over the drawing on the line and the stations after it (D38);
-   each wipes on word by word */
+   D97: each rises on line by line and lifts off the same way, like the opening lines */
 .problem, .answer { position: absolute; left: 0; right: 0; top: 10%; margin: 0 auto; text-align: center; font-weight: 500; }
-/* h2, smaller on short screens so its three lines end above the drawing on the line */
-.problem { width: min(860px, 62vw); font-size: min(var(--text-h2), 5.2vh); line-height: 1.12; letter-spacing: var(--tracking-h2); text-wrap-style: balance; }
-.answer { font-size: calc(var(--text-h1) * 0.86); line-height: 1.05; letter-spacing: var(--tracking-h1); white-space: nowrap; }
+/* D97: the shared size (--say); the problem's column wide enough for three balanced lines at it */
+.problem { width: min(1240px, 86vw); font-size: var(--say); line-height: 1.06; letter-spacing: var(--tracking-h1); text-wrap-style: balance; }
+.answer { font-size: var(--say); line-height: 1.05; letter-spacing: var(--tracking-h1); white-space: nowrap; }
 .owned { color: var(--color-green-text); }
-.pw { display: inline-block; opacity: 0.14; white-space: pre; }
+.pw { display: inline-block; white-space: pre; }
 
 /* Stations: centred on their --x, the drawing above the line, the words below */
 .station { position: absolute; left: var(--x); top: 0; bottom: 0; width: 0; }
@@ -47,7 +51,7 @@
 .line { position: absolute; left: 0; top: calc(var(--rail-y) + var(--space-6) + var(--space-2) + 1.5 * var(--text-h2)); width: 34ch; margin: 0; transform: translateX(-50%); text-align: center; }
 
 /* Fixed on the stage */
-.connect { position: absolute; left: var(--inset); top: 14%; font-size: var(--text-h1); font-weight: 500; line-height: 1.05; letter-spacing: var(--tracking-h1); }
+.connect { position: absolute; left: var(--inset); top: 14%; font-size: var(--say); font-weight: 500; line-height: 1.05; letter-spacing: var(--tracking-h1); }
 .cline { margin: 0; white-space: nowrap; }
 .clineIn { display: inline-block; }
 

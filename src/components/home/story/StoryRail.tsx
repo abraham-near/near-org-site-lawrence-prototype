@@ -47,7 +47,6 @@ export function StoryRail({ look = "plain", art = "line" }: { look?: RailLook; a
             <span className={styles.rail} />
             <span className={`${styles.green} ${styles.greenL}`} data-s="greenL" />
             <span className={`${styles.green} ${styles.greenR}`} data-s="greenR" />
-            <span className={`${styles.green} ${styles.greenOn}`} style={{ "--x": "100vw" } as React.CSSProperties} data-s="greenOn" />
             <span className={styles.end} style={{ "--x": "5vw" } as React.CSSProperties} data-s="end">AI <em>the frontend</em></span>
             <span className={`${styles.end} ${styles.endR}`} style={{ "--x": "95vw" } as React.CSSProperties} data-s="end">Blockchain <em>the backend</em></span>
             {/* Where the two sides meet: NEAR's tile on the line (the official black N on green) */}

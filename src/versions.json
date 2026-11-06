@@ -20,6 +20,17 @@
   },
   "versions": [
     {
+      "commit": "a4a1a5a",
+      "date": "2026-11-06T09:38:35-05:00",
+      "direction": "b",
+      "title": "Rail: one type size, line-by-line motion, the green as progress",
+      "summary": [
+        "The rail's three statements are one size, and every block of words rises on and lifts off line by line; the opening lines rise as the section locks. After the meeting the green line always runs from the left edge to the middle of the black box. The people on the disc are larger, and Go deeper's scroll bar can be dragged."
+      ],
+      "decisions": ["D97", "D98", "D99", "D100"],
+      "home": "home"
+    },
+    {
       "commit": "f0e032f",
       "date": "2026-11-06T08:10:18-05:00",
       "direction": "b",

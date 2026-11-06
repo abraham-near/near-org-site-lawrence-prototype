@@ -173,9 +173,18 @@
   /* The scroll bar (D96, Lawrence: "I want this to have a scroll bar visible on the right edge of the scroll box"): a
      hairline track just outside the window's right edge, and an ink thumb as tall as the rows in view, moving with them */
   :global(html[data-js]) .bar[data-on] { display: block; }
-  :global(html[data-js]) .bar { position: absolute; z-index: 3; top: 0; bottom: 0; right: calc(var(--space-4) * -1); width: 3px; }
-  :global(html[data-js]) .bar::before { content: ""; position: absolute; top: 0; bottom: 0; left: 1px; width: 1px; background: var(--hair); }
-  :global(html[data-js]) .thumb2 { position: absolute; top: 0; left: 0; width: 3px; border-radius: 2px; background: var(--color-ink); will-change: transform; }
+  /* D98: draggable. The bar is a 17 px wide hit area centred on the 1 px track (the thumb 3 px, 5 px under the pointer) */
+  :global(html[data-js]) .bar {
+    position: absolute; z-index: 3; top: 0; bottom: 0; right: calc(var(--space-4) * -1 - 7px); width: 17px;
+    cursor: pointer; touch-action: none; user-select: none;
+  }
+  :global(html[data-js]) .bar::before { content: ""; position: absolute; top: 0; bottom: 0; left: 8px; width: 1px; background: var(--hair); }
+  :global(html[data-js]) .thumb2 {
+    position: absolute; top: 0; left: 7px; width: 3px; border-radius: 3px; background: var(--color-ink); will-change: transform;
+    cursor: grab; transition: width var(--dur-1) var(--ease-out), left var(--dur-1) var(--ease-out);
+  }
+  :global(html[data-js]) .bar:hover .thumb2, :global(html[data-js]) .bar[data-drag] .thumb2 { left: 6px; width: 5px; }
+  :global(html[data-js]) .bar[data-drag], :global(html[data-js]) .bar[data-drag] .thumb2 { cursor: grabbing; }
   :global(html[data-js]) .win::before, :global(html[data-js]) .win::after {
     content: ""; position: absolute; left: 0; right: 0; z-index: 2; height: 1px; background: var(--hair); pointer-events: none;
   }

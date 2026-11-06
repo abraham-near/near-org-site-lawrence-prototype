@@ -145,7 +145,39 @@ export function DeeperView({ active, onSelect }: { active: DeeperFilter; onSelec
         requestAnimationFrame(() => { window.scrollTo({ top: y, behavior: "instant" }); tl.progress(s / k); render(s / k); });
       };
       panel.addEventListener("focusin", onFocus);
+      // D98 (Lawrence: "this scroll bar should be draggable"): the page scroll moves the list, so dragging the thumb
+      // scrolls the page to the matching point (the rows and the thumb follow, through the same scrub); a press on the
+      // track jumps the thumb's middle to it and drags from there
+      let grab = 0;
+      const toPointer = (e: PointerEvent) => {
+        if (!bar || !thumb) return;
+        const r = bar.getBoundingClientRect(), th = thumb.offsetHeight, room = r.height - th;
+        const x = room > 0 ? clamp((e.clientY - r.top - grab) / room, 0, 1) : 0;
+        window.scrollTo({ top: st.start + x * (st.end - st.start), behavior: "instant" });
+      };
+      const onMove = (e: PointerEvent) => toPointer(e);
+      const onUp = (e: PointerEvent) => {
+        bar?.releasePointerCapture(e.pointerId);
+        bar?.removeAttribute("data-drag");
+        bar?.removeEventListener("pointermove", onMove);
+        bar?.removeEventListener("pointerup", onUp);
+        bar?.removeEventListener("pointercancel", onUp);
+      };
+      const onDown = (e: PointerEvent) => {
+        if (!bar || !thumb || e.button !== 0) return;
+        e.preventDefault();
+        const t = thumb.getBoundingClientRect();
+        grab = e.clientY >= t.top && e.clientY <= t.bottom ? e.clientY - t.top : t.height / 2;
+        bar.setPointerCapture(e.pointerId);
+        bar.setAttribute("data-drag", "");
+        bar.addEventListener("pointermove", onMove);
+        bar.addEventListener("pointerup", onUp);
+        bar.addEventListener("pointercancel", onUp);
+        toPointer(e);
+      };
+      bar?.addEventListener("pointerdown", onDown);
       return () => {
+        bar?.removeEventListener("pointerdown", onDown);
         panel.removeEventListener("focusin", onFocus);
         st.kill(); tIn.kill(); tl.kill();
         list.style.transform = "";

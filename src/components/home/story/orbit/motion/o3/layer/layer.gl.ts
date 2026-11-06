@@ -120,7 +120,9 @@ function clear(pal: Pal, R: number, H: number): Clear {
 // falls across the face from the key light's side (upper left, at the back)
 type Core = { mat: THREE.MeshPhysicalMaterial; set: (green: number, mark: number) => void };
 function frost(pal: Pal, nTex: THREE.Texture, top: boolean): Core {
-  const neutral = pal.onDark.clone();
+  // D101 (Lawrence: "I want the middle disc to be tinted darker"): the neutral frost (someone else's layer) is a
+  // darker grey; the green it turns is unchanged
+  const neutral = mix(pal.onDark, pal.ink, 0.2);
   const green = mix(pal.green, pal.ink, 0.22);
   const m = new THREE.MeshPhysicalMaterial({
     color: neutral.clone(), metalness: 0, roughness: 0.4, transmission: 1, thickness: 0.3, ior: 1.4,
@@ -129,7 +131,7 @@ function frost(pal: Pal, nTex: THREE.Texture, top: boolean): Core {
   });
   const u = {
     uN: { value: nTex }, uMark: { value: 0 }, uGreen: { value: 0 },
-    uGlow: { value: mix(pal.onDark, pal.surface2, 0.15) }, uMilk: { value: mix(pal.onDark, mix(pal.green, pal.ink, 0.15), 0.45) },
+    uGlow: { value: mix(pal.onDark, pal.surface2, 0.15) }, uGrey: { value: mix(mix(pal.onDark, pal.surface2, 0.15), pal.ink, 0.24) }, uMilk: { value: mix(pal.onDark, mix(pal.green, pal.ink, 0.15), 0.45) },
     uDeep: { value: mix(mix(pal.green, pal.ink, 0.6), pal.surface2, 0.1) }, uHi: { value: pal.onDark.clone() },
   };
   m.onBeforeCompile = (sh) => {
@@ -138,7 +140,7 @@ function frost(pal: Pal, nTex: THREE.Texture, top: boolean): Core {
       .replace("#include <common>", "#include <common>\nvarying vec3 vLoc;")
       .replace("#include <begin_vertex>", "#include <begin_vertex>\nvLoc = position;");
     sh.fragmentShader = sh.fragmentShader
-      .replace("#include <common>", "#include <common>\nvarying vec3 vLoc;\nuniform sampler2D uN;\nuniform float uMark;\nuniform float uGreen;\nuniform vec3 uGlow;\nuniform vec3 uMilk;\nuniform vec3 uDeep;\nuniform vec3 uHi;")
+      .replace("#include <common>", "#include <common>\nvarying vec3 vLoc;\nuniform sampler2D uN;\nuniform float uMark;\nuniform float uGreen;\nuniform vec3 uGlow;\nuniform vec3 uGrey;\nuniform vec3 uMilk;\nuniform vec3 uDeep;\nuniform vec3 uHi;")
       .replace("#include <opaque_fragment>", `{
         float rr = length(vLoc.xz);
         float sheen = 0.5 + 0.5 * dot(vLoc.xz, normalize(vec2(-0.6, -0.8)));
@@ -147,7 +149,7 @@ function frost(pal: Pal, nTex: THREE.Texture, top: boolean): Core {
         float band = smoothstep(0.74, 0.93, rr) * (1.0 - smoothstep(0.95, 0.985, rr));
         float edge = smoothstep(0.965, 0.995, rr);
         float milk = mix(0.62, 0.5, uGreen) * (1.0 - band) * (0.8 + 0.3 * sheen);
-        outgoingLight = mix(outgoingLight, mix(uGlow, uMilk, uGreen), milk);
+        outgoingLight = mix(outgoingLight, mix(uGrey, uMilk, uGreen), milk);
         outgoingLight *= 1.0 - 0.05 * band * uGreen;
         outgoingLight += uGlow * (edge * mix(0.3, 0.45, uGreen) + 0.06 * sheen);
         // the mark (the people): a shallow incised line. Inside it the glass is a touch deeper and clearer; along its walls a bright
@@ -162,18 +164,18 @@ function frost(pal: Pal, nTex: THREE.Texture, top: boolean): Core {
         outgoingLight += uHi * max(-e, 0.0) * 0.55 * uMark;
         outgoingLight *= 1.0 - max(e, 0.0) * 0.35 * uMark;` : `
         // the wall: the glass's thickness, where the colour is densest; a little milk and a glow at its upper lip
-        outgoingLight = mix(outgoingLight, uGlow, 0.55 * (1.0 - uGreen));
+        outgoingLight = mix(outgoingLight, uGrey, 0.55 * (1.0 - uGreen));
         outgoingLight *= mix(0.84, 1.0, smoothstep(0.0, 1.0, vLoc.y));
         outgoingLight += uGlow * smoothstep(0.85, 1.0, vLoc.y) * 0.18;`}
       }
       #include <opaque_fragment>`);
   };
-  m.customProgramCacheKey = () => `layer-frost-${top ? "top" : "side"}-7`;
+  m.customProgramCacheKey = () => `layer-frost-${top ? "top" : "side"}-8`;
   return {
     mat: m,
     set(g, mark) {
       m.color.copy(neutral).lerp(green, g);
-      m.attenuationColor.copy(pal.onDark).lerp(green, g);
+      m.attenuationColor.copy(neutral).lerp(green, g);
       m.specularIntensity = 0.8 - 0.25 * g;
       u.uGreen.value = g;
       u.uMark.value = mark;

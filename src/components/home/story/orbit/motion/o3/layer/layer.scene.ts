@@ -33,7 +33,8 @@ export const LAYER = {
   token: { r: 0.19, h: 0.066, at: [100, 160, 220, 280, 340, 40] as const }, // degrees; 90 is the back
   tokenIn: 0.81, // where the tokens draw in to
   core: { r0: 0.4, r1: 1.11, h0: 0.15, h1: 0.22 },
-  dial: { r: 1.98, span: 110, period: 90 }, // the graduated sectors outside the plate, in its foot's plane
+  // the graduated sectors outside the plate, in its foot's plane; D101: `out` further out while the drawing arrives
+  dial: { r: 1.98, span: 110, period: 90, out: 0.7 },
   ride: { ring: 84, square: 120 }, // the markers on the track (seconds a lap)
   enter: { yaw: rad(48), still: 0.05, full: 0.45 }, // the arrival turn
   breath: 8,
@@ -159,17 +160,21 @@ export function layerVectors({ own, yaw, t }: LayerPose): Record<string, Attrs> 
   [0, 90, 180, 270].forEach((d, i) => { out[`cross${i}`] = { transform: xf(at(polar(P.R - 0.2, d, LIFT))) }; });
 
   // two graduated sectors outside the plate, opposite each other, turning once every 90 s (carried rigidly)
+  // D101 (Lawrence: "Have the graphic arcs on the outside of the base disc be farther away from the base when it
+  // animates on and they settle to their current position when it lands in the middle of the frame"): their radius
+  // follows the arrival turn (its spring), out by `out` while the drawing is still turning in, home as it lands
   const D = LAYER.dial, c0 = 200 + (360 * t) / D.period;
+  const away = clamp(Math.abs(yaw) / LAYER.enter.yaw), dr = D.r + D.out * away * away * (3 - 2 * away);
   let dArc = "", dTicks = "";
   // (in the plane of the plate's foot, so on screen they pass clear below its front edge, and left out wherever the
   // plate covers them at the back)
   const foot = -P.depth;
   for (const base of [c0, c0 + 180]) {
-    dArc += path((u) => polar(D.r, base - D.span / 2 + u * D.span, foot), 60, W, seen);
+    dArc += path((u) => polar(dr, base - D.span / 2 + u * D.span, foot), 60, W, seen);
     const n = D.span / 2.5;
     for (let i = 0; i <= n; i++) {
-      const deg = base - D.span / 2 + i * 2.5, r1 = D.r + (i === 0 || i === n ? 0.13 : i % 6 === 0 ? 0.075 : 0.04);
-      const p0 = polar(D.r, deg, foot), p1 = polar(r1, deg, foot);
+      const deg = base - D.span / 2 + i * 2.5, r1 = dr + (i === 0 || i === n ? 0.13 : i % 6 === 0 ? 0.075 : 0.04);
+      const p0 = polar(dr, deg, foot), p1 = polar(r1, deg, foot);
       if (seen(p0) && seen(p1)) dTicks += seg2(at(p0), at(p1));
     }
   }

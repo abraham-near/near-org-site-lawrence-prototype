@@ -20,6 +20,17 @@
   },
   "versions": [
     {
+      "commit": "8e7c7fb",
+      "date": "2026-11-06T09:44:16-05:00",
+      "direction": "b",
+      "title": "Layer: darker core, arcs settle in",
+      "summary": [
+        "In the layer moment the centre disc is a darker grey while the layer is someone else's, and the graduated arcs outside the base start further out as the drawing slides in, settling into place as it lands."
+      ],
+      "decisions": ["D101"],
+      "home": "home"
+    },
+    {
       "commit": "a4a1a5a",
       "date": "2026-11-06T09:38:35-05:00",
       "direction": "b",

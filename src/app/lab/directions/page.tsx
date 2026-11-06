@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { LabSwitch } from "@/components/home/story/LabSwitch";
-import { ILLUSTRATIONS, VERSIONS, illoThumb } from "./data";
+import { HERO_VERSIONS, ILLUSTRATIONS, VERSIONS, heroRoute, heroThumb, illoThumb } from "./data";
 import { DIR_SWITCH } from "./switch";
 import { Picker } from "./Picker";
 import styles from "./directions.module.css";
@@ -34,6 +34,27 @@ export default function Directions() {
           </li>
         ))}
       </ul>
+
+      <section className={styles.heroes} aria-labelledby="hero-versions">
+        <h2 id="hero-versions" className="t-h3">Hero versions</h2>
+        <p className={styles.lede}>
+          The five opening heroes the homepage picks from at random. Each opens the whole homepage with that hero only: scroll
+          through it to run the camera move and its tracked graphics.
+        </p>
+        <ul className={styles.heroList}>
+          {HERO_VERSIONS.map((h) => (
+            <li key={h.key} className={styles.hero}>
+              <Link className={styles.thumb} href={heroRoute(h.key)} prefetch={false}>
+                {/* eslint-disable-next-line @next/next/no-img-element -- static lab thumbnails, sized by CSS */}
+                <img src={heroThumb(h.key)} alt={`${h.name}: the homepage's opening view`} loading="lazy" />
+              </Link>
+              <p className="t-h4">{h.name}</p>
+              <p className={styles.versionNote}>{h.note}</p>
+              <p className={styles.open}><Link href={heroRoute(h.key)} prefetch={false}>Open the page<span className="sr-only">: {h.name}</span></Link></p>
+            </li>
+          ))}
+        </ul>
+      </section>
 
       <section aria-labelledby="by-section">
         <h2 id="by-section" className="t-h3">Section by section</h2>

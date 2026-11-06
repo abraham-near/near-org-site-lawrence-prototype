@@ -40,7 +40,7 @@ export default function HeroLive() {
               </div>
               <p className={styles.links}>
                 <a href={`/${home(k)}`}>On the homepage</a>
-                {k !== "original" && <Link href={reviewHref(k)} prefetch={false}>Review page</Link>}
+                <Link href={reviewHref(k)} prefetch={false}>Review page</Link>
               </p>
             </li>
           );

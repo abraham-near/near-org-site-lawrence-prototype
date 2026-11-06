@@ -20,6 +20,20 @@
   },
   "versions": [
     {
+      "commit": "9d196c1",
+      "date": "2026-11-06T07:13:21-05:00",
+      "direction": "b",
+      "title": "Hero versions on the contact sheet",
+      "summary": [
+        "The contact sheet shows the five hero versions, each with a thumbnail of its opening view. Each opens the whole homepage with that hero only, to show them one at a time; the homepage itself still picks one at random."
+      ],
+      "decisions": ["D94"],
+      "home": "home",
+      "options": [
+        { "label": "Hero versions (contact sheet)", "path": "lab/directions#hero-versions" }
+      ]
+    },
+    {
       "commit": "71df0cd",
       "date": "2026-11-06T06:58:52-05:00",
       "direction": "b",

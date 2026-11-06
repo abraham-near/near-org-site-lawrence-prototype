@@ -50,3 +50,9 @@
 .illo { display: grid; align-content: start; gap: var(--space-2); }
 .illo .thumb { aspect-ratio: 4 / 3; margin-bottom: var(--space-2); }
 .status { font-size: var(--text-caption); font-weight: 500; color: var(--color-ink); }
+
+/* The hero versions (D94) */
+.heroes { margin-bottom: var(--space-10); border-top: 1px solid var(--color-line-strong); padding-top: var(--space-6); }
+.heroList { margin-top: var(--space-6); display: grid; gap: var(--space-7) var(--space-6); grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr)); list-style: none; padding: 0; }
+.hero { display: grid; align-content: start; gap: var(--space-2); }
+.hero .thumb { aspect-ratio: 16 / 10; margin-bottom: var(--space-2); }

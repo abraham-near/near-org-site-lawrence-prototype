@@ -69,3 +69,16 @@ export const ILLUSTRATIONS: { key: string; name: string; href: string; note: str
   { key: "flat", name: "Round one: eight flat styles", href: "/lab/own-styles", status: "Earlier round", note: "Fine line, Survey, Stipple, Plexus, Frosted, Window, Axonometric, Construction." },
 ];
 export const illoThumb = (key: string) => `/lab/directions/illo-${key}.webp`;
+
+// The five hero versions (D90–D93, D94), each its own full page with that hero only (one video loads), and a thumbnail
+// of its opening view at 1440 (the first frame with its tracked layer). Routes are joined from parts: a whole
+// "/lab/hero…" string would be prefixed twice in the frozen copies (scripts/build-versions.sh and basePath).
+export const HERO_VERSIONS: { key: string; name: string; note: string }[] = [
+  { key: "original", name: "Ridges (original)", note: "Take j's pull-back down misty forest ridges, with the tracked plexus and dust over it." },
+  { key: "clouds", name: "Above the clouds", note: "A forested summit over a sea of cloud; the camera comes down and closer while the clouds roll round the ridges." },
+  { key: "unfurl", name: "Unfurl", note: "A fern crozier with dew; the camera moves down the stem while the coil opens a little and the dew slides." },
+  { key: "dune", name: "Dune", note: "A dune crest at first light; the camera cranes down while the light moves like a time-lapse and sand blows off the crest." },
+  { key: "gate", name: "The gate", note: "A chrome ring and frosted disc with a green sphere on a misty slope; the camera cranes down as the reflections slide." },
+];
+export const heroRoute = (key: string) => "/lab/" + "hero-live-" + key;
+export const heroThumb = (key: string) => `/lab/directions/hero-${key}.webp`;

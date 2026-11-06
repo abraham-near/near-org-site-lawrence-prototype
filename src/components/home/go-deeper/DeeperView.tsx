@@ -7,7 +7,6 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { FILTERS, LOGOS, TYPE_LABEL, lead, type DeeperFilter, type DeeperItem } from "./content";
-import { halftone, type Halftone } from "./halftone";
 import styles from "./GoDeeper.module.css";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
@@ -26,7 +25,6 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
 const isFilter = (v: string | null): v is DeeperFilter => FILTERS.some((f) => f.key === v);
 const WIN = "(min-width: 1280px) and (prefers-reduced-motion: no-preference)";
 const FLOW = "(max-width: 1279px) and (prefers-reduced-motion: no-preference)";
-const MOTION = "(prefers-reduced-motion: no-preference)";
 const SCRUB = 0.6; // DESIGN §4: about 0.6 s of scrub smoothing
 const clamp = (v: number, a: number, b: number) => (v < a ? a : v > b ? b : v);
 const smooth = (t: number) => { t = clamp(t, 0, 1); return t * t * (3 - 2 * t); };
@@ -99,6 +97,7 @@ export function DeeperView({ active, onSelect }: { active: DeeperFilter; onSelec
       seen.current = null;
     }
     const list = panel.querySelector<HTMLElement>("[data-list]");
+    const bar = panel.querySelector<HTMLElement>("[data-bar]"), thumb = bar?.firstElementChild as HTMLElement | null;
     const items = [...panel.querySelectorAll<HTMLElement>("[data-row]")];
     const setK = (row: HTMLElement, v: number) => {
       row.style.setProperty("--k", smooth(v * 1.6).toFixed(3));
@@ -106,17 +105,8 @@ export function DeeperView({ active, onSelect }: { active: DeeperFilter; onSelec
     };
     const mm = gsap.matchMedia();
 
-    // The lead photo's halftone: scrubbed as it comes into view; replayed when a filter switches it in
-    mm.add(MOTION, () => {
-      const media = panel.querySelector<HTMLElement>("[data-media]"), img = media?.querySelector("img");
-      if (!media || !img) return;
-      el.setAttribute("data-ht", "");
-      const ht: Halftone = halftone(media, img);
-      const st = ScrollTrigger.create({ trigger: media, start: "clamp(top 92%)", end: "clamp(top 38%)", onUpdate: (s) => ht.set(s.progress), onRefresh: (s) => { ht.resize(); ht.set(s.progress); } });
-      ht.set(st.progress);
-      if (switched) ht.replay();
-      return () => { st.kill(); ht.destroy(); el.removeAttribute("data-ht"); };
-    });
+    // D96: no halftone on the lead photo any more (Lawrence: "remove this pixel effect when the image appears"); it
+    // fades in as it loads, like the thumbnails
 
     // Desktop: the windowed list, moved by the page scroll while the section holds
     mm.add(WIN, () => {
@@ -130,6 +120,13 @@ export function DeeperView({ active, onSelect }: { active: DeeperFilter; onSelec
         cur = e;
         const rowh = (list.parentElement?.clientHeight ?? 0) / N();
         list.style.transform = `translate3d(0, ${(-e * rowh).toFixed(2)}px, 0)`;
+        // D96: the scroll bar on the window's right edge: the thumb is the share of rows in view, at the rows shown
+        if (thumb) {
+          const all = items.length, H = list.parentElement?.clientHeight ?? 0;
+          thumb.style.height = `${((Math.min(N(), all) / all) * H).toFixed(1)}px`;
+          thumb.style.transform = `translate3d(0, ${((e / all) * H).toFixed(2)}px, 0)`;
+          bar?.toggleAttribute("data-on", n > 0);
+        }
       };
       const state = { x: 0 };
       const tl = gsap.timeline({ paused: true }).fromTo(state, { x: 0 }, { x: 1, duration: 1, ease: "none", immediateRender: false, onUpdate: () => render(state.x) });
@@ -152,6 +149,7 @@ export function DeeperView({ active, onSelect }: { active: DeeperFilter; onSelec
         panel.removeEventListener("focusin", onFocus);
         st.kill(); tIn.kill(); tl.kill();
         list.style.transform = "";
+        bar?.removeAttribute("data-on");
         items.forEach((row) => { row.style.removeProperty("--k"); row.style.removeProperty("--kt"); });
       };
     });
@@ -213,9 +211,13 @@ function Panel({ filter, label, active, near }: { filter: DeeperFilter; label: s
       {first && <Featured item={first} show={active} eager={filter === "all"} />}
       <div className={styles.win}>
         {rest.length > 0 ? (
-          <ol className={styles.list} data-list aria-label={`More in ${label}`}>
-            {rest.map((it, i) => <Row key={it.id} item={it} n={i + 2} show={active && near} />)}
-          </ol>
+          <>
+            <ol className={styles.list} data-list aria-label={`More in ${label}`}>
+              {rest.map((it, i) => <Row key={it.id} item={it} n={i + 2} show={active && near} />)}
+            </ol>
+            {/* D96: a scroll bar on the window's right edge (desktop with motion, where the list moves in the window) */}
+            <span className={styles.bar} data-bar aria-hidden="true"><span className={styles.thumb2} /></span>
+          </>
         ) : (
           <p className={styles.empty}>That&rsquo;s everything in {label} for now.</p>
         )}

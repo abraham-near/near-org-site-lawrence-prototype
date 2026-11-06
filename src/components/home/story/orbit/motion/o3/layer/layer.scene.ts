@@ -17,9 +17,9 @@ import { add, CAM_POS, clamp, project, px, rad, rotX, rotY, seg2, smooth, xf, ty
 //   pairs of fine lines from the core to each token, arrowheads at their ends, small dots and squares travelling out
 //   and in along them (only the markers travel; no light runs along a line).
 // - towards 1: the tokens draw in; the core grows out over them, wider and thicker, and its frost turns NEAR green as it
-//   grows; a low polished chrome bezel rises round its foot; the official N (icon.svg's path, unaltered) etches into its top
+//   grows; a low polished chrome bezel rises round its foot; three people (D95; it was the official N) etch into its top
 //   face. The tokens inside are blurred by the frost itself (three's transmission), "hidden". The plate stays.
-// - 1: the transactions carry on quietly, as four short ticks round the N inside the green disc.
+// - 1: the transactions carry on quietly, as four short ticks round the people inside the green disc.
 //
 // At rest, on the time (as the stations, D76–D82): a pair of graduated sectors outside the plate turn once every 90 s;
 // a ring and a square ride the dotted track (84 s, 120 s the other way); the horizon's ticks breathe (8 s); the
@@ -44,7 +44,7 @@ const smoother = (u: number) => { const x = clamp(u); return x * x * x * (x * (6
 const lerp = (a: number, b: number, k: number) => a + (b - a) * k;
 
 // The change, as a function of the chased progress: each part on its own stretch, so the tokens draw in first, the core
-// passes over them (between about 0.4 and 0.58), and the green, the collar and the N arrive as it settles
+// passes over them (between about 0.4 and 0.58), and the green, the collar and the people arrive as it settles
 export function shapeOf(own: number) {
   const tok = smoother(own / 0.6);
   const grow = smoother((own - 0.12) / 0.62);
@@ -215,7 +215,7 @@ export function layerVectors({ own, yaw, t }: LayerPose): Record<string, Attrs> 
     });
   });
 
-  // Inside the green disc, once it is the user's, the transactions carry on quietly: four short ticks round the N
+  // Inside the green disc, once it is the user's, the transactions carry on quietly: four short ticks round the people
   // (as in B2), and on two of them a fine dot drifting slowly in and out
   const ki = S.inner, y = S.h + 0.004;
   [0, 90, 180, 270].forEach((deg, i) => {

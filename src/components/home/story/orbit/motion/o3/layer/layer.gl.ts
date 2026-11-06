@@ -113,8 +113,8 @@ function clear(pal: Pal, R: number, H: number): Clear {
   return { mat: m, deckInv };
 }
 
-// The core's frost: neutral milky glass that turns NEAR green, with the official N etched into its top face (a mask
-// rendered from icon.svg's own path, `mark`). Green, it reads as frosted glass rather than paint: the face is pale and
+// The core's frost: neutral milky glass that turns NEAR green, with three people etched into its top face (D95; it
+// was the official N; a mask, `mark`). Green, it reads as frosted glass rather than paint: the face is pale and
 // milky (B2's lightness) in the stations' deeper blue-green hue; the saturated green sits in the thickness, the walls
 // and a denser band inside the rim; at the very edge a fine bright line where light pipes to the rim; a soft sheen
 // falls across the face from the key light's side (upper left, at the back)
@@ -150,7 +150,7 @@ function frost(pal: Pal, nTex: THREE.Texture, top: boolean): Core {
         outgoingLight = mix(outgoingLight, mix(uGlow, uMilk, uGreen), milk);
         outgoingLight *= 1.0 - 0.05 * band * uGreen;
         outgoingLight += uGlow * (edge * mix(0.3, 0.45, uGreen) + 0.06 * sheen);
-        // the N: a shallow incised mark. Inside it the glass is a touch deeper and clearer; along its walls a bright
+        // the mark (the people): a shallow incised line. Inside it the glass is a touch deeper and clearer; along its walls a bright
         // edge on the side away from the light and a dark one toward it
         vec2 uv = vec2(vLoc.x, -vLoc.z) / 0.98 + 0.5;
         vec2 px = vec2(1.0 / 1024.0);
@@ -181,27 +181,53 @@ function frost(pal: Pal, nTex: THREE.Texture, top: boolean): Core {
   };
 }
 
-// The official N (assets/brand/icon.svg, served as /brand/icon.svg), its path read from the file and filled unaltered
-// into a mask; until it arrives the mask is empty (the N only shows late in the change)
+// D95: users, not NEAR's N ("I want to use a user image on the green disc so it doesn't look like it's NEAR owned";
+// then "make this icon closer to the reference image I showed that had 3 people"). After Lawrence's reference: three
+// equal people in an even outline (a ring for the head, the shoulders' outline tucking in under it, a flat foot), one
+// in front and two behind it, higher and to either side, whose lines break with a clear gap where the front one passes
+// in front of them. Stroked into the mask, so it etches into the core exactly as the N did. Units: the front figure's
+// head centre is at (0, -0.285), the group spans about ±1.28 by ±1; set about the N's size and clear of the four
+// ticks round it.
+function person(g: CanvasRenderingContext2D, dx: number, dy: number) {
+  const head = new Path2D(), body = new Path2D();
+  head.arc(dx, dy - 0.285, 0.405, 0, Math.PI * 2);
+  const w = 0.7, r = 0.11, foot = 0.935;
+  body.moveTo(dx - 0.1, dy + 0.13);
+  body.bezierCurveTo(dx - 0.3, dy + 0.2, dx - 0.5, dy + 0.25, dx - 0.6, dy + 0.34);
+  body.bezierCurveTo(dx - 0.67, dy + 0.41, dx - w, dy + 0.48, dx - w, dy + 0.58);
+  body.lineTo(dx - w, dy + foot - r);
+  body.quadraticCurveTo(dx - w, dy + foot, dx - w + r, dy + foot);
+  body.lineTo(dx + w - r, dy + foot);
+  body.quadraticCurveTo(dx + w, dy + foot, dx + w, dy + foot - r);
+  body.lineTo(dx + w, dy + 0.58);
+  body.bezierCurveTo(dx + w, dy + 0.48, dx + 0.67, dy + 0.41, dx + 0.6, dy + 0.34);
+  body.bezierCurveTo(dx + 0.5, dy + 0.25, dx + 0.3, dy + 0.2, dx + 0.1, dy + 0.13);
+  return { head, body };
+}
 function markTexture() {
   const c = document.createElement("canvas");
   c.width = c.height = 1024;
   const g = c.getContext("2d")!;
   g.fillStyle = "black";
   g.fillRect(0, 0, 1024, 1024);
+  g.setTransform(272, 0, 0, 272, 512, 512 + 272 * 0.03);
+  g.lineJoin = g.lineCap = "round";
+  const line = 0.1, gap = 0.09;
+  // the two behind
+  g.strokeStyle = "white";
+  g.lineWidth = line;
+  for (const dx of [-0.53, 0.53]) { const p = person(g, dx, -0.27); g.stroke(p.head); g.stroke(p.body); }
+  // the front one: first clear a gap round it (its silhouette filled, its outline widened), then draw it
+  const f = person(g, 0, 0);
+  g.fillStyle = g.strokeStyle = "black";
+  g.fill(f.head); g.fill(f.body);
+  g.lineWidth = line + 2 * gap;
+  g.stroke(f.head); g.stroke(f.body);
+  g.strokeStyle = "white";
+  g.lineWidth = line;
+  g.stroke(f.head); g.stroke(f.body);
   const tex = new THREE.CanvasTexture(c);
   tex.anisotropy = 4;
-  fetch("/brand/icon.svg").then((r) => r.text()).then((svg) => {
-    const doc = new DOMParser().parseFromString(svg, "image/svg+xml");
-    const box = doc.documentElement.getAttribute("viewBox")?.split(/\s+/).map(Number) ?? [0, 0, 639, 639];
-    g.save();
-    g.scale(1024 / box[2], 1024 / box[3]);
-    g.translate(-box[0], -box[1]);
-    g.fillStyle = "white";
-    doc.querySelectorAll("path").forEach((p) => g.fill(new Path2D(p.getAttribute("d") ?? "")));
-    g.restore();
-    tex.needsUpdate = true;
-  }).catch(() => {});
   return tex;
 }
 
@@ -313,7 +339,7 @@ export function layerView(tokens: Tokens): View<LayerPose> {
     return g;
   });
 
-  // the core: a unit cylinder scaled to its radius and height each frame; frosted side and top (the top carries the N),
+  // the core: a unit cylinder scaled to its radius and height each frame; frosted side and top (the top carries the people),
   // no bottom (it sits on the plate)
   const nTex = markTexture();
   const side = frost(pal, nTex, false), top = frost(pal, nTex, true);

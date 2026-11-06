@@ -24,11 +24,13 @@ export function addLook(look: RailLook, { tl, root, world, gateX, steps }: Ctx):
 
   if (look === "horizon") {
     const finder = q("finder")!, playhead = q("playhead")!;
-    // A slow camera pull-back across the whole rail; the playhead marks the reader's place once the stations begin (before
-    // that NEAR's tile and then the layer drawing hold the centre, and it would sit on them); corners lock onto each
-    // station as it reaches the centre
+    // A slow camera pull-back across the whole rail; corners lock onto each station as it reaches the centre.
+    // D95, the playhead: the reader's place on the line from the moment NEAR's tile lands between AI and blockchain
+    // (it grows out round the tile just after it). The tiles stay on the line and leave with it; the box holds the
+    // centre, so it travels on, empty, to the layer, where a tile lands in it as the disc turns green (StoryRailMotion),
+    // and on to each station, whose tile lands in it in turn. Every tile is the same size, and so is the box.
     tl.fromTo(q("plate"), { scale: 1.08 }, { scale: 1, duration: 100, ease: "none" }, 0)
-      .fromTo(playhead, { autoAlpha: 0 }, { autoAlpha: 1, duration: 3, immediateRender: false }, 57);
+      .fromTo(playhead, { autoAlpha: 0, scale: 48 / 56 }, { autoAlpha: 1, scale: 1, duration: 2.5, ease: "power3.out", immediateRender: false }, 8.5);
     steps.forEach((at, i) => {
       tl.fromTo(finder, { autoAlpha: 0, scale: 1.14 }, { autoAlpha: 1, scale: 1, duration: 3, ease: "power3.out", immediateRender: false }, at - 2.5);
       if (i < steps.length - 1) tl.to(finder, { autoAlpha: 0, duration: 2, ease: "power1.in" }, steps[i + 1] - 6);

@@ -20,6 +20,28 @@
   },
   "versions": [
     {
+      "commit": "f0e032f",
+      "date": "2026-11-06T08:10:18-05:00",
+      "direction": "b",
+      "title": "Three people on the disc; Go deeper scroll bar; lines rise in",
+      "summary": [
+        "The layer's green disc carries three people, after the reference, instead of a single user. Go deeper's list shows a scroll bar on its right edge and its lead photo appears without the halftone dots. The rail's opening three lines rise into place as the section scrolls in."
+      ],
+      "decisions": ["D95", "D96"],
+      "home": "home"
+    },
+    {
+      "commit": "72c0126",
+      "date": "2026-11-06T08:04:39-05:00",
+      "direction": "b",
+      "title": "Layer: a user on the disc, the playhead from the start",
+      "summary": [
+        "The green disc in the layer moment carries a user instead of NEAR's N, so the layer reads as yours. The black box on the line now appears around NEAR's tile where AI and blockchain meet and marks your place from there: the tiles stay on the line, a new one lands in the box as the disc turns green, and every tile and the box are one size throughout."
+      ],
+      "decisions": ["D95"],
+      "home": "home"
+    },
+    {
       "commit": "9d196c1",
       "date": "2026-11-06T07:13:21-05:00",
       "direction": "b",

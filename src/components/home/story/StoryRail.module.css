@@ -36,16 +36,20 @@
 .artSlot[data-large] { width: min(420px, calc((54vh - 126px) * 4 / 3)); }
 .gateSlot { left: var(--x); bottom: calc(100% - var(--rail-y) + var(--space-3)); }
 .art { width: 100%; }
-/* The station marker (D57, D69): a small green tile matching the hub (32 px, corner a quarter of its side) carrying the
+/* The station marker (D57, D69): a green tile matching the hub (D95: now its size, 48 px) carrying the
    official black N (icon.svg, unaltered) at the hub's size (D70: 92%); the playhead's square outline lands around it */
-.dot { position: absolute; left: 0; top: var(--rail-y); width: var(--space-6); height: var(--space-6); margin: calc(var(--space-6) / -2) 0 0 calc(var(--space-6) / -2); display: grid; place-items: center; border-radius: var(--radius-md); background: var(--color-green); }
+/* D95: the same size as NEAR's tile (48 px, was 32), so every tile in the playhead's box is the same; the words below
+   move down by the 8 px the tile grew under the line, keeping their gap */
+.dot { position: absolute; left: 0; top: var(--rail-y); width: var(--space-7); height: var(--space-7); margin: calc(var(--space-7) / -2) 0 0 calc(var(--space-7) / -2); display: grid; place-items: center; border-radius: calc(var(--radius-md) + var(--space-1)); background: var(--color-green); }
+
 .dotMark { display: block; width: 92%; height: auto; }
-.title { position: absolute; left: 0; top: calc(var(--rail-y) + var(--space-6)); width: 40rem; margin: 0; transform: translateX(-50%); text-align: center; font-size: var(--text-h2); font-weight: 500; line-height: 1.1; letter-spacing: var(--tracking-h2); }
-.line { position: absolute; left: 0; top: calc(var(--rail-y) + var(--space-6) + 1.5 * var(--text-h2)); width: 34ch; margin: 0; transform: translateX(-50%); text-align: center; }
+.title { position: absolute; left: 0; top: calc(var(--rail-y) + var(--space-6) + var(--space-2)); width: 40rem; margin: 0; transform: translateX(-50%); text-align: center; font-size: var(--text-h2); font-weight: 500; line-height: 1.1; letter-spacing: var(--tracking-h2); }
+.line { position: absolute; left: 0; top: calc(var(--rail-y) + var(--space-6) + var(--space-2) + 1.5 * var(--text-h2)); width: 34ch; margin: 0; transform: translateX(-50%); text-align: center; }
 
 /* Fixed on the stage */
 .connect { position: absolute; left: var(--inset); top: 14%; font-size: var(--text-h1); font-weight: 500; line-height: 1.05; letter-spacing: var(--tracking-h1); }
 .cline { margin: 0; white-space: nowrap; }
+.clineIn { display: inline-block; }
 
 /* Looks (D32) */
 /* Drafting: each drawing sits in a dashed frame on a dotted leader down to its dot; both belong to the drawing, so they

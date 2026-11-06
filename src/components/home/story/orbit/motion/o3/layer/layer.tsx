@@ -17,7 +17,7 @@ import { LAYER, layerPose, layerVectors, type LayerPose, type Spring } from "./l
 // the answer never flashes up and resets as the layer slides in (D56).
 export const name = "Glass tokens";
 export const note =
-  "Your data as six clear glass tokens round a frosted core on a brushed chrome plate, with transactions running between them; as the layer becomes the user's, the tokens draw in, the core grows over them, turns NEAR green and takes the N, and the data inside is blurred out of sight.";
+  "Your data as six clear glass tokens round a frosted core on a brushed chrome plate, with transactions running between them; as the layer becomes the user's, the tokens draw in, the core grows over them, turns NEAR green and takes three people etched into it, and the data inside is blurred out of sight.";
 
 const REST = { answer: layerVectors(layerPose(0, 0, 1)), problem: layerVectors(layerPose(0, 0, 0)) };
 const STILL = { answer: "layer", problem: "layer-problem" };

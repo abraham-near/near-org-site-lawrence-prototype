@@ -103,9 +103,6 @@
 .media { position: relative; aspect-ratio: 16 / 10; overflow: hidden; background: var(--color-surface-2); } /* square-cornered (DESIGN §3) */
 .img { object-fit: cover; transition: transform var(--dur-4) var(--ease-settle), opacity var(--dur-3) var(--ease-out); }
 :global(html[data-js]) .img:not([data-loaded]) { opacity: 0; }
-/* The halftone (motion only): the photo waits under its dots until they merge, then the canvas clears */
-.track[data-ht] .media:not([data-done]) .img { opacity: 0; transition: none; }
-.media canvas { position: absolute; inset: 0; z-index: 1; width: 100%; height: 100%; pointer-events: none; }
 @media (hover: hover) and (pointer: fine) { .feat:hover .img { transform: scale(1.03); } }
 .featText { min-width: 0; padding-top: var(--space-4); }
 .featTitle {
@@ -137,6 +134,7 @@
 @media (hover: hover) and (pointer: fine) { .row:hover::before { transform: none; } }
 .row:has(.stretch:focus-visible)::before { transform: none; }
 .rowTitle { margin: var(--space-2) 0 0; font-size: var(--text-h4); font-weight: 400; line-height: 1.2; text-wrap: balance; }
+.bar { display: none; }
 .thumb { position: relative; width: 96px; aspect-ratio: 16 / 10; overflow: hidden; background: var(--color-surface-2); }
 /* Below desktop only the first two rows carry a picture */
 @media (max-width: 1279px) { .row:nth-child(n + 3) .thumb { display: none; } }
@@ -170,7 +168,14 @@
   /* the lead's photo and text sit on the two rows, so its text and "View everything" share a line */
   :global(html[data-js]) .feat { display: grid; grid-template-rows: subgrid; }
   /* Clipped top and bottom only, so a row's focus ring may sit just outside the column */
-  :global(html[data-js]) .win { position: relative; height: var(--imgh); clip-path: inset(0 calc(var(--space-2) * -1)); }
+  /* D96: clipped a little wider on the right, for the scroll bar */
+  :global(html[data-js]) .win { position: relative; height: var(--imgh); clip-path: inset(0 calc(var(--space-6) * -1) 0 calc(var(--space-2) * -1)); }
+  /* The scroll bar (D96, Lawrence: "I want this to have a scroll bar visible on the right edge of the scroll box"): a
+     hairline track just outside the window's right edge, and an ink thumb as tall as the rows in view, moving with them */
+  :global(html[data-js]) .bar[data-on] { display: block; }
+  :global(html[data-js]) .bar { position: absolute; z-index: 3; top: 0; bottom: 0; right: calc(var(--space-4) * -1); width: 3px; }
+  :global(html[data-js]) .bar::before { content: ""; position: absolute; top: 0; bottom: 0; left: 1px; width: 1px; background: var(--hair); }
+  :global(html[data-js]) .thumb2 { position: absolute; top: 0; left: 0; width: 3px; border-radius: 2px; background: var(--color-ink); will-change: transform; }
   :global(html[data-js]) .win::before, :global(html[data-js]) .win::after {
     content: ""; position: absolute; left: 0; right: 0; z-index: 2; height: 1px; background: var(--hair); pointer-events: none;
   }

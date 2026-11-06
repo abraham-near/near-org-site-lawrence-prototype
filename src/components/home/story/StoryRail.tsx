@@ -55,6 +55,11 @@ export function StoryRail({ look = "plain", art = "line" }: { look?: RailLook; a
               <Image src="/brand/icon.svg" alt="" width={639} height={639} className={styles.hubMark} unoptimized />
             </span>
 
+            {/* D95: at the layer, NEAR's tile again, landing on the line (in the playhead's box) as the disc turns green */}
+            <span className={styles.hub} style={{ "--x": `${RAIL.gate}vw` } as React.CSSProperties} data-s="gateTile">
+              <Image src="/brand/icon.svg" alt="" width={639} height={639} className={styles.hubMark} unoptimized />
+            </span>
+
             {/* The layer beneath your agents, on the line: someone else's while the problem is read, the user's with the
                 answer (D86: real-time 3D, the rail's timeline drives its change through --own) */}
             <div className={`${styles.artSlot} ${styles.gateSlot}`} style={{ "--x": `${RAIL.gate}vw` } as React.CSSProperties} data-own-stage data-large>
@@ -77,8 +82,9 @@ export function StoryRail({ look = "plain", art = "line" }: { look?: RailLook; a
 
           {/* Fixed on the stage: the three lines; then the problem, and the answer in its place, which stays */}
           <div className={styles.connect}>
-            {CONNECT.map((s, i) => <p key={s} className={styles.cline} data-s={`c${i}`}>{s}</p>)}
-            <p className={styles.cline} data-s="c2">{MEET.near}{MEET.rest}</p>
+            {/* D96: each line rises into place as the section scrolls in (the inner span; the line itself leaves later) */}
+            {CONNECT.map((s, i) => <p key={s} className={styles.cline} data-s={`c${i}`}><span className={styles.clineIn} data-s="cin">{s}</span></p>)}
+            <p className={styles.cline} data-s="c2"><span className={styles.clineIn} data-s="cin">{MEET.near}{MEET.rest}</span></p>
           </div>
           <p className={styles.problem} data-s="problem">{words(PROBLEM)}</p>
           <p className={styles.answer} data-s="answer">

@@ -24,8 +24,12 @@
 /* Both centred on 50vw, not 50%: the track brings each station to the middle of the window (vw, scrollbar included), and
    with a visible scrollbar 50% sits half its width to the left (D57). The playhead is a square outline 8 px wider than
    the station tile (StoryRail.module.css), its corner concentric with the tile's, so it lands around it with an even
-   4 px gap (D69). */
-.playhead { position: absolute; left: 50vw; top: var(--rail-y); width: calc(var(--space-6) + var(--space-2)); height: calc(var(--space-6) + var(--space-2)); margin: calc((var(--space-6) + var(--space-2)) / -2) 0 0 calc((var(--space-6) + var(--space-2)) / -2); border: 1px solid var(--color-ink); border-radius: calc(var(--radius-md) + var(--space-1)); opacity: 0; }
+   4 px gap (D69). D95: every tile on the rail is NEAR's tile's size (48 px), so the box is 56 px throughout. */
+.playhead {
+  --ph: calc(var(--space-7) + var(--space-2));
+  position: absolute; left: 50vw; top: var(--rail-y); width: var(--ph); height: var(--ph); margin: calc(var(--ph) / -2) 0 0 calc(var(--ph) / -2);
+  border: 1px solid var(--color-ink); border-radius: calc(var(--radius-md) + var(--space-2)); opacity: 0;
+}
 .finder { position: absolute; left: 50vw; top: calc(var(--rail-y) - var(--space-6) - 240px - 20px); width: 360px; height: 280px; margin-left: -180px; opacity: 0; }
 /* With Orbit's larger drawings (D56) the corners frame the 420 × 315 slot (StoryRail.module.css), 20 px outside it */
 :global([data-art-kind^="orbit"]) > .finder {

@@ -36,7 +36,7 @@ export function StoryRailMotion({ gate, stations, end, look }: { gate: number; s
       gsap.set(q("greenL"), { transformOrigin: "0% 50%" });
       gsap.set(q("greenR"), { transformOrigin: "100% 50%" });
       gsap.set(q("greenOn"), { transformOrigin: "0% 50%" });
-      gsap.set([q("hub"), ...dots], { scale: 0 });
+      gsap.set([q("hub"), q("gateTile"), ...dots], { scale: 0 });
       gsap.set(qa("end"), { autoAlpha: 0 });
       gsap.set(problem, { autoAlpha: 0 });
       gsap.set(aWords, { autoAlpha: 0, y: "0.3em" });
@@ -46,6 +46,14 @@ export function StoryRailMotion({ gate, stations, end, look }: { gate: number; s
       const pics = stops.map((st) => st.querySelector<HTMLElement>("[data-art]")!);
       gsap.set(pics, { autoAlpha: 0 });
       gsap.set(words.flat(), { autoAlpha: 0 });
+
+      // 0. D96 (Lawrence: "I want this type to animate up into position and not just be there when it scrolls in"): the
+      //    three lines rise into place one after another as the section comes up the screen, scrubbed, landing before
+      //    it pins (their inner spans, so the main timeline's exit on the lines themselves is untouched)
+      gsap.fromTo(qa("cin"), { yPercent: 70, autoAlpha: 0 }, {
+        yPercent: 0, autoAlpha: 1, ease: "power3.out", stagger: 0.18, duration: 1,
+        scrollTrigger: { trigger: root, start: "top 85%", end: "top 15%", scrub: 0.6 },
+      });
 
       const tl = gsap.timeline({ defaults: { ease: "power2.inOut" }, scrollTrigger: { trigger: root, start: "top top", end: "bottom bottom", scrub: 0.6, invalidateOnRefresh: true } });
       // 1. The two sides appear and the line draws in from both into NEAR's tile, under the three lines
@@ -66,7 +74,9 @@ export function StoryRailMotion({ gate, stations, end, look }: { gate: number; s
         //    spring, so the scrub itself runs straight; from-to, so the problem holds before it. It starts as the
         //    problem starts leaving and lands, with the N, as "user-owned." finishes)
         .fromTo(near, { "--own": 0 }, { "--own": 1, duration: 8, ease: "none" }, 40)
-        .to(q("greenOn"), { scaleX: reach(gate + 20), duration: 6, ease: "power2.out" }, 46);
+        .to(q("greenOn"), { scaleX: reach(gate + 20), duration: 6, ease: "power2.out" }, 46)
+        //    (D95: NEAR's tile lands on the line under the layer as its disc turns green; it leaves with the line)
+        .to(q("gateTile"), { scale: 1, duration: 2, ease: "back.out(1.6)" }, 45.5);
       // 4. Station by station: the world moves on, the green runs ahead to the station, its dot lands and its drawing plays
       const STEPS = [62, 72, 82, 92];
       STEPS.forEach((at, i) => {

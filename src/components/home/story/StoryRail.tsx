@@ -18,10 +18,16 @@ import styles from "./StoryRail.module.css";
 // layer becomes the user's, and the line runs on green to four stations, one for each thing you own: the drawing above the line, the words
 // below; only the station being read shows (its neighbours are dots on the line). The answer stays at the top
 // throughout. Positions on the track are in vw (StoryRail.module.css: --x on each element). `look` adds a cinematic
-// layer (D32, RailLooks.tsx).
+// layer (D32, RailLooks.tsx). At the end the line hands over to the Stack: it lifts off as the nearest layer, the
+// Stack's dark hanging under it, and rises over the world behind (StoryRailMotion).
 const words = (s: string) => s.split(" ").map((w, i) => <span key={i} className={styles.pw}>{w} </span>);
 
 export const RAIL = { gate: 150, stations: [235, 290, 345, 400], end: 470 };
+// The hand-over to the Stack (StoryRailMotion): the extra scroll, in vh, added to the 620vh the story itself runs on. The
+// line rises from 64% of the screen to its top: the first 12vh of scroll ease it up to the page's speed (covering 6vh of
+// the rise), the other 58vh carry it the rest of the way at that speed (64 + 6). Stack.module.css overlaps the Stack's
+// band with the track's end (keep the two together).
+export const HANDOVER = 70;
 
 // `art` picks the "Own your" drawings: today's line drawings (D18) or Orbit's rendered chrome and glass (D56), which
 // take a larger 420 × 315 slot
@@ -39,12 +45,12 @@ export function StoryRail({ look = "plain", art = "line" }: { look?: RailLook; a
   return (
     <section className={base.story} aria-labelledby="story-title" data-story="rail">
       <StoryStatic titleId="story-title" art={art} />
-      <div className={base.track} style={{ "--story-h": "620vh" } as React.CSSProperties} aria-hidden="true">
+      <div className={base.track} style={{ "--story-h": `${620 + HANDOVER}vh` } as React.CSSProperties} aria-hidden="true">
         <div className={`${base.stage} ${styles.stage}`} data-s="stage" data-look={look} data-art-kind={art}>
           <RailBack look={look} />
           <div className={styles.world} style={{ "--end": `${RAIL.end}vw` } as React.CSSProperties} data-s="world">
             <RailDetail look={look} gate={RAIL.gate} stations={RAIL.stations} />
-            <span className={styles.rail} />
+            <span className={styles.rail} data-s="rail" />
             <span className={`${styles.green} ${styles.greenL}`} data-s="greenL" />
             <span className={`${styles.green} ${styles.greenR}`} data-s="greenR" />
             <span className={styles.end} style={{ "--x": "5vw" } as React.CSSProperties} data-s="end">AI <em>the frontend</em></span>
@@ -64,6 +70,10 @@ export function StoryRail({ look = "plain", art = "line" }: { look?: RailLook; a
             <div className={`${styles.artSlot} ${styles.gateSlot}`} style={{ "--x": `${RAIL.gate}vw` } as React.CSSProperties} data-own-stage data-large>
               <LayerArt from="problem" className={styles.art} data-s="near" />
             </div>
+
+            {/* The hand-over (StoryRailMotion): the Stack's dark, hung from the line under the last station; it drops to
+                the foot of the screen and rises with the line over everything behind it */}
+            <span className={styles.curtain} style={{ "--x": `${RAIL.stations[RAIL.stations.length - 1]}vw` } as React.CSSProperties} data-s="curtain" />
 
             {OWN.map((o, i) => (
               <div key={o.key} className={styles.station} style={{ "--x": `${RAIL.stations[i]}vw` } as React.CSSProperties} data-s="station">
@@ -92,7 +102,7 @@ export function StoryRail({ look = "plain", art = "line" }: { look?: RailLook; a
           <RailOver look={look} />
         </div>
       </div>
-      <StoryRailMotion gate={RAIL.gate} stations={RAIL.stations} end={RAIL.end} look={look} />
+      <StoryRailMotion gate={RAIL.gate} stations={RAIL.stations} end={RAIL.end} handover={HANDOVER} look={look} />
       <OwnReplay />
     </section>
   );

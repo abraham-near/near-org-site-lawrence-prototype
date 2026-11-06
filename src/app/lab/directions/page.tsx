@@ -38,22 +38,27 @@ export default function Directions() {
       <section className={styles.heroes} aria-labelledby="hero-versions">
         <h2 id="hero-versions" className="t-h3">Hero versions</h2>
         <p className={styles.lede}>
-          The five opening heroes the homepage picks from at random. Each opens the whole homepage with that hero only: scroll
-          through it to run the camera move and its tracked graphics.
+          The six ring heroes the homepage picks from at random, then the earlier versions (no longer picked). Each opens
+          the whole homepage with that hero only: scroll through it to run the camera move and its tracked graphics.
         </p>
-        <ul className={styles.heroList}>
-          {HERO_VERSIONS.map((h) => (
-            <li key={h.key} className={styles.hero}>
-              <Link className={styles.thumb} href={heroRoute(h.key)} prefetch={false}>
-                {/* eslint-disable-next-line @next/next/no-img-element -- static lab thumbnails, sized by CSS */}
-                <img src={heroThumb(h.key)} alt={`${h.name}: the homepage's opening view`} loading="lazy" />
-              </Link>
-              <p className="t-h4">{h.name}</p>
-              <p className={styles.versionNote}>{h.note}</p>
-              <p className={styles.open}><Link href={heroRoute(h.key)} prefetch={false}>Open the page<span className="sr-only">: {h.name}</span></Link></p>
-            </li>
-          ))}
-        </ul>
+        {[true, false].map((onHome) => (
+          <div key={String(onHome)}>
+            <h3 className={`t-h4 ${styles.heroGroup}`}>{onHome ? "On the homepage, at random" : "Earlier versions"}</h3>
+            <ul className={styles.heroList}>
+              {HERO_VERSIONS.filter((h) => h.home === onHome).map((h) => (
+                <li key={h.key} className={styles.hero}>
+                  <Link className={styles.thumb} href={heroRoute(h)} prefetch={false}>
+                    {/* eslint-disable-next-line @next/next/no-img-element -- static lab thumbnails, sized by CSS */}
+                    <img src={heroThumb(h.key)} alt={`${h.name}: the homepage's opening view`} loading="lazy" />
+                  </Link>
+                  <p className="t-h4">{h.name}</p>
+                  <p className={styles.versionNote}>{h.note}</p>
+                  <p className={styles.open}><Link href={heroRoute(h)} prefetch={false}>Open the page<span className="sr-only">: {h.name}</span></Link></p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
       </section>
 
       <section aria-labelledby="by-section">

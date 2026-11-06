@@ -1,0 +1,45 @@
+/* The ring options contact sheet (lab). Tokens only; follows lab/directions and lab/hero-live. */
+.page { padding-block: calc(var(--space-10) + var(--space-6)) calc(var(--section-pad-y) + var(--space-9)); }
+.intro { max-width: 60rem; margin-bottom: var(--space-8); }
+.intro p { margin-top: var(--space-5); max-width: var(--measure); }
+.lede { margin-top: var(--space-3); max-width: var(--measure); color: var(--color-muted); }
+.note { margin-top: var(--space-2); font-size: var(--text-small); line-height: 1.5; color: var(--color-muted); }
+.open { margin-top: var(--space-3); font-size: var(--text-small); }
+.open a { color: var(--color-ink); text-decoration: underline; text-underline-offset: 4px; }
+
+.thumb {
+  display: block; aspect-ratio: 16 / 10; overflow: hidden; border-radius: var(--radius-sm);
+  background: var(--color-surface-2); outline: 1px solid var(--color-line); outline-offset: -1px;
+}
+.thumb img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.thumb:focus-visible { outline: 2px solid var(--color-green); outline-offset: 2px; }
+
+/* The gate, for reference */
+.reference { display: grid; gap: var(--space-5) var(--space-7); align-items: center; border-top: 1px solid var(--color-line-strong); padding-top: var(--space-6); }
+@media (min-width: 1024px) { .reference { grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); } }
+.referenceText { max-width: var(--measure); }
+.referenceText h2 { margin-top: var(--space-2); }
+.kicker { font-size: var(--text-caption); font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-green-text); }
+
+/* The eight options */
+.grid { margin-top: var(--space-9); display: grid; gap: var(--space-8) var(--space-6); list-style: none; padding: 0; border-top: 1px solid var(--color-line-strong); padding-top: var(--space-6); }
+@media (min-width: 768px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1024px) { .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.card { display: grid; align-content: start; gap: var(--space-2); }
+.card .thumb { margin-bottom: var(--space-2); }
+.card[data-chosen] .thumb { outline: 2px solid var(--color-green); outline-offset: 2px; }
+.choice {
+  margin-top: var(--space-3); display: flex; align-items: center; gap: var(--space-2); width: fit-content;
+  font-size: var(--text-small); font-weight: 500; cursor: pointer;
+}
+.choice input { width: 18px; height: 18px; accent-color: var(--color-green-text); cursor: pointer; }
+
+.summary { margin-top: var(--space-9); padding: var(--space-7); border-radius: var(--radius-lg); background: var(--color-surface-2); }
+.summaryText {
+  margin-top: var(--space-5); padding: var(--space-5); border-radius: var(--radius-md); background: var(--color-surface);
+  font-family: var(--font-mono); font-size: var(--text-small); line-height: 1.6; white-space: pre-wrap; color: var(--color-ink);
+}
+.actions { margin-top: var(--space-5); display: flex; flex-wrap: wrap; gap: var(--space-4); align-items: center; }
+.actions button:disabled { opacity: 0.5; cursor: not-allowed; }
+.reset { font-size: var(--text-small); color: var(--color-ink); text-decoration: underline; text-underline-offset: 4px; background: none; border: 0; cursor: pointer; }
+.reset:focus-visible { outline: 2px solid var(--color-green); outline-offset: 2px; }

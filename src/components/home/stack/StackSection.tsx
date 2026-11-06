@@ -3,6 +3,8 @@ import { StackInteractions } from "./StackInteractions";
 import { StackLayers } from "./StackLayers";
 import styles from "./Stack.module.css";
 
+const words = (s: string) => s.split(" ").map((w, i) => <span key={i} className={styles.w}>{w} </span>);
+
 // Section 2 (spec/pages/home.md §2, D7, D14, D17, D18, D38): an ink band. The heading, then three columns: the four
 // layers as a numbered list (core first), the selected layer's detail, and the isometric Stack on the right (the
 // Protocol pillar inside the Intents, NEAR AI and near.com frames), centred on the heading and the columns together. On
@@ -12,21 +14,22 @@ import styles from "./Stack.module.css";
 export function StackSection() {
   return (
     <section className={styles.band} aria-labelledby="stack-title" data-stack data-tone="dark" data-active-layer="protocol">
-      <span className={styles.handoff} aria-hidden="true" />
+      <span className={styles.handoff} aria-hidden="true" data-stack-thread />
       <div className={styles.inner}>
         <div className={styles.grid}>
           <div className={styles.track} data-track>
             <div className={styles.pin} data-pin>
-              <span className={styles.pinLine} aria-hidden="true" />
+              <span className={styles.pinLine} aria-hidden="true" data-stack-thread />
               {/* Inside the pin (D38), so the section's title stays on screen while the layers build */}
               <header className={styles.head}>
+                {/* Word by word (.w), so after the rail each line can rise into place as the section arrives (StoryRailMotion) */}
                 <h2 id="stack-title" className="t-h2">
-                  Four layers. One <span className="accent">system.</span>
+                  {words("Four layers. One")}<span className={styles.w}><span className="accent">system.</span></span>
                 </h2>
-                <p className="t-lede">Each layer does one job, and together they keep your world in your&nbsp;hands.</p>
+                <p className="t-lede">{words("Each layer does one job, and together they keep your world in your\u00a0hands.")}</p>
               </header>
               <div className={styles.cols}>
-                <div className={styles.art}><StackDrawing /></div>
+                <div className={styles.art} data-stack-art><StackDrawing /></div>
                 <StackLayers />
               </div>
             </div>

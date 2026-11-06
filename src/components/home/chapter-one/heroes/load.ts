@@ -8,4 +8,9 @@ export const LOAD: Record<HeroKey, () => Promise<HeroVariant>> = {
   unfurl: () => import("./unfurl").then((m) => m.hero),
   dune: () => import("./dune").then((m) => m.hero),
   gate: () => import("./gate").then((m) => m.hero),
+  cliff: () => import("./ring-options/motion/cliff").then((m) => m.hero),
+  birch: () => import("./ring-options/motion/birch").then((m) => m.hero),
+  blacksand: () => import("./ring-options/motion/blacksand").then((m) => m.hero),
+  mesa: () => import("./ring-options/motion/mesa").then((m) => m.hero),
+  lake: () => import("./ring-options/motion/lake").then((m) => m.hero),
 };

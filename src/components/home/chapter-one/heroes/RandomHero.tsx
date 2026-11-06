@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { HeroVideo } from "../HeroVideo";
 import { choose, type PosterSet } from "./choose";
 import { LOAD } from "./load";
+import { RANDOM_KEYS } from "./pool";
 import type { HeroKey, HeroVariant } from "./types";
 
 // The homepage's hero version, once picked (D90). RandomPoster's inline script has already chosen it and shown its
@@ -18,12 +19,12 @@ export function RandomHero({ posters }: { posters: PosterSet }) {
   useEffect(() => {
     const img = anchor.current?.closest("[data-ch='media']")?.querySelector<HTMLImageElement>("img[data-hero-poster]");
     if (!img) return;
-    const key = (img.getAttribute("data-hero") ?? choose(posters, img)) as HeroKey;
+    const key = (img.getAttribute("data-hero") ?? choose(posters, img, RANDOM_KEYS)) as HeroKey;
     // html[data-hero] keys each version's crop (ChapterOne) and thread (ChapterOneMotion); set again on every mount,
     // since this effect's cleanup (a navigation away, or React's development double mount) clears it
     document.documentElement.setAttribute("data-hero", key);
     let live = true;
-    (LOAD[key] ?? LOAD.original)().then((h) => { if (live) setHero(h); });
+    (LOAD[key] ?? LOAD.gate)().then((h) => { if (live) setHero(h); });
     return () => {
       live = false;
       document.documentElement.removeAttribute("data-hero");

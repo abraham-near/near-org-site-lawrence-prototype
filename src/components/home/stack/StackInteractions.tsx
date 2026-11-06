@@ -53,12 +53,18 @@ export function StackInteractions() {
     const place = () => {
       if (!line) return;
       const b = root.getBoundingClientRect(), p = pin.getBoundingClientRect(), t = line.getBoundingClientRect();
-      const x = t.left + t.width / 2;
+      // After the rail the drawing rises and grows into place (StoryRailMotion: y, and scale about its top centre), so
+      // measure it as it will rest: undo that move on the points read from it
+      const art = svg.parentElement!, a = art.getBoundingClientRect();
+      const dy = Number(gsap.getProperty(art, "y")) || 0, k = Number(gsap.getProperty(art, "scale")) || 1;
+      const ox = a.left + a.width / 2, oy = a.top - dy;
+      const rest = { x: (sx: number) => ox + (sx - ox) / k, y: (sy: number) => oy + (sy - dy - oy) / k };
+      const x = rest.x(t.left + t.width / 2);
       root.style.setProperty("--handoff-x", `${x - b.left}px`);
       root.style.setProperty("--handoff-h", `${Math.max(0, track.getBoundingClientRect().top - b.top)}px`);
       pin.style.setProperty("--pin-x", `${x - p.left}px`);
       // The drawing's thread starts at the drawing's top edge (it may lift with the pillar, so measure the edge)
-      pin.style.setProperty("--pin-h", `${Math.max(0, svg.getBoundingClientRect().top - p.top)}px`);
+      pin.style.setProperty("--pin-h", `${Math.max(0, rest.y(svg.getBoundingClientRect().top) - p.top)}px`);
     };
     place();
     const ro = new ResizeObserver(place);

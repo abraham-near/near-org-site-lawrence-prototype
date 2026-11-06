@@ -14,6 +14,24 @@
 /* Only where Chapter 1 runs its thread (desktop, JS, motion allowed); elsewhere its rule runs down the left. */
 @media (min-width: 1280px) and (prefers-reduced-motion: no-preference) {
   :global(html[data-js]) :is(.handoff, .pinLine) { display: block; }
+  /* After the rail, the band arrives as its hand-over (StoryRail, StoryRailMotion): the rail's line rises with the page
+     over its last 70vh, the band's ink hung from it, and the band itself comes up over the stage 47vh before the track
+     ends, by which time that ink fills the screen below the line (from about 20vh in), so its top edge never shows. It
+     lands at the top of the screen 53vh of scroll after the line. Its content travels ahead of it, close under the
+     line, and settles into place as the band arrives (StoryRailMotion, "the Stack arrives"). */
+  :global(html[data-js]) :global([data-story="rail"]) + .band { margin-top: -47vh; }
+  /* The section's content rises into place ahead of the band itself, over the rail's ink (StoryRailMotion): its words
+     line by line, so they need to take a transform (elsewhere they are plain inline text) */
+  :global(html[data-js]) :global([data-story="rail"]) + .band .w { display: inline-block; white-space: pre; }
+  /* There the band's top edge never shows, so the thread fades in from its top (the topmost piece: the hand-off above
+     the pin, or the pin's own line where the pin sits at the band's top) rather than starting at an edge in the dark */
+  :global(html[data-js]) :global([data-story="rail"]) + .band :is(.handoff, .pinLine) { mask-image: linear-gradient(to bottom, transparent, var(--color-ink) var(--space-10)); }
+}
+@media (min-width: 1280px) and (min-height: 760px) and (prefers-reduced-motion: no-preference) {
+  :global(html[data-js]) :global([data-story="rail"]) + .band .handoff { mask-image: none; }
+}
+@media (min-width: 1280px) and (max-height: 759px) and (prefers-reduced-motion: no-preference) {
+  :global(html[data-js]) :global([data-story="rail"]) + .band .pinLine { mask-image: none; }
 }
 
 /* Layout (D14; the Figma's measurements in D17; pinned in D18): phones and tablets stack the heading, the drawing,
@@ -24,6 +42,8 @@
   --list-w: calc(var(--space-11) + var(--space-6));
   --detail-w: calc(var(--space-11) * 2 + var(--space-6));
 }
+/* The heading's and intro's words (StackSection): inline text, except where they rise into place after the rail */
+.w { white-space: normal; }
 /* The heading sits inside the pin (D38) */
 .head { max-width: none; margin-bottom: var(--space-7); }
 .head h2 { margin: 0; }

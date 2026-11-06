@@ -7,7 +7,7 @@ import { add, CAM_POS, clamp, project, px, rad, rotX, rotY, seg2, smooth, xf, ty
 //
 // The scene, in the plate's own frame (y up from the plate's top face, the plate leaned toward the camera so it reads
 // three-quarter from above):
-// - a thin brushed-chrome plate with a finely ticked rim;
+// - a thin brushed-aluminium plate with a finely ticked rim;
 // - six clear glass data tokens with thin polished chrome rims, a simple glyph etched into each top (dot, square,
 //   triangle, diamond, ring, small rectangle), on a dotted track;
 // - at the centre a thick frosted glass core.
@@ -17,8 +17,8 @@ import { add, CAM_POS, clamp, project, px, rad, rotX, rotY, seg2, smooth, xf, ty
 //   pairs of fine lines from the core to each token, arrowheads at their ends, small dots and squares travelling out
 //   and in along them (only the markers travel; no light runs along a line).
 // - towards 1: the tokens draw in; the core grows out over them, wider and thicker, and its frost turns NEAR green as it
-//   grows; a low polished chrome bezel rises round its foot; three people (D95; it was the official N) etch into its top
-//   face. The tokens inside are blurred by the frost itself (three's transmission), "hidden". The plate stays.
+//   grows; a low polished chrome bezel rises round its foot; three people (D95; it was the official N), a polished
+//   metal inlay, arrive in its top face. The tokens inside are blurred by the frost itself (three's transmission), "hidden". The plate stays.
 // - 1: the transactions carry on quietly, as four short ticks round the people inside the green disc.
 //
 // At rest, on the time (as the stations, D76–D82): a pair of graduated sectors outside the plate turn once every 90 s;

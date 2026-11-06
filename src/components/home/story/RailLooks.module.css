@@ -17,7 +17,9 @@
 .mist { position: absolute; left: var(--x); top: calc(var(--rail-y) - 20vh); width: 90vw; height: 24vh; background: url("/images/home/rail/home-rail-mist-v1.webp") no-repeat center / 100% 100%; opacity: 0.45; }
 
 /* Surveyor's layer on the track: a tick scale under the line; hairlines above it, each with a node on the line */
-.ticks { position: absolute; left: 0; right: 0; top: calc(var(--rail-y) + 4px); height: 6px; background: repeating-linear-gradient(90deg, var(--color-line-strong) 0 1px, transparent 1px 12px); opacity: 0.6; }
+.ticks { position: absolute; left: 0; right: 0; top: calc(var(--rail-y) + 4px); height: 6px; background: repeating-linear-gradient(90deg, var(--color-line-strong) 0 1px, transparent 1px 12px); opacity: 0.6; z-index: 2; }
+/* The hand-over: the scale in the light on the Stack's dark (shown by StoryRailMotion) */
+.ticksDark { background: repeating-linear-gradient(90deg, var(--color-on-dark-muted) 0 1px, transparent 1px 12px); opacity: 0; visibility: hidden; }
 .survey { position: absolute; left: var(--x); top: calc(var(--rail-y) - 26vh); height: 26vh; width: 1px; background: var(--color-line-strong); mask-image: linear-gradient(to bottom, transparent, var(--color-ink) 60%); }
 .node { position: absolute; left: -3px; bottom: -3px; width: 7px; height: 7px; border-radius: 50%; background: var(--color-surface); border: 1px solid var(--color-ink); }
 /* Fixed on the stage: the reader's place on the line, and corners that lock onto the station being read */
@@ -29,7 +31,11 @@
   --ph: calc(var(--space-7) + var(--space-2));
   position: absolute; left: 50vw; top: var(--rail-y); width: var(--ph); height: var(--ph); margin: calc(var(--ph) / -2) 0 0 calc(var(--ph) / -2);
   border: 1px solid var(--color-ink); border-radius: calc(var(--radius-md) + var(--space-2)); opacity: 0;
+  z-index: 2; /* over the world (StoryRail.module.css), so over the Stack's dark in the hand-over */
 }
+/* The hand-over: the box straddles the line, so its lower half sits on the Stack's dark: a light stroke there (the same
+   box, cut at the line by a fixed clip), shown by StoryRailMotion as the dark arrives */
+.playheadDark { position: absolute; inset: -1px; border: 1px solid var(--color-on-dark); border-radius: inherit; clip-path: inset(50% 0 0 0); opacity: 0; visibility: hidden; }
 .finder { position: absolute; left: 50vw; top: calc(var(--rail-y) - var(--space-6) - 240px - 20px); width: 360px; height: 280px; margin-left: -180px; opacity: 0; }
 /* With Orbit's larger drawings (D56) the corners frame the 420 × 315 slot (StoryRail.module.css), 20 px outside it */
 :global([data-art-kind^="orbit"]) > .finder {

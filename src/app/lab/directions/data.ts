@@ -70,15 +70,20 @@ export const ILLUSTRATIONS: { key: string; name: string; href: string; note: str
 ];
 export const illoThumb = (key: string) => `/lab/directions/illo-${key}.webp`;
 
-// The five hero versions (D90–D93, D94), each its own full page with that hero only (one video loads), and a thumbnail
-// of its opening view at 1440 (the first frame with its tracked layer). Routes are joined from parts: a whole
-// "/lab/hero…" string would be prefixed twice in the frozen copies (scripts/build-versions.sh and basePath).
-export const HERO_VERSIONS: { key: string; name: string; note: string }[] = [
-  { key: "original", name: "Ridges (original)", note: "Take j's pull-back down misty forest ridges, with the tracked plexus and dust over it." },
-  { key: "clouds", name: "Above the clouds", note: "A forested summit over a sea of cloud; the camera comes down and closer while the clouds roll round the ridges." },
-  { key: "unfurl", name: "Unfurl", note: "A fern crozier with dew; the camera moves down the stem while the coil opens a little and the dew slides." },
-  { key: "dune", name: "Dune", note: "A dune crest at first light; the camera cranes down while the light moves like a time-lapse and sand blows off the crest." },
-  { key: "gate", name: "The gate", note: "A chrome ring and frosted disc with a green sphere on a misty slope; the camera cranes down as the reflections slide." },
+// The hero versions (D94, D107), each its own full page with that hero only (one video loads), and a thumbnail of its
+// opening view at 1440. `home`: in the homepage's random set (the ring heroes, D107). Routes are joined from parts: a
+// whole "/lab/hero…" string would be prefixed twice in the frozen copies (scripts/build-versions.sh and basePath).
+export const HERO_VERSIONS: { key: string; name: string; note: string; home: boolean; page: string }[] = [
+  { key: "gate", name: "The gate", note: "A chrome ring and frosted disc with a green sphere on a misty slope; the camera cranes down as the reflections slide.", home: true, page: "hero-live-" },
+  { key: "cliff", name: "Sea cliff", note: "The ring on a grassy headland over a misty ocean; the camera cranes down as the sea and cliffs sink behind the grass.", home: true, page: "hero-ring-" },
+  { key: "birch", name: "Birch clearing", note: "The ring in moss and ferns in a misty birch wood; the camera cranes down through the fog among the trunks.", home: true, page: "hero-ring-" },
+  { key: "blacksand", name: "Black sand", note: "The ring on black sand and moss in fog; the camera cranes down and round as the coast sinks behind the slope.", home: true, page: "hero-ring-" },
+  { key: "mesa", name: "Mesa ledge", note: "The ring on a sandstone ledge over a hazy canyon; the camera pushes in and round as the ledge rises.", home: true, page: "hero-ring-" },
+  { key: "lake", name: "Lake shore", note: "The ring on a gravel shore with reeds at a still lake; the camera cranes down as the mist drifts on the water.", home: true, page: "hero-ring-" },
+  { key: "original", name: "Ridges (original)", note: "Take j's pull-back down misty forest ridges, with the tracked plexus and dust over it.", home: false, page: "hero-live-" },
+  { key: "clouds", name: "Above the clouds", note: "A forested summit over a sea of cloud; the camera comes down and closer while the clouds roll round the ridges.", home: false, page: "hero-live-" },
+  { key: "unfurl", name: "Unfurl", note: "A fern crozier with dew; the camera moves down the stem while the coil opens a little and the dew slides.", home: false, page: "hero-live-" },
+  { key: "dune", name: "Dune", note: "A dune crest at first light; the camera cranes down while the light moves like a time-lapse and sand blows off the crest.", home: false, page: "hero-live-" },
 ];
-export const heroRoute = (key: string) => "/lab/" + "hero-live-" + key;
+export const heroRoute = (h: { key: string; page: string }) => "/lab/" + h.page + h.key;
 export const heroThumb = (key: string) => `/lab/directions/hero-${key}.webp`;

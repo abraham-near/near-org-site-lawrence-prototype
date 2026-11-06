@@ -25,6 +25,30 @@ function lines(words: HTMLElement[]) {
   words.forEach((w) => { const k = Math.round(w.offsetTop); rows.set(k, [...(rows.get(k) ?? []), w]); });
   return [...rows.keys()].sort((x, y) => x - y).map((k) => rows.get(k)!);
 }
+// The hand-over (see StoryRailMotion): depth as a share of the line's rise. The line, its green, the tiles, the box and
+// the dark hung from it are nearest (1, so they move with the page); the world's drawing, words and hairlines and the
+// answer behind them a third of that; the ridges and mist, farthest, a seventh. EASE_IN: the vh over which the line
+// gets up to the page's speed (it covers half of it, so the rise is HANDOVER - EASE_IN at full speed).
+const DEPTH = { near: 1, mid: 0.32, far: 0.14 } as const;
+const EASE_IN = 12;
+// The Stack's arrival after the hand-over. Its band overlaps the track's end by OVERLAP vh (Stack.module.css), so its
+// top is FAR = handover + 100 - OVERLAP vh down the screen as the hand-over starts. Each block of the section starts
+// LOW vh further below its resting place (on top of the band's own travel) and settles into it; the lower blocks come
+// from further down, so they close up into place behind the heading, and the drawing grows from SCALE. Where the
+// section pins (tall screens) its blocks land at rest; elsewhere they land already moving with the page.
+const OVERLAP = 47;
+const LOW = { head: 75, intro: 82, list: 95, panels: 100, art: 85 } as const;
+const SCALE = 0.9;
+const PINNED = "(min-width: 1280px) and (min-height: 760px) and (prefers-reduced-motion: no-preference)";
+const SHORT = "(min-width: 1280px) and (max-height: 759px) and (prefers-reduced-motion: no-preference)";
+// A block's offset from its place in the band, as an ease over the arrival (t: 0 → 1). With u = 1 - t (the band's top,
+// as a share of FAR), the block sits LOW·u² below its resting place on the screen, so it closes in fastest early on
+// and comes to rest with no speed left where the section pins; on short screens it keeps the page's speed as it
+// lands (the extra term), since the section scrolls on from there.
+const settle = (low: number, far: number, pinned: boolean) => (t: number) => {
+  const u = 1 - t, off = low * u * u - far * u + (pinned ? 0 : far * u * (1 - u) ** 4);
+  return 1 - off / (low - far);
+};
 const comeOn = (tl: gsap.core.Timeline, rows: Element[][], at: number) =>
   rows.forEach((r, i) => tl.fromTo(r, FROM, { ...ON, immediateRender: false }, at + i * GAP_ON));
 const goOff = (tl: gsap.core.Timeline, rows: Element[][], at: number) =>
@@ -32,7 +56,7 @@ const goOff = (tl: gsap.core.Timeline, rows: Element[][], at: number) =>
 
 // Option C's choreography (D29, D38): one scrubbed timeline over the pinned stage, 100 units long (6.2 screens of
 // scroll). The world moves in steps (eased between holds), so each thing on the line stops at the centre to be read.
-export function StoryRailMotion({ gate, stations, look }: { gate: number; stations: number[]; end?: number; look: RailLook }) {
+export function StoryRailMotion({ gate, stations, handover, look }: { gate: number; stations: number[]; end?: number; handover: number; look: RailLook }) {
   const anchor = useRef<HTMLSpanElement>(null);
 
   useGSAP(() => {
@@ -41,6 +65,8 @@ export function StoryRailMotion({ gate, stations, look }: { gate: number; statio
     const q = <T extends Element = HTMLElement>(s: string) => root.querySelector<T>(`[data-s="${s}"]`)!;
     const qa = (s: string) => [...root.querySelectorAll<HTMLElement>(`[data-s="${s}"]`)];
 
+    // The story runs to `handover` vh before the track's end; the hand-over to the Stack takes the rest (5, 6)
+    const lead = () => (window.innerHeight * handover) / 100;
     const mm = gsap.matchMedia();
     mm.add(MOTION, () => {
       const world = q("world"), problem = q("problem"), near = q("near");
@@ -70,7 +96,7 @@ export function StoryRailMotion({ gate, stations, look }: { gate: number; statio
         scrollTrigger: { trigger: root, start: "top 30%", end: "top -20%", scrub: 0.6 },
       });
 
-      const tl = gsap.timeline({ defaults: { ease: "power2.inOut" }, scrollTrigger: { trigger: root, start: "top top", end: "bottom bottom", scrub: 0.6, invalidateOnRefresh: true } });
+      const tl = gsap.timeline({ defaults: { ease: "power2.inOut" }, scrollTrigger: { trigger: root, start: "top top", end: () => `bottom-=${lead()} bottom`, scrub: 0.6, invalidateOnRefresh: true } });
       // 1. The two sides appear and the line draws in from both into NEAR's tile, under the three lines
       tl.to(qa("end"), { autoAlpha: 1, duration: 3, stagger: 1 }, 0)
         .to([q("greenL"), q("greenR")], { scaleX: 1, duration: 7, ease: "power2.inOut" }, 1)
@@ -119,9 +145,91 @@ export function StoryRailMotion({ gate, stations, look }: { gate: number; statio
       // by cancelling the world's travel on it (it stays under the tiles, which are in the world above it)
       const setGreen = gsap.quickSetter(q("greenL"), "x", "px");
       const update = () => { parallax(); setGreen(-Number(gsap.getProperty(world, "x"))); };
+
+      // 5. The hand-over to the Stack (Lawrence: "that line should feel like it's in the foreground and start to move
+      //    up over the background and the imagery that's behind it … turn to the dark gray of the four layers, one
+      //    system background as a transition from that horizontal line downwards … The green box with the black stroke
+      //    around it, that stays in the middle, and we see that the entire time"). Over the track's last `handover` vh,
+      //    scrubbed exactly (no smoothing: the line moves with the page, as the Stack's band does below it):
+      //    - the line, its green and ticks, the identity tile and the box lift off as one, easing up to the page's
+      //      speed and reaching the top of the screen as the stage lets go, so they carry on up with the page;
+      //    - the Stack's ink hangs from the line: it drops from the line to the foot of the screen (accelerating away
+      //      from the line), then rises with it, covering the words, the drawing, the ridges and the answer;
+      //    - everything behind moves up more slowly, by depth (DEPTH), so the line passes over it;
+      //    - the box's lower half and the ticks turn light where the ink comes under them.
+      //    The band overlaps the track's end (Stack.module.css) and comes up over the stage once the ink fills the
+      //    screen below the line (same token, so its edge never shows), bringing its heading up under the line.
+      const opt = (s: string) => root.querySelector<HTMLElement>(`[data-s="${s}"]`); // a look's own parts, if it has them
+      const rail = q("rail"), curtain = q("curtain");
+      const front = [rail, q("greenL"), dots[dots.length - 1], curtain, opt("ticks"), opt("ticksDark")].filter((e): e is HTMLElement => !!e);
+      const playhead = opt("playhead"), back = root.querySelector<HTMLElement>("[data-depth]")?.parentElement;
+      // The drawing's corners go with the drawing; the answer, high on the screen, hangs back with the ridges, so the
+      // line passes over it as it reaches the top rather than the answer leaving first
+      const mids = [opt("finder")].filter((e): e is HTMLElement => !!e), fars = [q("answer"), back].filter((e): e is HTMLElement => !!e);
+      const vh = (n: number) => (window.innerHeight * n) / 100;
+      const ho = gsap.timeline({
+        defaults: { ease: "none" },
+        scrollTrigger: { trigger: root, start: () => `bottom-=${lead()} bottom`, end: "bottom bottom", scrub: true, invalidateOnRefresh: true },
+      });
+      // (units: vh of scroll) Each layer rises by its depth's share of the line's rise: the line eases up to the page's
+      // speed over EASE_IN (a quadratic, so it covers half of that and leaves at exactly the page's speed), then rides
+      // with it to the top of the screen (the line's own top on the stage), arriving as the track ends. Plain tweens
+      // (not a proxy read on update), so a refresh restores them with the scroll. The world's own rise is the middle
+      // depth, so what is nearest in it moves the rest of the way.
+      const rise = (targets: HTMLElement | HTMLElement[], k: number) => {
+        if (Array.isArray(targets) && !targets.length) return;
+        ho.to(targets, { y: () => -k * vh(EASE_IN / 2), ease: "power1.in", duration: EASE_IN }, 0)
+          .to(targets, { y: () => -k * rail.offsetTop, duration: handover - EASE_IN }, EASE_IN);
+      };
+      rise(world, DEPTH.mid);
+      rise(front, DEPTH.near - DEPTH.mid);
+      if (playhead) rise(playhead, DEPTH.near);
+      rise(mids, DEPTH.mid);
+      rise(fars, DEPTH.far);
+      // The ink drops from the line to the foot of the screen, accelerating away from it (a cubic): it reaches the foot
+      // about 20vh in, before the band comes up behind it (Stack.module.css: 23vh in), so their edges never meet on
+      // screen, and the Stack's words start to show on it from 18vh, inside it (6)
+      ho.fromTo(curtain, { scaleY: 0 }, { scaleY: 1, ease: "power2.in", duration: 26 }, 0);
+      // The ticks (4–10 px under the line) and the box's lower half (28 px) turn light as the ink passes under them
+      const ticksDark = opt("ticksDark"), boxDark = opt("playheadDark");
+      if (ticksDark) ho.fromTo(ticksDark, { autoAlpha: 0 }, { autoAlpha: 1, duration: 2 }, 1);
+      if (boxDark) ho.fromTo(boxDark, { autoAlpha: 0 }, { autoAlpha: 1, duration: 3 }, 2.5);
       return playSteps(tl, arts, STEPS.map((s) => (s - 4) / 100), update);
     });
-    return () => mm.revert();
+    // 6. The Stack arrives (Lawrence: "tighten it and have it feel like there is depth and the four layers is animating
+    //    up into position"): the band's edge still comes up only once the ink fills the screen, but its content travels
+    //    ahead of it, over the ink, close under the line: each block from its own depth (LOW), its words line by line
+    //    (D97), the drawing growing into place. Scrubbed exactly with the scroll from the hand-over's start until the
+    //    band reaches the top of the screen, where the section's own pinned steps take over (StackInteractions).
+    const band = root.nextElementSibling instanceof HTMLElement && root.nextElementSibling.matches("[data-stack]") ? root.nextElementSibling : null;
+    const arrive = gsap.matchMedia();
+    if (band) arrive.add({ pinned: PINNED, short: SHORT }, (ctx) => {
+      const pinned = !!ctx.conditions?.pinned;
+      const qs = (s: string) => band.querySelector<HTMLElement>(s);
+      const head = qs("h2"), intro = qs("header p"), list = qs("[role='tablist']"), panels = qs("[role='tabpanel']")?.parentElement;
+      const art = qs("[data-stack-art]"), threads = [...band.querySelectorAll<HTMLElement>("[data-stack-thread]")];
+      if (!head || !intro || !list || !panels || !art) return;
+      const far = handover + 100 - OVERLAP;
+      const vh = (n: number) => (window.innerHeight * n) / 100;
+      const at = gsap.timeline({
+        defaults: { ease: "none" },
+        scrollTrigger: { trigger: root, start: () => `bottom-=${lead()} bottom`, endTrigger: band, end: "top top", scrub: true, invalidateOnRefresh: true },
+      });
+      // (units: vh of scroll, `far` in all) Each block from its depth to its place
+      const place = (el: HTMLElement | HTMLElement[], low: number) =>
+        at.fromTo(el, { y: () => vh(low - far) }, { y: 0, duration: far, ease: settle(low, far, pinned) }, 0);
+      place(head, LOW.head); place(intro, LOW.intro); place(list, LOW.list); place(panels, LOW.panels);
+      place([art, ...threads], LOW.art);
+      at.fromTo(art, { scale: SCALE, transformOrigin: "50% 0%" }, { scale: 1, duration: far, ease: settle(LOW.art, far, pinned) }, 0);
+      // Shown once the ink is under them: the words line by line (D97), the blocks fading up
+      const rowsOf = (el: HTMLElement) => lines([...el.querySelectorAll<HTMLElement>(":scope > *")]);
+      const rise = (rows: Element[][], from: number) => rows.forEach((r, i) => at.fromTo(r, FROM, { ...ON, duration: 12, immediateRender: true }, from + i * 4));
+      rise(rowsOf(head), 18);
+      rise(rowsOf(intro), 22);
+      at.fromTo([list, panels], { autoAlpha: 0 }, { autoAlpha: 1, duration: 14, stagger: 3, ease: "power1.out" }, 25)
+        .fromTo([art, ...threads], { autoAlpha: 0 }, { autoAlpha: 1, duration: 16, ease: "power1.out" }, 22);
+    });
+    return () => { mm.revert(); arrive.revert(); };
   }, { scope: anchor });
 
   return <span ref={anchor} hidden />;

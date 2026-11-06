@@ -14,7 +14,9 @@ import { draw, type Track } from "./draw";
 // prefers reduced motion; it pauses with the tab and while the hero is off screen, and redraws at 30 fps at rest.
 const FPS = 24; // unless track.json gives the clip's own rate (round 4: 30)
 
-export function GateLayer() {
+// `track` (optional): another picture's track in the same format, drawn instead of the gate's own (the ring options,
+// heroes/ring-options, pass a single-frame track fitted to their still)
+export function GateLayer({ track }: { track?: Track } = {}) {
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -29,8 +31,8 @@ export function GateLayer() {
     const g = canvas.getContext("2d")!;
     const playing = () => !!video?.hasAttribute("data-ready");
 
-    let data: Track | null = null, dead = false;
-    import("./track.json").then((m) => { if (!dead) { data = m.default as Track; key = ""; update(); } });
+    let data: Track | null = track ?? null, dead = false;
+    if (!track) import("./track.json").then((m) => { if (!dead) { data = m.default as Track; key = ""; update(); } });
 
     // The frame on screen: during a seek currentTime is already the target while the old frame still shows, so take
     // the presented frame's own time where the browser reports it, and otherwise hold the last time while seeking
@@ -107,7 +109,7 @@ export function GateLayer() {
       still.removeEventListener("change", start);
       canvas.remove();
     };
-  }, []);
+  }, [track]);
 
   return <div ref={ref} className={styles.layer} aria-hidden="true" />;
 }

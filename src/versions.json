@@ -20,6 +20,22 @@
   },
   "versions": [
     {
+      "commit": "2c80fb3",
+      "date": "2026-11-06T14:30:14-05:00",
+      "direction": "b",
+      "title": "Ring heroes on the homepage; layer in real materials; rail hands over to Four layers",
+      "summary": [
+        "The homepage now picks at random from six ring heroes: the gate and five new landscapes made in motion with its graphics tracked (sea cliff, birch clearing, black sand, mesa ledge, lake shore). The earlier heroes keep their own pages.",
+        "The layer moment is rebuilt in real materials, with the people as a silver inlay, and at the end of the rail the line rises in front while Four layers rises into place from depth."
+      ],
+      "decisions": ["D103", "D104", "D105", "D106", "D107"],
+      "home": "home",
+      "options": [
+        { "label": "Hero versions (contact sheet)", "path": "lab/directions#hero-versions" },
+        { "label": "Ring options", "path": "lab/hero-ring" }
+      ]
+    },
+    {
       "commit": "8e7c7fb",
       "date": "2026-11-06T09:44:16-05:00",
       "direction": "b",

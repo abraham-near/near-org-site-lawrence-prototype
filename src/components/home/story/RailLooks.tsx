@@ -64,7 +64,9 @@ export function RailDetail({ look, gate, stations }: { look: RailLook; gate: num
     const survey = Array.from({ length: 19 }, (_, i) => i * 25 + 12.5).filter((v) => busy.every((b) => Math.abs(v - b) > 16));
     return (
       <>
-        <span className={styles.ticks} />
+        <span className={styles.ticks} data-s="ticks" />
+        {/* The same scale in the light, under the line once the Stack's dark hangs from it (the hand-over) */}
+        <span className={`${styles.ticks} ${styles.ticksDark}`} data-s="ticksDark" />
         {survey.map((v) => <span key={v} className={styles.survey} style={x(v)}><span className={styles.node} /></span>)}
       </>
     );
@@ -99,7 +101,8 @@ export function RailOver({ look }: { look: RailLook }) {
   if (look === "horizon") {
     return (
       <>
-        <span className={styles.playhead} data-s="playhead" />
+        {/* The box's lower half turns light where the Stack's dark comes under the line (the hand-over) */}
+        <span className={styles.playhead} data-s="playhead"><span className={styles.playheadDark} data-s="playheadDark" /></span>
         <span className={styles.finder} data-s="finder">
           {CORNERS.map((c) => <span key={c} className={`${styles.corner} ${styles[c]}`} />)}
         </span>
